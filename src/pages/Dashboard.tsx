@@ -8,9 +8,9 @@ const Dashboard = () => {
   const userName = "Alex";
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-background">
       {/* Sidebar */}
-      <aside className="fixed left-0 top-0 h-full w-64 bg-secondary border-r border-border p-6 hidden lg:block">
+      <aside className="fixed left-0 top-0 h-full w-64 bg-card border-r border-primary/20 p-6 hidden lg:block shadow-[0_0_30px_hsl(330_81%_60%_/_0.1)]">
         <div className="mb-8">
           <img src={logo} alt="QHQ Logo" className="h-16" />
         </div>
@@ -68,7 +68,7 @@ const Dashboard = () => {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <Card className="bg-gradient-to-br from-primary/10 to-transparent border-primary/20 hover-lift">
+            <Card className="gradient-card neon-border hover-lift bg-gradient-to-br from-primary/10 via-card to-card">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>Upcoming Events</span>
@@ -83,7 +83,7 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-accent/10 to-transparent border-accent/20 hover-lift">
+            <Card className="gradient-card neon-border hover-lift bg-gradient-to-br from-primary/10 via-card to-card">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>Tickets Owned</span>
@@ -98,7 +98,7 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-foreground/5 to-transparent border-foreground/10 hover-lift">
+            <Card className="gradient-card neon-border hover-lift bg-gradient-to-br from-primary/5 via-card to-card">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>Events Created</span>

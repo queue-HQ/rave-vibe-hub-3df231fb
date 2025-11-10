@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 
 const Ticket = () => {
   return (
-    <div className="min-h-screen bg-black p-6 flex items-center justify-center">
+    <div className="min-h-screen bg-background p-6 flex items-center justify-center">
       <div className="max-w-2xl w-full">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-2">Your Ticket</h1>
@@ -15,7 +15,7 @@ const Ticket = () => {
         </div>
 
         {/* Ticket Card */}
-        <Card className="overflow-hidden mb-6 bg-gradient-to-br from-primary/10 via-background to-background border-primary/20">
+        <Card className="overflow-hidden mb-6 gradient-card neon-border bg-gradient-to-br from-primary/20 via-card to-card shadow-[0_0_50px_hsl(330_81%_60%_/_0.2)]">
           <CardContent className="p-0">
             {/* Ticket Header */}
             <div className="bg-primary/10 p-6 border-b border-primary/20">

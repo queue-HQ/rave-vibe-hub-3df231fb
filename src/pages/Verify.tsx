@@ -8,7 +8,7 @@ const Verify = () => {
   const [verificationStatus, setVerificationStatus] = useState<"pending" | "under-review" | "verified">("pending");
 
   return (
-    <div className="min-h-screen bg-black p-6 flex items-center justify-center">
+    <div className="min-h-screen bg-background p-6 flex items-center justify-center">
       <div className="max-w-2xl w-full">
         <Card>
           <CardHeader>

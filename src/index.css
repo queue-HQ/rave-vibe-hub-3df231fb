@@ -8,32 +8,32 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
+    --background: 0 0% 5%;
+    --foreground: 0 0% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 98%;
 
     --primary: 330 81% 60%;
-    --primary-foreground: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
 
-    --secondary: 0 0% 10%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 40%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
 
     --accent: 330 81% 60%;
-    --accent-foreground: 0 0% 100%;
+    --accent-foreground: 0 0% 0%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
+    --border: 330 81% 60% / 0.2;
+    --input: 0 0% 15%;
     --ring: 330 81% 60%;
 
     --radius: 0.75rem;
@@ -42,10 +42,11 @@ All colors MUST be HSL.
     --neon-glow: 330 100% 70%;
     
     --gradient-rave: linear-gradient(135deg, hsl(330 81% 60%), hsl(340 90% 50%));
-    --gradient-dark: linear-gradient(180deg, hsl(0 0% 0%), hsl(0 0% 10%));
+    --gradient-dark: linear-gradient(180deg, hsl(0 0% 5%), hsl(0 0% 10%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 8%), hsl(330 81% 60% / 0.05));
     
-    --shadow-neon: 0 0 20px hsl(330 81% 60% / 0.6);
-    --shadow-bold: 0 10px 40px hsl(0 0% 0% / 0.3);
+    --shadow-neon: 0 0 30px hsl(330 81% 60% / 0.5), 0 0 60px hsl(330 81% 60% / 0.2);
+    --shadow-bold: 0 10px 40px hsl(330 81% 60% / 0.2);
     
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -117,18 +118,23 @@ All colors MUST be HSL.
 
 @layer utilities {
   .neon-text {
-    text-shadow: 0 0 10px hsl(var(--neon-pink)), 0 0 20px hsl(var(--neon-pink));
+    text-shadow: 0 0 15px hsl(var(--neon-pink)), 0 0 30px hsl(var(--neon-pink)), 0 0 45px hsl(var(--neon-pink) / 0.5);
   }
   
   .neon-border {
-    box-shadow: 0 0 10px hsl(var(--neon-pink) / 0.5), inset 0 0 10px hsl(var(--neon-pink) / 0.2);
+    border: 1px solid hsl(var(--neon-pink) / 0.3);
+    box-shadow: 0 0 15px hsl(var(--neon-pink) / 0.4), inset 0 0 15px hsl(var(--neon-pink) / 0.1);
   }
   
   .hover-lift {
-    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl;
+    @apply transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_0_30px_hsl(var(--neon-pink)_/_0.4)];
   }
   
   .gradient-rave {
     background: var(--gradient-rave);
+  }
+  
+  .gradient-card {
+    background: var(--gradient-card);
   }
 }

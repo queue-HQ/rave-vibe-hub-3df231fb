@@ -16,11 +16,12 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_hsl(330_81%_60%_/_0.1)_0%,_transparent_65%)]" />
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_hsl(330_81%_60%_/_0.2)_0%,_transparent_50%)] animate-pulse-neon" />
+      <div className="absolute inset-0 bg-[conic-gradient(from_0deg_at_50%_50%,_transparent_0deg,_hsl(330_81%_60%_/_0.1)_60deg,_transparent_120deg)] opacity-30" />
       
-      <div className="w-full max-w-md relative">
-        <div className="bg-card border border-border rounded-2xl p-8 shadow-2xl backdrop-blur-sm">
+      <div className="w-full max-w-md relative z-10">
+        <div className="gradient-card neon-border rounded-2xl p-8 backdrop-blur-xl shadow-[0_0_50px_hsl(330_81%_60%_/_0.3)]">
           <div className="flex justify-center mb-8">
             <img src={logo} alt="QHQ Logo" className="h-20 animate-float" />
           </div>
