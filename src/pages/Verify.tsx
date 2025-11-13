@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Upload, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { Upload, CheckCircle, Clock, AlertCircle, Instagram, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -86,20 +86,38 @@ const Verify = () => {
             {/* Verification Options */}
             {verificationStatus === "pending" && (
               <div className="space-y-4">
-                <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer">
-                  <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center hover:border-primary hover:shadow-[0_0_20px_hsl(var(--neon-pink)_/_0.3)] transition-all cursor-pointer group">
+                  <Upload className="h-12 w-12 mx-auto mb-4 text-primary group-hover:animate-pulse" />
                   <p className="font-semibold mb-2">Upload ID Document</p>
                   <p className="text-sm text-muted-foreground mb-4">
                     Accepted: Driver's License, Passport, National ID
                   </p>
-                  <Button>Choose File</Button>
+                  <Button className="bg-primary text-primary-foreground hover:bg-primary/90">Choose File</Button>
                 </div>
 
-                <div className="text-center">
+                <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center hover:border-primary hover:shadow-[0_0_20px_hsl(var(--neon-pink)_/_0.3)] transition-all cursor-pointer group">
+                  <Instagram className="h-12 w-12 mx-auto mb-4 text-primary group-hover:animate-pulse" />
+                  <p className="font-semibold mb-2">Instagram Profile Screenshot</p>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Upload a screenshot of your Instagram profile
+                  </p>
+                  <Button className="bg-primary text-primary-foreground hover:bg-primary/90">Choose File</Button>
+                </div>
+
+                <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center hover:border-primary hover:shadow-[0_0_20px_hsl(var(--neon-pink)_/_0.3)] transition-all cursor-pointer group">
+                  <Camera className="h-12 w-12 mx-auto mb-4 text-primary group-hover:animate-pulse" />
+                  <p className="font-semibold mb-2">Clear Face Picture</p>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Upload a clear photo showing your face
+                  </p>
+                  <Button className="bg-primary text-primary-foreground hover:bg-primary/90">Choose File</Button>
+                </div>
+
+                <div className="text-center pt-4">
                   <p className="text-muted-foreground mb-4">or</p>
                   <Button
                     variant="outline"
-                    className="w-full"
+                    className="w-full border-primary/50 hover:bg-primary/10 hover:border-primary"
                     onClick={() => setVerificationStatus("under-review")}
                   >
                     Send Verification Email
