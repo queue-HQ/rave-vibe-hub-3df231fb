@@ -1,11 +1,19 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Calendar, Ticket, User, Settings, LogOut, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import logo from "@/assets/logo.png";
+import { logout } from "@/lib/logout";
 
 const Dashboard = () => {
   const userName = "Alex";
+
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -14,7 +22,7 @@ const Dashboard = () => {
         <div className="mb-8">
           <img src={logo} alt="QHQ Logo" className="h-16" />
         </div>
-        
+
         <nav className="space-y-2">
           <Link to="/dashboard">
             <Button variant="ghost" className="w-full justify-start text-lg">
@@ -46,7 +54,11 @@ const Dashboard = () => {
               Settings
             </Button>
           </Link>
-          <Button variant="ghost" className="w-full justify-start text-lg text-destructive">
+          <Button
+            variant="ghost"
+            onClick={handleLogout}
+            className="w-full justify-start text-lg text-destructive"
+          >
             <LogOut className="mr-3 h-5 w-5" />
             Logout
           </Button>
@@ -131,7 +143,9 @@ const Dashboard = () => {
                         <Calendar className="h-8 w-8 text-primary" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-lg">Underground Rave #{i}</h3>
+                        <h3 className="font-bold text-lg">
+                          Underground Rave #{i}
+                        </h3>
                         <p className="text-sm text-muted-foreground">
                           Dec {15 + i}, 2024 • Brooklyn Warehouse
                         </p>
