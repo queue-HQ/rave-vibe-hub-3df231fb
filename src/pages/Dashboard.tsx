@@ -55,7 +55,10 @@ const Dashboard = () => {
       <div className="lg:hidden w-full p-4 flex justify-between items-center bg-card border-b border-primary/20 shadow-md">
         <img src={logo} className="h-12" alt="Logo" />
 
-        <span onClick={() => setMobileSidebarOpen(true)}>
+        <span
+          className="cursor-pointer"
+          onClick={() => setMobileSidebarOpen(true)}
+        >
           <Logs />
         </span>
       </div>

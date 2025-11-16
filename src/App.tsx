@@ -15,6 +15,9 @@ import Events from "./pages/Events";
 import Event from "./pages/Event";
 import Ticket from "./pages/Ticket";
 import NotFound from "./pages/NotFound";
+import WaitingApproval from "./pages/WaitingApproval";
+import OTPVerify from "./pages/OTPVerify";
+import SetupProfile from "./pages/SetupProfile";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +45,33 @@ const App = () => (
             element={
               <PublicRoute>
                 <Signup />
+              </PublicRoute>
+            }
+          />
+
+          <Route
+            path="/waiting-approval"
+            element={
+              <PublicRoute>
+                <WaitingApproval />
+              </PublicRoute>
+            }
+          />
+
+          <Route
+            path="/verify-otp"
+            element={
+              <PublicRoute>
+                <OTPVerify />
+              </PublicRoute>
+            }
+          />
+
+          <Route
+            path="/setup-profile"
+            element={
+              <PublicRoute>
+                <SetupProfile />
               </PublicRoute>
             }
           />

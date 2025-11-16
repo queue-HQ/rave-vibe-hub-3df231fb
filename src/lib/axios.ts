@@ -1,7 +1,8 @@
 import axios from "axios";
+import { apiUrl } from "./apiURL";
 
 const api = axios.create({
-  baseURL: "http://localhost/wp-backend/wp-json/app/v1",
+  baseURL: apiUrl,
   headers: {
     "Content-Type": "application/json",
   },
