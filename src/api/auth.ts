@@ -19,6 +19,12 @@ export const registerUserOTP = async (data: any) => {
   return res.data;
 };
 
+export const setPassword = async (data: any) => {
+  const res = await api.post("/set-password", data);
+  return res.data;
+};
+
+
 export const setupProfile = async (data: any) => {
   const res = await api.post("/setup-profile", data);
   return res.data;

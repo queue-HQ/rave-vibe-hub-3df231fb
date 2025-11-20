@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import slugify from "@/lib/slugify";
 
 const Events = () => {
   const events = [
@@ -74,7 +75,10 @@ const Events = () => {
 
         {/* Events Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {events.map((event) => (
+          {events.map((event) => {
+            const eventSlug = slugify(event.title);
+
+            return (
             <Card key={event.id} className="overflow-hidden hover-lift cursor-pointer group">
               <div className="relative h-48 overflow-hidden">
                 <img
@@ -110,7 +114,7 @@ const Events = () => {
                 </div>
 
                 <div className="flex gap-2">
-                  <Link to={`/event/${event.id}`} className="flex-1">
+                  <Link to={`/event/${eventSlug}`} className="flex-1">
                     <Button variant="outline" className="w-full">
                       View Details
                     </Button>
@@ -121,7 +125,8 @@ const Events = () => {
                 </div>
               </CardContent>
             </Card>
-          ))}
+          );
+          })}
         </div>
       </div>
     </div>

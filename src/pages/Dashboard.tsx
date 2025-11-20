@@ -18,6 +18,7 @@ import { getUserProfile } from "@/api/user";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import AppSidebar from "@/components/sidebar/AppSidebar";
+import slugify from "@/lib/slugify";
 
 const Dashboard = () => {
   const [userName, setUserName] = useState("");
@@ -188,30 +189,33 @@ const Dashboard = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {[1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 bg-primary/20 rounded-lg flex items-center justify-center">
-                          <Calendar className="h-8 w-8 text-primary" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-lg">
-                            Underground Rave #{i}
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            Dec {15 + i}, 2024 • Brooklyn Warehouse
-                          </p>
-                        </div>
-                      </div>
+                  {[1, 2, 3].map((i) => {
+                    const title = `Underground Rave #${i}`;
+                    const slug = slugify(title);
 
-                      <Link to={`/event/${i}`}>
-                        <Button>View Details</Button>
-                      </Link>
-                    </div>
-                  ))}
+                    return (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-16 h-16 bg-primary/20 rounded-lg flex items-center justify-center">
+                            <Calendar className="h-8 w-8 text-primary" />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-lg">{title}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              Dec {15 + i}, 2024 • Brooklyn Warehouse
+                            </p>
+                          </div>
+                        </div>
+
+                        <Link to={`/event/${slug}`}>
+                          <Button>View Details</Button>
+                        </Link>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </CardContent>

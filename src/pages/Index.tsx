@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Calendar, Users, Zap, Sparkles } from "lucide-react";
 import logo from "@/assets/logo.png";
+import { Navbar } from "@/components/Navbar";
 import { isAuthenticated } from "@/lib/auth";
 
 const Index = () => {
@@ -9,34 +10,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Navigation */}
-      <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-md border-b border-primary/30 z-50 shadow-[0_0_20px_hsl(330_81%_60%_/_0.1)]">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <img src={logo} alt="QHQ Logo" className="h-12" />
-
-          {isAuth ? (
-            <div className="flex gap-4">
-              <Link to="/dashboard">
-                <Button size="lg" className="font-bold">
-                  Dashboard
-                </Button>
-              </Link>
-            </div>
-          ) : (
-            <div className="flex gap-4">
-              <Link to="/login">
-                <Button variant="ghost" size="lg">
-                  Login
-                </Button>
-              </Link>
-              <Link to="/signup">
-                <Button size="lg" className="font-bold">
-                  Sign Up
-                </Button>
-              </Link>
-            </div>
-          )}
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero Section */}
       <section className="pt-32 pb-20 px-6 relative overflow-hidden">

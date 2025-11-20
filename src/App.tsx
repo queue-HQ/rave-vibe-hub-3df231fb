@@ -5,19 +5,26 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import PublicRoute from "@/components/PublicRoute";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import Index from "./pages/Index";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import Dashboard from "./pages/Dashboard";
-import Profile from "./pages/Profile";
-import Verify from "./pages/Verify";
-import Events from "./pages/Events";
-import Event from "./pages/Event";
-import Ticket from "./pages/Ticket";
-import NotFound from "./pages/NotFound";
-import WaitingApproval from "./pages/WaitingApproval";
-import OTPVerify from "./pages/OTPVerify";
-import SetupProfile from "./pages/SetupProfile";
+import Index from "@/pages/Index";
+import Login from "@/pages/Login";
+import Signup from "@/pages/Signup";
+import Dashboard from "@/pages/Dashboard";
+import Profile from "@/pages/Profile";
+import Verify from "@/pages/Verify";
+import Events from "@/pages/Events";
+import Event from "@/pages/Event";
+import Ticket from "@/pages/Ticket";
+import NotFound from "@/pages/NotFound";
+import WaitingApproval from "@/pages/WaitingApproval";
+import OTPVerify from "@/pages/OTPVerify";
+import SetupProfile from "@/pages/SetupProfile";
+import EventsPage from "@/pages/EventsPage";
+import SignleEventPage from "@/pages/SignleEventPage";
+import PostsPage from "@/pages/PostsPage";
+import SinglePostPage from "@/pages/SinglePostPage";
+import ContactPage from "@/pages/Contact";
+import { EventsProvider } from "@/context/EventsContext";
+import { PostsProvider } from "@/context/PostsContext";
 
 const queryClient = new QueryClient();
 
@@ -26,10 +33,17 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
+      <EventsProvider>
+        <PostsProvider>
+          <BrowserRouter>
+          <Routes>
           {/* PUBLIC ROUTES */}
           <Route path="/" element={<Index />} />
+          <Route path="/events" element={<EventsPage />} />
+          <Route path="/event/:slug" element={<SignleEventPage />} />
+          <Route path="/blogs" element={<PostsPage />} />
+          <Route path="/blog/:slug" element={<SinglePostPage />} />
+          <Route path="/contact" element={<ContactPage />} />
 
           <Route
             path="/login"
@@ -76,8 +90,8 @@ const App = () => (
             }
           />
 
-          <Route path="/events" element={<Events />} />
-          <Route path="/event/:id" element={<Event />} />
+          <Route path="/dashboard-events" element={<Events />} />
+          <Route path="/dashboard-event/:id" element={<Event />} />
 
           {/* PROTECTED ROUTES */}
           <Route
@@ -118,8 +132,10 @@ const App = () => (
 
           {/* 404 */}
           <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+          </Routes>
+        </BrowserRouter>
+        </PostsProvider>
+      </EventsProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

@@ -161,7 +161,7 @@ const Profile = () => {
           </Card>
 
           {/* Preferences */}
-          <Card className="mb-6">
+          {/* <Card className="mb-6">
             <CardHeader>
               <CardTitle>Preferences</CardTitle>
             </CardHeader>
@@ -197,7 +197,7 @@ const Profile = () => {
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
 
           {/* Change Password */}
           <Card>
