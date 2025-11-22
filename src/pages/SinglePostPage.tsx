@@ -6,6 +6,8 @@ import { usePosts } from "@/context/PostsContext";
 import slugify from "@/lib/slugify";
 import { Calendar, User, Tag, ArrowLeft, Loader2 } from "lucide-react";
 import logo from "@/assets/logo.png";
+import { useEffect } from "react";
+import Footer from "@/components/Footer";
 
 const SinglePostPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -29,6 +31,10 @@ const SinglePostPage = () => {
       })
       .filter((item): item is string => Boolean(item));
   };
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   const post = posts.find((item) => {
     if (!slug) return false;
@@ -201,12 +207,7 @@ const SinglePostPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-12 px-6">
-        <div className="max-w-6xl mx-auto text-center text-muted-foreground">
-          <img src={logo} alt="QHQ Logo" className="h-12 mx-auto mb-6" />
-          <p>© 2024 QHQ. All rights reserved. Stay underground.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

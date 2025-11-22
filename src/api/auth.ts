@@ -35,3 +35,8 @@ export const loginUser = async (data: any) => {
   const res = await api.post("/userLogin", data);
   return res.data;
 };
+
+export const eventBooking = async (data: any) => {
+  const res = await api.post("/event-booking", data);
+  return res.data;
+};

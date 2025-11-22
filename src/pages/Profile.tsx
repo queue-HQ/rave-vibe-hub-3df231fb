@@ -9,17 +9,43 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import AppSidebar from "@/components/sidebar/AppSidebar";
 import logo from "@/assets/logo.png";
+import { useUserProfile } from "@/context/UserProfileContext";
 
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const { user, isLoading } = useUserProfile();
   const [profile, setProfile] = useState({
-    name: "Alex Rivera",
-    email: "alex.rivera@email.com",
-    phone: "+1 (555) 123-4567",
-    address: "Brooklyn, NY",
-    bio: "Underground music enthusiast and rave curator. Living for the bass drops and neon lights.",
+    name: user?.display_name || user?.username || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
+    address: user?.address || "",
+    bio: user?.bio || "",
+    username: user?.username || "",
+    image: user?.image || "",
   });
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setProfile((prev) => ({
+        ...prev,
+        image: reader.result, // PREVIEW temporary
+        _file: file, // actual file backend ko bhejna
+      }));
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log(profile);
+    setIsEditing(false);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -53,9 +79,20 @@ const Profile = () => {
             <CardContent className="pt-6">
               <div className="flex flex-col md:flex-row items-center gap-6">
                 <Avatar className="w-32 h-32 border-4 border-primary">
-                  <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" />
+                  <AvatarImage src={profile.image} />
                   <AvatarFallback>AR</AvatarFallback>
                 </Avatar>
+
+                {isEditing && (
+                  <div className="mt-3">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(e)}
+                      className="block text-sm"
+                    />
+                  </div>
+                )}
 
                 <div className="flex-1 text-center md:text-left">
                   <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
@@ -83,6 +120,17 @@ const Profile = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
+                  value={profile.username}
+                  disabled={true}
+                  onChange={(e) =>
+                    setProfile({ ...profile, username: e.target.value })
+                  }
+                />
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
@@ -156,7 +204,11 @@ const Profile = () => {
                 />
               </div>
 
-              {isEditing && <Button className="w-full">Save Changes</Button>}
+              {isEditing && (
+                <Button onClick={handleSave} className="w-full">
+                  Save Changes
+                </Button>
+              )}
             </CardContent>
           </Card>
 

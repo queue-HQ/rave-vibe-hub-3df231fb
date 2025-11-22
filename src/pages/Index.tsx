@@ -4,41 +4,54 @@ import { Calendar, Users, Zap, Sparkles } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { Navbar } from "@/components/Navbar";
 import { isAuthenticated } from "@/lib/auth";
+import HomePageEvents from "@/components/HomePageEvents";
+import HomePageBlogs from "@/components/HomePageBlogs";
+import Footer from "@/components/Footer";
 
 const Index = () => {
   const isAuth = isAuthenticated();
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Navigation */}
       <Navbar />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-6 relative overflow-hidden">
+      <section className="pt-32 pb-20 px-4 sm:px-6 relative overflow-hidden">
+        {/* Background Effects */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_hsl(330_81%_60%_/_0.3)_0%,_transparent_60%)] animate-pulse-neon" />
         <div className="absolute inset-0 bg-[conic-gradient(from_0deg_at_50%_50%,_transparent_0deg,_hsl(330_81%_60%_/_0.2)_45deg,_transparent_90deg)] opacity-40" />
 
         <div className="max-w-6xl mx-auto text-center relative">
-          <h1 className="text-6xl md:text-8xl font-black mb-6 leading-tight">
+          {/* Heading */}
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black mb-6 leading-tight">
             The Underground
             <br />
             <span className="text-primary neon-text">Awaits</span>
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto">
+
+          {/* Subheading */}
+          <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground mb-8 sm:mb-12 max-w-2xl mx-auto">
             Discover exclusive underground raves, connect with the scene, and
             experience the pulse of the night.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/signup">
-              <Button size="lg" className="text-lg px-8 py-6 h-auto font-bold">
-                <Sparkles className="mr-2 h-5 w-5" />
+
+          {/* Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Link to="/signup" className="w-full sm:w-auto">
+              <Button
+                size="lg"
+                className="text-sm sm:text-base px-4 sm:px-8 py-3 sm:py-6 h-auto font-bold flex items-center justify-center w-full"
+              >
+                <Sparkles className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                 Join the Movement
               </Button>
             </Link>
-            <Link to="/events">
+            <Link to="/events" className="w-full sm:w-auto">
               <Button
                 size="lg"
                 variant="outline"
-                className="text-lg px-8 py-6 h-auto"
+                className="text-sm sm:text-base px-4 sm:px-8 py-3 sm:py-6 h-auto w-full sm:w-auto"
               >
                 Explore Events
               </Button>
@@ -46,6 +59,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Upcoming Events Section */}
+      <HomePageEvents />
 
       {/* Features Section */}
       <section className="py-20 px-6 bg-gradient-to-b from-background via-card/20 to-background">
@@ -91,6 +107,9 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Latest Blogs Section */}
+      <HomePageBlogs />
+
       {/* CTA Section */}
       <section className="py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
@@ -111,12 +130,7 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-12 px-6">
-        <div className="max-w-6xl mx-auto text-center text-muted-foreground">
-          <img src={logo} alt="QHQ Logo" className="h-12 mx-auto mb-6" />
-          <p>© 2024 QHQ. All rights reserved. Stay underground.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

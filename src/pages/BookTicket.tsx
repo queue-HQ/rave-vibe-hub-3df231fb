@@ -1,0 +1,276 @@
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  Calendar,
+  MapPin,
+  Clock,
+  User,
+  Mail,
+  Phone,
+  Loader2,
+  Upload,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { useEvents } from "@/context/EventsContext";
+import { useUserProfile } from "@/context/UserProfileContext";
+import { eventBooking } from "@/api/auth";
+
+// ⬇⬇⬇ Add your upload function here
+async function uploadScreenshot(file: File) {
+  if (!file) return null;
+  const data = new FormData();
+  data.append("file", file);
+
+  const res = await fetch("http://localhost/wp-backend/wp-json/app/v1/upload", {
+    method: "POST",
+    body: data,
+  });
+
+  const json = await res.json();
+  return json.url;
+}
+// ⬆⬆⬆ Upload Function
+
+const BookTicket = () => {
+  const { user } = useUserProfile();
+  const { id } = useParams(); // event ID from URL
+  const { events, isLoading } = useEvents();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const [paymentProof, setPaymentProof] = useState<File | null>(null);
+
+  const [formData, setFormData] = useState({
+    phone: "",
+  });
+
+  const event = events.find((item) => String(item.id) === String(id));
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-14 w-14 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const handleChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!paymentProof) {
+      toast({
+        title: "Payment proof required",
+        description: "Please upload a screenshot.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Upload screenshot
+      const proofUrl = await uploadScreenshot(paymentProof);
+
+      const currentDate = new Date().toLocaleString("en-PK", {
+        timeZone: "Asia/Karachi",
+      });
+
+      const finalData = {
+        event_id: event?.id,
+        date: currentDate,
+        phone: formData.phone,
+        payment_image: proofUrl,
+      };
+
+      // API request
+      await eventBooking(finalData);
+
+      console.log("Submitted Data:", finalData);
+
+      toast({
+        title: "Ticket Booked Successfully! 🎉",
+        description: "Your ticket has been confirmed.",
+      });
+
+      navigate("/dashboard/tickets");
+    } catch (error: any) {
+      console.error("Booking Error:", error);
+
+      toast({
+        title: "Booking failed!",
+        description: error?.message || "Something went wrong. Try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <div className="min-h-screen gradient-soft p-6 lg:p-8">
+      <div className="max-w-5xl mx-auto">
+        <div className="mb-6">
+          <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
+            ← Back
+          </Button>
+          <h1 className="text-4xl font-bold">Book Your Ticket</h1>
+          <p className="text-muted-foreground mt-2">
+            Complete your booking details below
+          </p>
+        </div>
+
+        <div className="grid lg:grid-cols-5 gap-6">
+          {/* Left - Event Info */}
+          <Card className="lg:col-span-2 p-6 rounded-2xl shadow-soft h-fit sticky top-6">
+            <div className="space-y-6">
+              <img
+                src={event?.feature_image || ""}
+                alt="Event"
+                className="w-full h-48 object-cover rounded-xl mb-4"
+              />
+
+              <h2 className="text-2xl font-bold mb-2">{event?.title}</h2>
+
+              <div className="space-y-3 text-sm">
+                <div className="flex items-center gap-3">
+                  <Calendar className="w-5 h-5 text-primary" />
+                  <div>
+                    <p className="font-semibold">{event?.date}</p>
+                    <p className="text-muted-foreground">Saturday</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <Clock className="w-5 h-5 text-primary" />
+                  <div>
+                    <p className="font-semibold">{event?.time}</p>
+                    <p className="text-muted-foreground">
+                      {event?.event_duration}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <MapPin className="w-5 h-5 text-primary" />
+                  <div>
+                    <p className="font-semibold">Address</p>
+                    <p className="text-muted-foreground">{event?.venue}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-muted-foreground">Ticket Price</span>
+                  <span className="text-2xl font-bold text-primary">
+                    PKR {event?.price}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          {/* Right - Form */}
+          <Card className="lg:col-span-3 p-8 rounded-2xl shadow-soft">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Personal Info */}
+              <div>
+                <h3 className="text-xl font-semibold mb-4">
+                  Personal Information
+                </h3>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Full Name</Label>
+                    <Input value={user?.display_name} disabled />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Email</Label>
+                    <Input value={user?.email} disabled />
+                  </div>
+
+                  <div className="space-y-2 md:col-span-2">
+                    <Label>Phone Number *</Label>
+                    <Input
+                      placeholder="+92 300 0000000"
+                      value={formData.phone}
+                      onChange={(e) => handleChange("phone", e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Proof */}
+              <div className="border-t pt-6">
+                <h3 className="text-xl font-semibold mb-4">
+                  Payment Information
+                </h3>
+                <p>
+                  Bank Details:
+                  <br />
+                  Account Title: Rave Vibe Hub
+                  <br />
+                  Account Number: 1234567890
+                  <br />
+                  Bank Name: ABC Bank
+                  <br />
+                  Branch Code: 00123
+                </p>
+
+                <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center group cursor-pointer">
+                  <Upload className="h-12 w-12 mx-auto mb-4 text-primary group-hover:animate-pulse" />
+
+                  <p className="font-semibold mb-2">Proof of Payment</p>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Upload a screenshot of your payment receipt
+                  </p>
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="paymentFile"
+                    className="hidden"
+                    onChange={(e) =>
+                      setPaymentProof(e.target.files?.[0] || null)
+                    }
+                  />
+
+                  <Button
+                    type="button"
+                    onClick={() =>
+                      document.getElementById("paymentFile")?.click()
+                    }
+                  >
+                    Choose File
+                  </Button>
+
+                  {paymentProof && (
+                    <p className="text-sm mt-2 text-green-600">
+                      Selected: {paymentProof.name}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full h-12 gradient-primary text-white font-semibold rounded-xl"
+              >
+                Complete Booking
+              </Button>
+            </form>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default BookTicket;

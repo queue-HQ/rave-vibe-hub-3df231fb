@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Calendar,
   Ticket,
@@ -13,42 +13,21 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import logo from "@/assets/logo.png";
-import { logout } from "@/lib/logout";
-import { getUserProfile } from "@/api/user";
 import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
 import AppSidebar from "@/components/sidebar/AppSidebar";
 import slugify from "@/lib/slugify";
+import { useUserProfile } from "@/context/UserProfileContext";
+import { useEvents } from "@/context/EventsContext";
 
 const Dashboard = () => {
-  const [userName, setUserName] = useState("");
-  const [loading, setLoading] = useState(true);
+  const { user, isLoading } = useUserProfile();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const navigate = useNavigate();
+  const userName = user?.display_name || user?.username || "";
+  const { events, error } = useEvents();
 
-  // Fetch user profile
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await getUserProfile();
+  console.log(user);
 
-        if (res.success) {
-          setUserName(res.user.display_name || res.user.username);
-        } else {
-          toast.error("Session expired!");
-          logout();
-          navigate("/");
-        }
-      } catch (err) {
-        logout();
-        navigate("/");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, [navigate]);
+  console.log(events);
 
   return (
     <div className="min-h-screen bg-background">
@@ -82,7 +61,7 @@ const Dashboard = () => {
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            {loading ? (
+            {isLoading ? (
               <>
                 <Skeleton className="h-10 w-72 mb-3" />
                 <Skeleton className="h-6 w-96" />
@@ -101,7 +80,7 @@ const Dashboard = () => {
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mb-8">
             <Card className="gradient-card neon-border hover-lift bg-gradient-to-br from-primary/10 via-card to-card">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
@@ -110,7 +89,7 @@ const Dashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {loading ? (
+                {isLoading ? (
                   <>
                     <Skeleton className="h-10 w-20" />
                     <Skeleton className="h-4 w-32 mt-3" />
@@ -134,7 +113,7 @@ const Dashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {loading ? (
+                {isLoading ? (
                   <>
                     <Skeleton className="h-10 w-20" />
                     <Skeleton className="h-4 w-24 mt-3" />
@@ -150,7 +129,7 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            <Card className="gradient-card neon-border hover-lift bg-gradient-to-br from-primary/5 via-card to-card">
+            {/* <Card className="gradient-card neon-border hover-lift bg-gradient-to-br from-primary/5 via-card to-card">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>Events Created</span>
@@ -158,7 +137,7 @@ const Dashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {loading ? (
+                {isLoading ? (
                   <>
                     <Skeleton className="h-10 w-16" />
                     <Skeleton className="h-4 w-28 mt-3" />
@@ -172,7 +151,7 @@ const Dashboard = () => {
                   </>
                 )}
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
 
           {/* Recent Events */}
@@ -181,7 +160,7 @@ const Dashboard = () => {
               <CardTitle className="text-2xl">Your Recent Events</CardTitle>
             </CardHeader>
             <CardContent>
-              {loading ? (
+              {isLoading ? (
                 <div className="space-y-4">
                   {[1, 2, 3].map((i) => (
                     <Skeleton key={i} className="h-20 w-full" />
@@ -189,33 +168,34 @@ const Dashboard = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {[1, 2, 3].map((i) => {
-                    const title = `Underground Rave #${i}`;
-                    const slug = slugify(title);
+                  {events &&
+                    events
+                      .slice(0, 3) // 👈 Only first 3 events
+                      .map((event, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-16 h-16 bg-primary/20 rounded-lg flex items-center justify-center">
+                              <Calendar className="h-8 w-8 text-primary" />
+                            </div>
 
-                    return (
-                      <div
-                        key={i}
-                        className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div className="w-16 h-16 bg-primary/20 rounded-lg flex items-center justify-center">
-                            <Calendar className="h-8 w-8 text-primary" />
+                            <div>
+                              <h3 className="font-bold text-lg">
+                                {event.title}
+                              </h3>
+                              <p className="text-sm text-muted-foreground">
+                                {event.date} • {event.venue}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <h3 className="font-bold text-lg">{title}</h3>
-                            <p className="text-sm text-muted-foreground">
-                              Dec {15 + i}, 2024 • Brooklyn Warehouse
-                            </p>
-                          </div>
+
+                          <Link to={`/event/${event.slug}`}>
+                            <Button>View Details</Button>
+                          </Link>
                         </div>
-
-                        <Link to={`/event/${slug}`}>
-                          <Button>View Details</Button>
-                        </Link>
-                      </div>
-                    );
-                  })}
+                      ))}
                 </div>
               )}
             </CardContent>

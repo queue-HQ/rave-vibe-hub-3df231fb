@@ -128,7 +128,12 @@ const Signup = () => {
           <div className="w-full max-w-xl relative z-10">
             <div className="gradient-card neon-border rounded-2xl p-8 backdrop-blur-xl shadow-[0_0_50px_hsl(330_81%_60%_/_0.3)]">
               <div className="flex justify-center mb-8">
-                <img src={logo} alt="QHQ Logo" className="h-20 animate-float" />
+                <img
+                  src={logo}
+                  alt="QHQ Logo"
+                  onClick={() => navigate("/")}
+                  className="h-20 animate-float cursor-pointer"
+                />
               </div>
 
               <h1 className="text-3xl font-bold text-center mb-2">

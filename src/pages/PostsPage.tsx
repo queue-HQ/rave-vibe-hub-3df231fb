@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +9,7 @@ import { usePosts } from "@/context/PostsContext";
 import slugify from "@/lib/slugify";
 import { Calendar, User, Search } from "lucide-react";
 import logo from "@/assets/logo.png";
+import Footer from "@/components/Footer";
 
 const PostsPage = () => {
   const { posts, isLoading, error } = usePosts();
@@ -32,6 +33,10 @@ const PostsPage = () => {
       })
       .filter((item): item is string => Boolean(item));
   };
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   const filteredPosts = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -211,12 +216,7 @@ const PostsPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-12 px-6">
-        <div className="max-w-6xl mx-auto text-center text-muted-foreground">
-          <img src={logo} alt="QHQ Logo" className="h-12 mx-auto mb-6" />
-          <p>© 2024 QHQ. All rights reserved. Stay underground.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

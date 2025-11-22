@@ -1,11 +1,10 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Calendar,
   Users,
   Music,
-  DollarSign,
   Share2,
   Clock,
   MapPin,
@@ -19,12 +18,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { useEvents } from "@/context/EventsContext";
 import slugify from "@/lib/slugify";
 import { checkEventStatus } from "@/lib/utils";
+import Footer from "@/components/Footer";
 
 const SignleEventPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { events, isLoading, error, refetch } = useEvents();
-
-  console.log("Events Details Page:", events);
 
   const event = events.find((item) => {
     if (!slug) return false;
@@ -39,6 +37,10 @@ const SignleEventPage = () => {
 
     return String(item.id) === slug;
   });
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   const heroImage =
     event?.feature_image ??
@@ -288,19 +290,22 @@ const SignleEventPage = () => {
               <CardContent className="p-6 space-y-4">
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-3xl font-bold text-primary">
-                    {event?.price}
+                    PKR {event?.price}
                   </span>
-                  <Badge variant="secondary">
+                  {/* <Badge variant="secondary">
                     {event.attendees ?? 250} spots left
-                  </Badge>
+                  </Badge> */}
                 </div>
 
-                <Link to={`/ticket/${event.id}`}>
-                  <Button className="w-full h-12 text-lg font-bold">
-                    <DollarSign className="mr-2 h-5 w-5" />
-                    Buy Ticket
-                  </Button>
-                </Link>
+                {checkEventStatus(event?.date, event?.time) == "past" ? (
+                  ""
+                ) : (
+                  <Link to={`/book-ticket/${event.id}`}>
+                    <Button className="w-full h-12 text-lg font-bold">
+                      Buy Ticket
+                    </Button>
+                  </Link>
+                )}
 
                 {/* <Button variant="outline" className="w-full">
                   <Share2 className="mr-2 h-4 w-4" />
@@ -381,12 +386,7 @@ const SignleEventPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-12 px-6">
-        <div className="max-w-6xl mx-auto text-center text-muted-foreground">
-          <img src={logo} alt="QHQ Logo" className="h-12 mx-auto mb-6" />
-          <p>© 2024 QHQ. All rights reserved. Stay underground.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

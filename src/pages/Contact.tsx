@@ -7,11 +7,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Mail, Phone, MapPin, SendHorizontal } from "lucide-react";
 import logo from "@/assets/logo.png";
+import Footer from "@/components/Footer";
 
 const ContactPage = () => {
-  const [formState, setFormState] = useState({ name: "", email: "", subject: "", message: "" });
+  const [formState, setFormState] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = event.target;
     setFormState((prev) => ({ ...prev, [name]: value }));
   };
@@ -31,13 +39,17 @@ const ContactPage = () => {
         <div className="absolute inset-0 bg-[conic-gradient(from_0deg_at_50%_50%,_transparent_0deg,_hsl(330_81%_60%_/_0.15)_60deg,_transparent_180deg)] opacity-40" />
 
         <div className="relative max-w-4xl mx-auto text-center space-y-6">
-          <Badge className="px-6 py-2 text-sm uppercase tracking-[0.3em] bg-primary/20 text-primary">Contact</Badge>
+          <Badge className="px-6 py-2 text-sm uppercase tracking-[0.3em] bg-primary/20 text-primary">
+            Contact
+          </Badge>
           <h1 className="text-5xl md:text-6xl font-black leading-tight">
-            Let's craft the next <span className="text-primary">underground</span> moment.
+            Let's craft the next{" "}
+            <span className="text-primary">underground</span> moment.
           </h1>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            Whether you're curating a rave, launching a collab, or just want to vibe with the QHQ crew, drop us a line.
-            We'll get back faster than the bass drops.
+            Whether you're curating a rave, launching a collab, or just want to
+            vibe with the QHQ crew, drop us a line. We'll get back faster than
+            the bass drops.
           </p>
         </div>
       </section>
@@ -47,7 +59,9 @@ const ContactPage = () => {
           <CardContent className="p-8 space-y-6">
             <div>
               <h2 className="text-2xl font-bold mb-2">Send us a message</h2>
-              <p className="text-muted-foreground">We typically respond within 24 hours.</p>
+              <p className="text-muted-foreground">
+                We typically respond within 24 hours.
+              </p>
             </div>
 
             <form className="space-y-5" onSubmit={handleSubmit}>
@@ -85,7 +99,10 @@ const ContactPage = () => {
                 required
               />
 
-              <Button type="submit" className="w-full h-12 text-lg font-semibold">
+              <Button
+                type="submit"
+                className="w-full h-12 text-lg font-semibold"
+              >
                 <SendHorizontal className="h-5 w-5 mr-2" />
                 Send Message
               </Button>
@@ -127,8 +144,8 @@ const ContactPage = () => {
             <CardContent className="p-6 space-y-4">
               <h3 className="text-xl font-bold">Booking & Collaborations</h3>
               <p>
-                Need QHQ for an event, immersive experience, or creative direction? We're down for bold ideas and
-                late-night brainstorms.
+                Need QHQ for an event, immersive experience, or creative
+                direction? We're down for bold ideas and late-night brainstorms.
               </p>
               <Button variant="secondary" className="w-full" asChild>
                 <a href="mailto:bookings@qhq.studio">bookings@qhq.studio</a>
@@ -138,12 +155,7 @@ const ContactPage = () => {
         </div>
       </div>
       {/* Footer */}
-      <footer className="border-t border-border py-12 px-6">
-        <div className="max-w-6xl mx-auto text-center text-muted-foreground">
-          <img src={logo} alt="QHQ Logo" className="h-12 mx-auto mb-6" />
-          <p>© 2024 QHQ. All rights reserved. Stay underground.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

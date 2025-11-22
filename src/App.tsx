@@ -25,6 +25,11 @@ import SinglePostPage from "@/pages/SinglePostPage";
 import ContactPage from "@/pages/Contact";
 import { EventsProvider } from "@/context/EventsContext";
 import { PostsProvider } from "@/context/PostsContext";
+import { UserProfileProvider } from "@/context/UserProfileContext";
+import BookTicket from "@/pages/BookTicket";
+import UserTickets from "@/pages/UserTickets";
+import TicketView from "@/pages/TicketView";
+import TicketScan from "@/pages/TicketScan";
 
 const queryClient = new QueryClient();
 
@@ -33,109 +38,141 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <EventsProvider>
-        <PostsProvider>
-          <BrowserRouter>
-          <Routes>
-          {/* PUBLIC ROUTES */}
-          <Route path="/" element={<Index />} />
-          <Route path="/events" element={<EventsPage />} />
-          <Route path="/event/:slug" element={<SignleEventPage />} />
-          <Route path="/blogs" element={<PostsPage />} />
-          <Route path="/blog/:slug" element={<SinglePostPage />} />
-          <Route path="/contact" element={<ContactPage />} />
+      <BrowserRouter>
+        <EventsProvider>
+          <PostsProvider>
+            <UserProfileProvider>
+              <Routes>
+              {/* PUBLIC ROUTES */}
+              <Route path="/" element={<Index />} />
+              <Route path="/events" element={<EventsPage />} />
+              <Route path="/event/:slug" element={<SignleEventPage />} />
+              <Route path="/blogs" element={<PostsPage />} />
+              <Route path="/blog/:slug" element={<SinglePostPage />} />
+              <Route path="/contact" element={<ContactPage />} />
 
-          <Route
-            path="/login"
-            element={
-              <PublicRoute>
-                <Login />
-              </PublicRoute>
-            }
-          />
+              <Route
+                path="/login"
+                element={
+                  <PublicRoute>
+                    <Login />
+                  </PublicRoute>
+                }
+              />
 
-          <Route
-            path="/signup"
-            element={
-              <PublicRoute>
-                <Signup />
-              </PublicRoute>
-            }
-          />
+              <Route
+                path="/signup"
+                element={
+                  <PublicRoute>
+                    <Signup />
+                  </PublicRoute>
+                }
+              />
 
-          <Route
-            path="/waiting-approval"
-            element={
-              <PublicRoute>
-                <WaitingApproval />
-              </PublicRoute>
-            }
-          />
+              <Route
+                path="/waiting-approval"
+                element={
+                  <PublicRoute>
+                    <WaitingApproval />
+                  </PublicRoute>
+                }
+              />
 
-          <Route
-            path="/verify-otp"
-            element={
-              <PublicRoute>
-                <OTPVerify />
-              </PublicRoute>
-            }
-          />
+              <Route
+                path="/verify-otp"
+                element={
+                  <PublicRoute>
+                    <OTPVerify />
+                  </PublicRoute>
+                }
+              />
 
-          <Route
-            path="/setup-profile"
-            element={
-              <PublicRoute>
-                <SetupProfile />
-              </PublicRoute>
-            }
-          />
+              <Route
+                path="/setup-profile"
+                element={
+                  <PublicRoute>
+                    <SetupProfile />
+                  </PublicRoute>
+                }
+              />
 
-          <Route path="/dashboard-events" element={<Events />} />
-          <Route path="/dashboard-event/:id" element={<Event />} />
+              <Route path="/dashboard-events" element={<Events />} />
+              <Route path="/dashboard-event/:id" element={<Event />} />
 
-          {/* PROTECTED ROUTES */}
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
+              {/* PROTECTED ROUTES */}
 
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
+              <Route
+                path="/book-ticket/:id"
+                element={
+                  <ProtectedRoute>
+                    <BookTicket />
+                  </ProtectedRoute>
+                }
+              />
 
-          <Route
-            path="/verify"
-            element={
-              <ProtectedRoute>
-                <Verify />
-              </ProtectedRoute>
-            }
-          />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
 
-          <Route
-            path="/ticket/:id"
-            element={
-              <ProtectedRoute>
-                <Ticket />
-              </ProtectedRoute>
-            }
-          />
+              <Route
+                path="/dashboard/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
 
-          {/* 404 */}
-          <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+              <Route
+                path="/dashboard/tickets"
+                element={
+                  <ProtectedRoute>
+                    <UserTickets />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/dashboard/view-ticket/:id"
+                element={
+                  <ProtectedRoute>
+                    <TicketView />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/verify"
+                element={
+                  <ProtectedRoute>
+                    <Verify />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/ticket/:id"
+                element={
+                  <ProtectedRoute>
+                    <Ticket />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route path="/ticket-scan/:passId" element={<TicketScan />} />
+
+              {/* 404 */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </UserProfileProvider>
         </PostsProvider>
       </EventsProvider>
+      </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );

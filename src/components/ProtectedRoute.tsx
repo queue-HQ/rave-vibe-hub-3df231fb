@@ -1,4 +1,4 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { isAuthenticated } from "@/lib/auth";
 
 export default function ProtectedRoute({
@@ -6,8 +6,12 @@ export default function ProtectedRoute({
 }: {
   children: JSX.Element;
 }) {
+  const location = useLocation();
+
   if (!isAuthenticated()) {
-    return <Navigate to="/login" replace />;
+    const redirectTo = `${location.pathname}${location.search}${location.hash}`;
+
+    return <Navigate to="/login" replace state={{ from: redirectTo }} />;
   }
   return children;
 }

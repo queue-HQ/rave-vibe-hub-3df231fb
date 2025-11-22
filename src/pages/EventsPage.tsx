@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,11 +23,16 @@ import { Input } from "@/components/ui/input";
 import { useEvents } from "@/context/EventsContext";
 import slugify from "@/lib/slugify";
 import { checkEventStatus } from "@/lib/utils";
+import Footer from "@/components/Footer";
 
 const EventsPage = () => {
   const { events, isLoading, error } = useEvents();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   const hasEvents = events.length > 0;
 
@@ -227,12 +232,7 @@ const EventsPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-12 px-6">
-        <div className="max-w-6xl mx-auto text-center text-muted-foreground">
-          <img src={logo} alt="QHQ Logo" className="h-12 mx-auto mb-6" />
-          <p>© 2024 QHQ. All rights reserved. Stay underground.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

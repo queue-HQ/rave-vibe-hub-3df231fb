@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,10 +10,15 @@ import api from "@/lib/axios";
 import { Loader2 } from "lucide-react";
 import { useFormValidation } from "@/lib/useFormValidation";
 import { required, email, minLength } from "@/lib/validators";
+import { useUserProfile } from "@/context/UserProfileContext";
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
+  const { refetch } = useUserProfile();
+
+  const redirectPath = (location.state as { from?: string } | null)?.from ?? "/dashboard";
 
   // Use reusable form validation hook
   const { formState, handleChange, getError, isValid } = useFormValidation({
@@ -44,7 +49,8 @@ const Login = () => {
           (Date.now() + 10 * 60 * 1000).toString()
         );
 
-        navigate("/dashboard");
+        await refetch();
+        navigate(redirectPath, { replace: true });
       } else {
         toast.error(res.data.message || "Login failed!");
       }
@@ -60,7 +66,12 @@ const Login = () => {
       <div className="w-full max-w-md relative z-10">
         <div className="gradient-card neon-border rounded-2xl p-8 backdrop-blur-xl shadow-lg">
           <div className="flex justify-center mb-8">
-            <img src={logo} alt="QHQ Logo" className="h-20 animate-float" />
+            <img
+              src={logo}
+              alt="QHQ Logo"
+              onClick={() => navigate("/")}
+              className="h-20 animate-float cursor-pointer"
+            />
           </div>
 
           <h1 className="text-3xl font-bold text-center mb-2">Welcome Back</h1>

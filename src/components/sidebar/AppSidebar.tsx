@@ -54,7 +54,7 @@ export default function AppSidebar({
           </Button>
         </Link>
 
-        <Link to="/profile" onClick={onClose}>
+        <Link to="/dashboard/profile" onClick={onClose}>
           <Button variant="ghost" className="w-full justify-start text-lg">
             <User className="mr-3 h-5 w-5" />
             My Profile
@@ -68,10 +68,10 @@ export default function AppSidebar({
           </Button>
         </Link>
 
-        <Link to="/tickets" onClick={onClose}>
+        <Link to="/dashboard/tickets" onClick={onClose}>
           <Button variant="ghost" className="w-full justify-start text-lg">
             <Ticket className="mr-3 h-5 w-5" />
-            Tickets
+            Bookings
           </Button>
         </Link>
 
