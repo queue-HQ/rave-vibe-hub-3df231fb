@@ -187,6 +187,7 @@ const Profile = () => {
       )}
       {/* Sidebar */}
       <AppSidebar />
+      
 
       {/* Main Content */}
       <main className="ml-0 lg:ml-64 p-4 sm:p-6">
