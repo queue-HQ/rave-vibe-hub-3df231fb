@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +14,7 @@ const SetupProfile = () => {
 
   const userPaylod = JSON.parse(localStorage.getItem("user-register-payload"));
 
+  const [inviteToken, setInviteToken] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     email: userPaylod?.email || "",
     password: "",
@@ -21,16 +22,31 @@ const SetupProfile = () => {
   });
 
   const navigate = useNavigate();
+  const location = useLocation();
   const userRegister = localStorage.getItem("user-register");
   const userVerify = localStorage.getItem("user-verify");
 
   useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const invite = searchParams.get("invite");
+    const inviteEmail = searchParams.get("email");
+
+    if (invite && inviteEmail) {
+      setInviteToken(invite);
+      setFormData((prev) => ({
+        ...prev,
+        email: decodeURIComponent(inviteEmail),
+      }));
+      setPageLoader(false);
+      return;
+    }
+
     if (!userRegister && !userPaylod) {
       navigate("/signup");
       return;
     }
     setPageLoader(false);
-  }, []);
+  }, [location.search]);
 
   const handleSetup = async (e) => {
     e.preventDefault();
@@ -43,11 +59,14 @@ const SetupProfile = () => {
         return;
       }
 
-      const payload = {
-        // ...userPaylod,
+      const payload: any = {
         email: formData.email,
         password: formData.password,
       };
+
+      if (inviteToken) {
+        payload.invite_token = inviteToken;
+      }
 
       const res = await setPassword(payload);
 

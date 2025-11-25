@@ -51,3 +51,18 @@ export function checkEventStatus(dateStr, timeStr) {
     return "ongoing";
 }
 
+
+export function getInitials(fullName) {
+    if (!fullName) return "";
+
+    // Remove extra spaces
+    const parts = fullName
+        .trim()
+        .split(" ")
+        .filter(p => p.length > 0);
+
+    const first = parts[0]?.charAt(0).toUpperCase() || "";
+    const last = parts[parts.length - 1]?.charAt(0).toUpperCase() || "";
+
+    return first + last;
+}

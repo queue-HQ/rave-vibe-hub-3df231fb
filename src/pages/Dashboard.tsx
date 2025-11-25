@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Calendar,
@@ -24,10 +24,80 @@ const Dashboard = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const userName = user?.display_name || user?.username || "";
   const { events, error } = useEvents();
+  const [ticketsCount, setTicketsCount] = useState<number | null>(null);
 
-  console.log(user);
+  const upcomingEvents = useMemo(() => {
+    const parseEventDateTime = (event: any) => {
+      const baseDate: string | undefined = event?.start_date || event?.date;
+      if (!baseDate) return null;
 
-  console.log(events);
+      const startTime = typeof event?.time === "string"
+        ? event.time.split("-")[0]?.trim()
+        : "";
+
+      const candidates = [] as string[];
+      if (startTime) {
+        candidates.push(`${baseDate} ${startTime} GMT+0500`);
+        candidates.push(`${baseDate} ${startTime}`);
+      }
+      candidates.push(`${baseDate} GMT+0500`);
+      candidates.push(baseDate);
+
+      for (const candidate of candidates) {
+        const parsed = new Date(candidate);
+        if (!isNaN(parsed.getTime())) {
+          return parsed;
+        }
+      }
+
+      return null;
+    };
+
+    const now = Date.now();
+
+    const enrichedEvents = (events || [])
+      .map((event) => ({
+        event,
+        startAt: parseEventDateTime(event),
+      }))
+      .filter((item) => item.startAt && item.startAt.getTime() >= now)
+      .sort((a, b) => {
+        return a.startAt!.getTime() - b.startAt!.getTime();
+      });
+
+    const count = enrichedEvents.length;
+    let subtitle = "No upcoming events";
+
+    if (enrichedEvents.length > 0) {
+      const diffMs = enrichedEvents[0].startAt!.getTime() - now;
+
+      if (diffMs <= 0) {
+        subtitle = "Live now!";
+      } else {
+        const diffMinutes = Math.floor(diffMs / (1000 * 60));
+        const diffHours = Math.floor(diffMinutes / 60);
+        const diffDays = Math.floor(diffHours / 24);
+
+        if (diffDays > 0) {
+          subtitle = `Next event in ${diffDays} day${diffDays > 1 ? "s" : ""}`;
+        } else if (diffHours > 0) {
+          subtitle = `Next event in ${diffHours} hour${diffHours > 1 ? "s" : ""}`;
+        } else if (diffMinutes > 0) {
+          subtitle = `Next event in ${diffMinutes} minute${diffMinutes > 1 ? "s" : ""}`;
+        } else {
+          subtitle = "Starting soon";
+        }
+      }
+    }
+
+    return { count, subtitle };
+  }, [events]);
+
+  const ticketsOwned = useMemo(() => {
+    if (!user) return 0;
+    const storedBookings = localStorage.getItem("user_bookings_count");
+    return storedBookings ? Number(storedBookings) : 0;
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -68,8 +138,13 @@ const Dashboard = () => {
               </>
             ) : (
               <>
-                <h1 className="text-4xl font-bold mb-2">
+                {/* <h1 className="text-4xl font-bold mb-2">
                   Welcome back, <span className="text-primary">{userName}</span>{" "}
+                  🎉
+                </h1> */}
+
+                <h1 className="text-4xl font-bold mb-2">
+                  Welcome back, <span className="text-primary">{user?.first_name + " " + user?.last_name}</span>{" "}
                   🎉
                 </h1>
                 <p className="text-muted-foreground text-lg">
@@ -96,9 +171,9 @@ const Dashboard = () => {
                   </>
                 ) : (
                   <>
-                    <p className="text-4xl font-bold text-primary">5</p>
+                    <p className="text-4xl font-bold text-primary">{upcomingEvents.count}</p>
                     <p className="text-sm text-muted-foreground mt-2">
-                      Next event in 3 days
+                      {upcomingEvents.subtitle}
                     </p>
                   </>
                 )}
@@ -120,7 +195,7 @@ const Dashboard = () => {
                   </>
                 ) : (
                   <>
-                    <p className="text-4xl font-bold text-accent">12</p>
+                    <p className="text-4xl font-bold text-accent">{ticketsOwned}</p>
                     <p className="text-sm text-muted-foreground mt-2">
                       Ready to party
                     </p>

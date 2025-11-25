@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,6 +42,7 @@ const Signup = () => {
   });
 
   const navigate = useNavigate();
+  const location = useLocation();
   const userRegister = localStorage.getItem("user-register");
   const userVerify = localStorage.getItem("user-verify");
   const userSetupProfile = localStorage.getItem("user-setup-profile");
@@ -69,6 +70,48 @@ const Signup = () => {
     }
     setPageLoader(false);
   }, []);
+
+  const fromGoogleSignup =
+    (location.state as { fromGoogle?: boolean } | null)?.fromGoogle ?? false;
+
+  useEffect(() => {
+    if (pageLoader || !fromGoogleSignup) return;
+
+    const rawPrefill = localStorage.getItem("google-signup-prefill");
+    if (!rawPrefill) return;
+
+    try {
+      const parsed = JSON.parse(rawPrefill) as {
+        email?: string;
+        firstName?: string;
+        lastName?: string;
+        name?: string;
+        picture?: string;
+      };
+
+      const fallbackNames = parsed.name?.trim().split(" ") ?? [];
+      const fallbackFirst = fallbackNames.at(0) ?? "";
+      const fallbackLast = fallbackNames.slice(1).join(" ");
+
+      setFormData((prev) => ({
+        ...prev,
+        username:
+          prev.username ||
+          (parsed.email ? parsed.email.split("@")[0] : prev.username),
+        email: prev.email || parsed.email || "",
+        first_name:
+          prev.first_name || parsed.firstName || fallbackFirst || prev.first_name,
+        last_name:
+          prev.last_name || parsed.lastName || fallbackLast || prev.last_name,
+        profile_picture: parsed.picture || prev.profile_picture,
+      }));
+
+      toast.info("We filled your details from Google. Complete the rest to continue.");
+    } catch (err) {
+      console.error("Failed to parse google signup prefill", err);
+      toast.error("Couldn't auto-fill Google info. Please enter details manually.");
+    }
+  }, [pageLoader, fromGoogleSignup]);
 
   async function uploadScreenshot(file) {
     if (!file) return null;

@@ -5,6 +5,16 @@ export const getUserProfile = async () => {
   return res.data;
 };
 
+export const updateUserProfile = async (data: any) => {
+  const res = await api.post("/userProfile", data);
+  return res.data;
+};
+
+export const updatePassword = async (data: any) => {
+  const res = await api.post("/update-password", data);
+  return res.data;
+};
+
 
 export const getBookings = async () => {
   const res = await api.get("/my-bookings");

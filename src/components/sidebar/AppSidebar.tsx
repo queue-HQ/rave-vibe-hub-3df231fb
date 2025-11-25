@@ -75,12 +75,12 @@ export default function AppSidebar({
           </Button>
         </Link>
 
-        <Link to="/settings" onClick={onClose}>
+        {/* <Link to="/settings" onClick={onClose}>
           <Button variant="ghost" className="w-full justify-start text-lg">
             <Settings className="mr-3 h-5 w-5" />
             Settings
           </Button>
-        </Link>
+        </Link> */}
 
         <Button
           variant="ghost"

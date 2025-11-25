@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Calendar, Logs } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ const UserTickets = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [bookings, setBookings] = useState<any[]>([]);
   const [loadingBookings, setLoadingBookings] = useState(true);
+  const [activeTab, setActiveTab] = useState<"current" | "past" | "cancel">("current");
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -39,9 +40,53 @@ const UserTickets = () => {
     }
   }, [user]);
 
+  const getEventDate = (bookingDate?: string) => {
+    if (!bookingDate) return null;
+    const parsed = Date.parse(bookingDate);
+    if (Number.isNaN(parsed)) return null;
+    return new Date(parsed);
+  };
+
+  const isPastEvent = (booking) => {
+    const eventDate = getEventDate(booking?.booking_date || booking?.registered_at);
+    if (!eventDate) return false;
+    const now = new Date();
+    const diff = now.getTime() - eventDate.getTime();
+    const oneDayMs = 24 * 60 * 60 * 1000;
+    return diff > oneDayMs;
+  };
+
+  const categorizedBookings = useMemo(() => {
+    const groups = {
+      current: [] as any[],
+      past: [] as any[],
+      cancel: [] as any[],
+    };
+
+    bookings.forEach((booking) => {
+      const status = (booking?.user_status || "").toLowerCase();
+      if (status === "cancel") {
+        groups.cancel.push(booking);
+        return;
+      }
+
+      if (isPastEvent(booking)) {
+        groups.past.push(booking);
+      } else {
+        groups.current.push(booking);
+      }
+    });
+
+    return groups;
+  }, [bookings]);
+
+  const filteredBookings = useMemo(() => {
+    return categorizedBookings[activeTab];
+  }, [activeTab, categorizedBookings]);
+
   const hanldeView = (status, id) => {
     console.log(status);
-    if (status === "pending") {
+    if (status === "Pending") {
       toast({
         title: "Waiting for Approval",
         description: "Please wait until your booking is approved.",
@@ -69,7 +114,17 @@ const UserTickets = () => {
     console.log("View Ticket Clicked");
   };
 
-  console.log(bookings);
+  const renderTabButton = (value: "current" | "past" | "cancel", label: string) => (
+    <Button
+      key={value}
+      variant={activeTab === value ? "default" : "ghost"}
+      className="capitalize"
+      onClick={() => setActiveTab(value)}
+    >
+      {label} ({categorizedBookings[value].length})
+    </Button>
+  );
+
   return (
     <div className="min-h-screen bg-background">
       {/* Mobile Navbar */}
@@ -110,7 +165,7 @@ const UserTickets = () => {
             ) : (
               <>
                 <h1 className="text-4xl font-bold mb-2">
-                  Welcome back, <span className="text-primary">{userName}</span>{" "}
+                  Welcome back, <span className="text-primary">{user?.first_name + " " + user?.last_name}</span>{" "}
                   🎉
                 </h1>
                 <p className="text-muted-foreground text-lg">
@@ -126,54 +181,73 @@ const UserTickets = () => {
               <CardTitle className="text-2xl">Event Booking Details</CardTitle>
             </CardHeader>
             <CardContent>
+              <div className="flex flex-wrap gap-2 mb-6">
+                {renderTabButton("current", "Current Bookings")}
+                {renderTabButton("past", "Past Bookings")}
+                {renderTabButton("cancel", "Cancel Bookings")}
+              </div>
               {loadingBookings ? (
                 <div className="space-y-4">
                   {[1, 2, 3].map((i) => (
                     <Skeleton key={i} className="h-20 w-full" />
                   ))}
                 </div>
-              ) : bookings.length === 0 ? (
+              ) : filteredBookings.length === 0 ? (
                 <p className="text-center text-muted-foreground py-6">
                   No tickets found.
                 </p>
               ) : (
                 <div className="space-y-4">
-                  {bookings.map((booking) => (
-                    <div
-                      key={booking.booking_id}
-                      className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 bg-primary/20 rounded-lg flex items-center justify-center">
-                          <Calendar className="h-8 w-8 text-primary" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-lg">
-                            {booking.event_title}
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            Registered on: {booking.registered_at}
-                          </p>
-                        </div>
-                      </div>
+                  {filteredBookings.map((booking) => {
+                    const status = booking?.user_status || "Pending";
+                    const normalizedStatus = status.toLowerCase();
+                    const pastEvent = activeTab === "past" || isPastEvent(booking);
+                    const isCancelled = normalizedStatus === "cancel";
+                    const canViewTicket = normalizedStatus === "confirm" && !pastEvent && !isCancelled;
+                    const buttonLabel = canViewTicket
+                      ? "View Ticket"
+                      : normalizedStatus === "confirm" && pastEvent
+                      ? "Event Ended"
+                      : normalizedStatus === "cancel"
+                      ? "Booking Cancelled"
+                      : normalizedStatus === "pending"
+                      ? "Pending Approval"
+                      : status;
 
-                      <Button
-                        onClick={() =>
-                          hanldeView(booking?.user_status, booking?.booking_id)
-                        }
+                    return (
+                      <div
+                        key={booking.booking_id}
+                        className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
                       >
-                        {booking.user_status == "Confirm"
-                          ? "View Ticket"
-                          : booking.user_status == "Cancel"
-                          ? "Booking Cancel"
-                          : "Pending"}
-                      </Button>
+                        <div className="flex items-center gap-4">
+                          <div className="w-16 h-16 bg-primary/20 rounded-lg flex items-center justify-center">
+                            {/* <Calendar className="h-8 w-8 text-primary" /> */}
+                            <img src={booking.feature_image} alt="Event Image" className="w-16 h-16 rounded-lg object-cover border" />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-lg">
+                              {booking.event_title}
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                              Event Date: {booking.event_date} <span className="text-xs pl-4 text-primary">{booking.event_time}</span>
+                            </p>
+                          
+                          </div>
+                        </div>
 
-                      {/* <Link to={`/dashboard/view-ticket/${booking.booking_id}`}>
+                        <Button
+                          disabled={pastEvent || isCancelled}
+                          onClick={() => hanldeView(booking?.user_status, booking?.booking_id)}
+                        >
+                          {buttonLabel}
+                        </Button>
+
+                        {/* <Link to={`/dashboard/view-ticket/${booking.booking_id}`}>
                         <Button>{booking.user_status || "Pending"}</Button>
                       </Link> */}
-                    </div>
-                  ))}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </CardContent>

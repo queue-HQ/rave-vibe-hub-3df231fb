@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Calendar,
@@ -25,7 +25,7 @@ async function uploadScreenshot(file: File) {
   const data = new FormData();
   data.append("file", file);
 
-  const res = await fetch("http://localhost/wp-backend/wp-json/app/v1/upload", {
+  const res = await fetch("https://admin.theqhq.com/wp-json/app/v1/upload", {
     method: "POST",
     body: data,
   });
@@ -43,10 +43,20 @@ const BookTicket = () => {
   const { toast } = useToast();
 
   const [paymentProof, setPaymentProof] = useState<File | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
-    phone: "",
+    phone: user?.phone || "",
   });
+
+  const fullName = [user?.first_name, user?.last_name]
+    .filter(Boolean)
+    .join(" ")
+    .trim() || user?.display_name || user?.username || "";
+
+  useEffect(() => {
+    setFormData((prev) => ({ ...prev, phone: user?.phone || "" }));
+  }, [user?.phone]);
 
   const event = events.find((item) => String(item.id) === String(id));
 
@@ -75,6 +85,7 @@ const BookTicket = () => {
     }
 
     try {
+      setSubmitting(true);
       // Upload screenshot
       const proofUrl = await uploadScreenshot(paymentProof);
 
@@ -103,11 +114,25 @@ const BookTicket = () => {
     } catch (error: any) {
       console.error("Booking Error:", error);
 
+      const apiPayload = error?.response?.data;
+      let responseMessage =
+        apiPayload?.message ||
+        apiPayload?.code ||
+        error?.message ||
+        "Something went wrong. Try again.";
+
+      if (!apiPayload?.message && apiPayload && typeof apiPayload === "object") {
+        responseMessage = JSON.stringify(apiPayload);
+      }
+
       toast({
         title: "Booking failed!",
-        description: error?.message || "Something went wrong. Try again.",
+        description: responseMessage,
         variant: "destructive",
       });
+    }
+    finally {
+      setSubmitting(false);
     }
   };
 
@@ -187,7 +212,7 @@ const BookTicket = () => {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Full Name</Label>
-                    <Input value={user?.display_name} disabled />
+                    <Input value={fullName} disabled />
                   </div>
 
                   <div className="space-y-2">
@@ -223,7 +248,7 @@ const BookTicket = () => {
                   <br />
                   Branch Code: 00123
                 </p>
-
+                <br />
                 <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center group cursor-pointer">
                   <Upload className="h-12 w-12 mx-auto mb-4 text-primary group-hover:animate-pulse" />
 
@@ -262,8 +287,16 @@ const BookTicket = () => {
               <Button
                 type="submit"
                 className="w-full h-12 gradient-primary text-white font-semibold rounded-xl"
+                disabled={submitting}
               >
-                Complete Booking
+                {submitting ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Processing...
+                  </span>
+                ) : (
+                  "Complete Booking"
+                )}
               </Button>
             </form>
           </Card>

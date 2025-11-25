@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { User, Mail, Phone, MapPin, Lock, Edit, Logs } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,22 +10,52 @@ import { Badge } from "@/components/ui/badge";
 import AppSidebar from "@/components/sidebar/AppSidebar";
 import logo from "@/assets/logo.png";
 import { useUserProfile } from "@/context/UserProfileContext";
+import { updateUserProfile, updatePassword } from "@/api/user";
+import { toast } from "sonner";
+import api from "@/lib/axios";
+import { getInitials } from "@/lib/utils";
 
 const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const { user, isLoading } = useUserProfile();
+  const { user, isLoading, refetch } = useUserProfile();
   const [profile, setProfile] = useState({
-    name: user?.display_name || user?.username || "",
-    email: user?.email || "",
-    phone: user?.phone || "",
-    address: user?.address || "",
-    bio: user?.bio || "",
-    username: user?.username || "",
-    image: user?.image || "",
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    bio: "",
+    username: "",
+    image: "",
+    pictureFile: null as File | null,
   });
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    current: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [changingPassword, setChangingPassword] = useState(false);
+  console.log('USER:', user)
 
-  const handleImageUpload = (e) => {
+  useEffect(() => {
+    if (!user) return;
+
+    setProfile((prev) => ({
+      ...prev,
+      name: (user.first_name + " " + user.last_name) || (user.username as string) || "",
+      email: (user.email as string) || "",
+      phone: (user.phone as string) || "",
+      address: (user.address as string) || "",
+      bio: (user.bio as string) || "",
+      username: (user.username as string) || "",
+      image:
+        ((user.profile_picture as string) || (user.image as string) || "") ?? "",
+      pictureFile: null,
+    }));
+  }, [user]);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -33,18 +63,105 @@ const Profile = () => {
     reader.onloadend = () => {
       setProfile((prev) => ({
         ...prev,
-        image: reader.result, // PREVIEW temporary
-        _file: file, // actual file backend ko bhejna
+        image: reader.result as string,
+        pictureFile: file,
       }));
     };
 
     reader.readAsDataURL(file);
   };
 
-  const handleSave = (e: React.FormEvent) => {
+  const uploadProfileImage = async () => {
+    if (!profile.pictureFile) return profile.image;
+
+    const formData = new FormData();
+    formData.append("file", profile.pictureFile);
+
+    const res = await api.post("/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    if (res.data?.url) {
+      return res.data.url as string;
+    }
+    throw new Error("Image upload failed");
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(profile);
-    setIsEditing(false);
+    if (savingProfile) return;
+
+    try {
+      setSavingProfile(true);
+
+      let uploadedImage = profile.image;
+      if (profile.pictureFile) {
+        uploadedImage = await uploadProfileImage();
+      }
+
+      const payload = {
+        phone: profile.phone,
+        address: profile.address,
+        bio: profile.bio,
+        profile_picture: uploadedImage,
+      };
+
+      const res = await updateUserProfile(payload);
+      if (res?.success) {
+        toast.success("Profile updated");
+        setIsEditing(false);
+        setProfile((prev) => ({
+          ...prev,
+          pictureFile: null,
+          image: uploadedImage,
+          phone: payload.phone,
+          address: payload.address,
+          bio: payload.bio,
+        }));
+        await refetch();
+      } else {
+        toast.error(res?.message || "Failed to update profile");
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to update profile");
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  const handlePasswordUpdate = async () => {
+    if (changingPassword) return;
+    if (!passwordData.current || !passwordData.newPassword || !passwordData.confirmPassword) {
+      toast.error("Please fill all password fields");
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error("New password and confirm password must match");
+      return;
+    }
+
+    try {
+      setChangingPassword(true);
+      const res = await updatePassword({
+        email: profile.email,
+        old_password: passwordData.current,
+        new_password: passwordData.newPassword,
+        confirm_password: passwordData.confirmPassword,
+      });
+
+      if (res?.success) {
+        toast.success("Password updated successfully");
+        localStorage.setItem("token", res.token);
+        setPasswordData({ current: "", newPassword: "", confirmPassword: "" });
+      } else {
+        toast.error(res?.message || "Failed to update password");
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to update password");
+    } finally {
+      setChangingPassword(false);
+    }
   };
 
   return (
@@ -80,7 +197,8 @@ const Profile = () => {
               <div className="flex flex-col md:flex-row items-center gap-6">
                 <Avatar className="w-32 h-32 border-4 border-primary">
                   <AvatarImage src={profile.image} />
-                  <AvatarFallback>AR</AvatarFallback>
+                  {/* {getInitials(profile?.name)} */}
+                  <AvatarFallback>{getInitials(profile?.name)}</AvatarFallback>
                 </Avatar>
 
                 {isEditing && (
@@ -122,26 +240,12 @@ const Profile = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  value={profile.username}
-                  disabled={true}
-                  onChange={(e) =>
-                    setProfile({ ...profile, username: e.target.value })
-                  }
-                />
+                <Input id="username" value={profile.username} disabled />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    value={profile.name}
-                    disabled={!isEditing}
-                    onChange={(e) =>
-                      setProfile({ ...profile, name: e.target.value })
-                    }
-                  />
+                  <Input id="name" value={profile.name} disabled />
                 </div>
 
                 <div className="space-y-2">
@@ -152,10 +256,7 @@ const Profile = () => {
                       id="email"
                       type="email"
                       value={profile.email}
-                      disabled={!isEditing}
-                      onChange={(e) =>
-                        setProfile({ ...profile, email: e.target.value })
-                      }
+                      disabled
                     />
                   </div>
                 </div>
@@ -205,8 +306,8 @@ const Profile = () => {
               </div>
 
               {isEditing && (
-                <Button onClick={handleSave} className="w-full">
-                  Save Changes
+                <Button onClick={handleSave} className="w-full" disabled={savingProfile}>
+                  {savingProfile ? "Saving..." : "Save Changes"}
                 </Button>
               )}
             </CardContent>
@@ -262,17 +363,38 @@ const Profile = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="currentPassword">Current Password</Label>
-                <Input id="currentPassword" type="password" />
+                <Input
+                  id="currentPassword"
+                  type="password"
+                  value={passwordData.current}
+                  onChange={(e) => setPasswordData((prev) => ({ ...prev, current: e.target.value }))}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="newPassword">New Password</Label>
-                <Input id="newPassword" type="password" />
+                <Input
+                  id="newPassword"
+                  type="password"
+                  value={passwordData.newPassword}
+                  onChange={(e) =>
+                    setPasswordData((prev) => ({ ...prev, newPassword: e.target.value }))
+                  }
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                <Input id="confirmPassword" type="password" />
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={passwordData.confirmPassword}
+                  onChange={(e) =>
+                    setPasswordData((prev) => ({ ...prev, confirmPassword: e.target.value }))
+                  }
+                />
               </div>
-              <Button>Update Password</Button>
+              <Button onClick={handlePasswordUpdate} disabled={changingPassword}>
+                {changingPassword ? "Updating..." : "Update Password"}
+              </Button>
             </CardContent>
           </Card>
         </div>
