@@ -1,4 +1,6 @@
+import axios from "axios";
 import api from "../lib/axios";
+import { baseUrl } from "../lib/apiURL";
 
 
 export const registerUser = async (data: any) => {
@@ -38,5 +40,11 @@ export const loginUser = async (data: any) => {
 
 export const eventBooking = async (data: any) => {
   const res = await api.post("/event-booking", data);
+  return res.data;
+};
+
+
+export const sendContactForm = async (data: any) => {
+  const res = await axios.post(`${baseUrl}/wp-json/contact/v1/send`, data);
   return res.data;
 };

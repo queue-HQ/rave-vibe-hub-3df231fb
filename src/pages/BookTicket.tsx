@@ -137,172 +137,190 @@ const BookTicket = () => {
   };
 
   return (
-    <div className="min-h-screen gradient-soft p-6 lg:p-8">
-      <div className="max-w-5xl mx-auto">
-        <div className="mb-6">
-          <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
-            ← Back
-          </Button>
-          <h1 className="text-4xl font-bold">Book Your Ticket</h1>
-          <p className="text-muted-foreground mt-2">
-            Complete your booking details below
-          </p>
-        </div>
+    <div className="min-h-screen gradient-soft p-4 sm:p-6 lg:p-8">
+  <div className="max-w-5xl mx-auto">
 
-        <div className="grid lg:grid-cols-5 gap-6">
-          {/* Left - Event Info */}
-          <Card className="lg:col-span-2 p-6 rounded-2xl shadow-soft h-fit sticky top-6">
-            <div className="space-y-6">
-              <img
-                src={event?.feature_image || ""}
-                alt="Event"
-                className="w-full h-48 object-cover rounded-xl mb-4"
-              />
+    {/* Back + Title */}
+    <div className="mb-4 sm:mb-6">
+      <Button
+        variant="ghost"
+        onClick={() => navigate(-1)}
+        className="mb-3 sm:mb-4 text-sm sm:text-base"
+      >
+        ← Back
+      </Button>
 
-              <h2 className="text-2xl font-bold mb-2">{event?.title}</h2>
+      <h1 className="text-3xl sm:text-4xl font-bold">Book Your Ticket</h1>
 
-              <div className="space-y-3 text-sm">
-                <div className="flex items-center gap-3">
-                  <Calendar className="w-5 h-5 text-primary" />
-                  <div>
-                    <p className="font-semibold">{event?.date}</p>
-                    <p className="text-muted-foreground">Saturday</p>
-                  </div>
-                </div>
+      <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
+        Complete your booking details below
+      </p>
+    </div>
 
-                <div className="flex items-center gap-3">
-                  <Clock className="w-5 h-5 text-primary" />
-                  <div>
-                    <p className="font-semibold">{event?.time}</p>
-                    <p className="text-muted-foreground">
-                      {event?.event_duration}
-                    </p>
-                  </div>
-                </div>
+    {/* GRID LAYOUT */}
+    <div className="grid gap-6 lg:grid-cols-5">
 
-                <div className="flex items-center gap-3">
-                  <MapPin className="w-5 h-5 text-primary" />
-                  <div>
-                    <p className="font-semibold">Address</p>
-                    <p className="text-muted-foreground">{event?.venue}</p>
-                  </div>
-                </div>
-              </div>
+      {/* LEFT CARD */}
+      <Card className="lg:col-span-2 p-5 sm:p-6 rounded-2xl shadow-soft h-fit lg:sticky lg:top-6">
+        <div className="space-y-6">
 
-              <div className="border-t pt-4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-muted-foreground">Ticket Price</span>
-                  <span className="text-2xl font-bold text-primary">
-                    PKR {event?.price}
-                  </span>
-                </div>
+          {/* Image */}
+          <img
+            src={event?.feature_image || ""}
+            alt="Event"
+            className="w-full h-40 sm:h-48 md:h-56 object-cover rounded-xl mb-4"
+          />
+
+          {/* Event Title */}
+          <h2 className="text-2xl sm:text-3xl font-bold mb-2">{event?.title}</h2>
+
+          {/* Event Details */}
+          <div className="space-y-3 text-sm sm:text-base">
+            <div className="flex items-center gap-3">
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+              <div>
+                <p className="font-semibold">{event?.date}</p>
+                <p className="text-muted-foreground">Saturday</p>
               </div>
             </div>
-          </Card>
 
-          {/* Right - Form */}
-          <Card className="lg:col-span-3 p-8 rounded-2xl shadow-soft">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Personal Info */}
+            <div className="flex items-center gap-3">
+              <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
               <div>
-                <h3 className="text-xl font-semibold mb-4">
-                  Personal Information
-                </h3>
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Full Name</Label>
-                    <Input value={fullName} disabled />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Email</Label>
-                    <Input value={user?.email} disabled />
-                  </div>
-
-                  <div className="space-y-2 md:col-span-2">
-                    <Label>Phone Number *</Label>
-                    <Input
-                      placeholder="+92 300 0000000"
-                      value={formData.phone}
-                      onChange={(e) => handleChange("phone", e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Payment Proof */}
-              <div className="border-t pt-6">
-                <h3 className="text-xl font-semibold mb-4">
-                  Payment Information
-                </h3>
-                <p>
-                  Bank Details:
-                  <br />
-                  Account Title: Rave Vibe Hub
-                  <br />
-                  Account Number: 1234567890
-                  <br />
-                  Bank Name: ABC Bank
-                  <br />
-                  Branch Code: 00123
+                <p className="font-semibold">{event?.time}</p>
+                <p className="text-muted-foreground">
+                  {event?.event_duration}
                 </p>
-                <br />
-                <div className="border-2 border-dashed border-primary/30 rounded-lg p-8 text-center group cursor-pointer">
-                  <Upload className="h-12 w-12 mx-auto mb-4 text-primary group-hover:animate-pulse" />
-
-                  <p className="font-semibold mb-2">Proof of Payment</p>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Upload a screenshot of your payment receipt
-                  </p>
-
-                  <input
-                    type="file"
-                    accept="image/*"
-                    id="paymentFile"
-                    className="hidden"
-                    onChange={(e) =>
-                      setPaymentProof(e.target.files?.[0] || null)
-                    }
-                  />
-
-                  <Button
-                    type="button"
-                    onClick={() =>
-                      document.getElementById("paymentFile")?.click()
-                    }
-                  >
-                    Choose File
-                  </Button>
-
-                  {paymentProof && (
-                    <p className="text-sm mt-2 text-green-600">
-                      Selected: {paymentProof.name}
-                    </p>
-                  )}
-                </div>
               </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+              <div>
+                <p className="font-semibold">Address</p>
+                <p className="text-muted-foreground">{event?.venue}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Price */}
+          <div className="border-t pt-4">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-muted-foreground text-sm sm:text-base">
+                Ticket Price
+              </span>
+              <span className="text-xl sm:text-2xl font-bold text-primary">
+                PKR {event?.price}
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </Card>
+
+      {/* RIGHT FORM */}
+      <Card className="lg:col-span-3 p-5 sm:p-6 md:p-8 rounded-2xl shadow-soft">
+        <form onSubmit={handleSubmit} className="space-y-6">
+
+          {/* Personal Info */}
+          <div>
+            <h3 className="text-lg sm:text-xl font-semibold mb-4">
+              Personal Information
+            </h3>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Full Name</Label>
+                <Input value={fullName} disabled />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Email</Label>
+                <Input value={user?.email} disabled />
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <Label>Phone Number *</Label>
+                <Input
+                  placeholder="+92 300 0000000"
+                  value={formData.phone}
+                  onChange={(e) => handleChange("phone", e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Payment Proof */}
+          <div className="border-t pt-6">
+            <h3 className="text-lg sm:text-xl font-semibold mb-4">
+              Payment Information
+            </h3>
+
+            <p className="text-sm sm:text-base leading-relaxed">
+              <strong>Bank Details:</strong><br />
+              Account Title: Rave Vibe Hub<br />
+              Account Number: 1234567890<br />
+              Bank Name: ABC Bank<br />
+              Branch Code: 00123
+            </p>
+
+            <div className="border-2 border-dashed border-primary/30 rounded-lg p-6 sm:p-8 text-center group cursor-pointer mt-6">
+              <Upload className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-4 text-primary group-hover:animate-pulse" />
+
+              <p className="font-semibold mb-2 text-sm sm:text-base">Proof of Payment</p>
+
+              <p className="text-xs sm:text-sm text-muted-foreground mb-4">
+                Upload a screenshot of your payment receipt
+              </p>
+
+              <input
+                type="file"
+                accept="image/*"
+                id="paymentFile"
+                className="hidden"
+                onChange={(e) => setPaymentProof(e.target.files?.[0] || null)}
+              />
 
               <Button
-                type="submit"
-                className="w-full h-12 gradient-primary text-white font-semibold rounded-xl"
-                disabled={submitting}
+                type="button"
+                onClick={() =>
+                  document.getElementById("paymentFile")?.click()
+                }
               >
-                {submitting ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Processing...
-                  </span>
-                ) : (
-                  "Complete Booking"
-                )}
+                Choose File
               </Button>
-            </form>
-          </Card>
-        </div>
-      </div>
+
+              {paymentProof && (
+                <p className="text-xs sm:text-sm mt-2 text-green-600">
+                  Selected: {paymentProof.name}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <Button
+            type="submit"
+            className="w-full h-12 gradient-primary text-white font-semibold rounded-xl text-base sm:text-lg"
+            disabled={submitting}
+          >
+            {submitting ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Processing...
+              </span>
+            ) : (
+              "Complete Booking"
+            )}
+          </Button>
+
+        </form>
+      </Card>
     </div>
+  </div>
+</div>
+
   );
 };
 

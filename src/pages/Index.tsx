@@ -24,10 +24,14 @@ const Index = () => {
 
         <div className="max-w-6xl mx-auto text-center relative">
           {/* Heading */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-black mb-6 leading-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight">
             The Underground
             <br />
-            <span className="text-primary neon-text">Awaits</span>
+            <span className="
+  text-primary
+  md:neon-text          
+  max-md:neon-text-mobile
+">Awaits</span>
           </h1>
 
           {/* Subheading */}
@@ -41,7 +45,7 @@ const Index = () => {
             <Link to="/signup" className="w-full sm:w-auto">
               <Button
                 size="lg"
-                className="text-sm sm:text-base px-4 sm:px-8 py-3 sm:py-6 h-auto font-bold flex items-center justify-center w-full"
+                className="text-sm sm:text-base px-4 sm:px-8 py-3 sm:py-[20px] h-auto font-bold flex items-center justify-center w-full"
               >
                 <Sparkles className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                 Join the Movement
@@ -51,7 +55,7 @@ const Index = () => {
               <Button
                 size="lg"
                 variant="outline"
-                className="text-sm sm:text-base px-4 sm:px-8 py-3 sm:py-6 h-auto w-full sm:w-auto"
+                className="text-sm sm:text-base px-4 sm:px-8 py-3 sm:py-[20px] h-auto w-full sm:w-auto"
               >
                 Explore Events
               </Button>
@@ -71,7 +75,7 @@ const Index = () => {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center p-8 rounded-2xl gradient-card neon-border hover-lift shadow-[0_0_30px_hsl(330_81%_60%_/_0.1)]">
+            <div className="text-center p-8 rounded-2xl cursor-default gradient-card neon-border hover-lift shadow-[0_0_30px_hsl(330_81%_60%_/_0.1)]">
               <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Calendar className="h-8 w-8 text-primary" />
               </div>
@@ -82,7 +86,7 @@ const Index = () => {
               </p>
             </div>
 
-            <div className="text-center p-8 rounded-2xl gradient-card neon-border hover-lift shadow-[0_0_30px_hsl(330_81%_60%_/_0.1)]">
+            <div className="text-center p-8 rounded-2xl cursor-default gradient-card neon-border hover-lift shadow-[0_0_30px_hsl(330_81%_60%_/_0.1)]">
               <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Users className="h-8 w-8 text-primary" />
               </div>
@@ -93,7 +97,7 @@ const Index = () => {
               </p>
             </div>
 
-            <div className="text-center p-8 rounded-2xl gradient-card neon-border hover-lift shadow-[0_0_30px_hsl(330_81%_60%_/_0.1)]">
+            <div className="text-center p-8 rounded-2xl cursor-default gradient-card neon-border hover-lift shadow-[0_0_30px_hsl(330_81%_60%_/_0.1)]">
               <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Zap className="h-8 w-8 text-primary" />
               </div>
@@ -110,24 +114,36 @@ const Index = () => {
       {/* Latest Blogs Section */}
       <HomePageBlogs />
 
-      {/* CTA Section */}
-      <section className="py-20 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="p-12 rounded-3xl gradient-card neon-border bg-gradient-to-br from-primary/30 via-card to-card shadow-[0_0_60px_hsl(330_81%_60%_/_0.4)]">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Ready to Dive In?
-            </h2>
-            <p className="text-xl text-muted-foreground mb-8">
-              Join thousands of ravers already vibing with QHQ
-            </p>
-            <Link to="/signup">
-              <Button size="lg" className="text-lg px-12 py-6 h-auto font-bold">
-                Get Started Now
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+     {/* CTA Section */}
+     <section className="py-20 px-6">
+  <div className="max-w-4xl mx-auto text-center">
+    <div className="p-12 rounded-3xl gradient-card neon-border bg-gradient-to-br from-primary/30 via-card to-card shadow-[0_0_60px_hsl(330_81%_60%_/_0.4)]">
+      
+      <h2 className="text-3xl md:text-5xl font-bold mb-6">
+        Ready to Dive In?
+      </h2>
+
+      <p className="text-xl text-muted-foreground mb-8">
+        Join thousands of ravers already vibing with QHQ
+      </p>
+
+      <Link to="/signup">
+        <Button
+          size="lg"
+          className="
+            font-bold
+            h-auto
+            px-6 py-3 text-base        /* Mobile */
+            sm:px-12 sm:py-[20px] sm:text-lg   /* Desktop */
+          "
+        >
+          Get Started Now
+        </Button>
+      </Link>
+
+    </div>
+  </div>
+</section>
 
       {/* Footer */}
       <Footer />

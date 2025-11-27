@@ -118,6 +118,9 @@ All colors MUST be HSL.
 
 @layer utilities {
   .neon-text {
+    text-shadow: 0 0 0px hsl(var(--neon-pink)), 0 0 30px hsl(var(--neon-pink)), 0 0 5px hsl(var(--neon-pink) / 0.5);
+  }
+  .neon-text-mobile {
     text-shadow: 0 0 15px hsl(var(--neon-pink)), 0 0 30px hsl(var(--neon-pink)), 0 0 45px hsl(var(--neon-pink) / 0.5);
   }
   
