@@ -30,6 +30,8 @@ import BookTicket from "@/pages/BookTicket";
 import UserTickets from "@/pages/UserTickets";
 import TicketView from "@/pages/TicketView";
 import TicketScan from "@/pages/TicketScan";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -65,6 +67,24 @@ const App = () => (
                 element={
                   <PublicRoute>
                     <Signup />
+                  </PublicRoute>
+                }
+              />
+
+              <Route
+                path="/forgot-password"
+                element={
+                  <PublicRoute>
+                    <ForgotPassword />
+                  </PublicRoute>
+                }
+              />
+
+              <Route
+                path="/reset-password"
+                element={
+                  <PublicRoute>
+                    <ResetPassword />
                   </PublicRoute>
                 }
               />
