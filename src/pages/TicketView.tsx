@@ -13,7 +13,9 @@ import { useParams } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 import { QRCodeCanvas } from "qrcode.react";
 import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
+// import html2pdf from "html2pdf.js";
+// import domtoimage from "dom-to-image-more";
+// import jsPDF from "jspdf";
 
 const TicketView = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -42,32 +44,76 @@ const TicketView = () => {
     window.print();
   };
 
-  const handleDownloadPdf = async () => {
-    if (!ticketRef.current) return;
-    const ticketElement = ticketRef.current;
-    const canvas = await html2canvas(ticketElement, {
-      scale: Math.min(3, window.devicePixelRatio || 2),
-      useCORS: true,
-      backgroundColor: "#ffffff",
-      scrollX: 0,
-      scrollY: -window.scrollY,
-    });
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "px",
-      format: "a4",
-    });
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const imgWidth = pageWidth - 40;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    const x = 20;
-    const y = Math.max(20, (pageHeight - imgHeight) / 2);
+  
+const handleDownloadPdf = async () => {
+  try {
+    const response = await fetch(
+      "https://us1.pdfgeneratorapi.com/api/v4/documents/generate",
+      {
+        method: "POST",
+        headers: {
+          "Authorization":
+            "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiI3YzBlZmVmODhmZDFkZTQ1ZmQ2OTQzZjAyZWE2NWU3Y2QwMWQ1ODhjOGViMzYyYjgxZGU2YmJhYjFkYWE3ZDkxIiwic3ViIjoibWRzaG9haWIxOTVAZ21haWwuY29tIiwiZXhwIjoxNzY0NTgwNTQyfQ.OvYPuaAAXIpurnjHe1C-STV0FqDcxwJ8fdBmSNSOYpI",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          template: {
+            id: 1564426,
+            data: {
+              logoUrl: "https://admin.theqhq.com/wp-content/uploads/2025/11/logo.png",
+              EventName: data.event_title,
+              TicketHolder: data.holder_name || "N/A",
+              TicketNumber: ticketNumber,
+              DateTime: "Dec 18, 2024 • 10:00 PM",
+              Location: "Brooklyn Warehouse, NY",
+              qrID: data?.qr_id,
+            }
+          },
+          format: "pdf",
+          output: "base64",   // ⭐ IMPORTANT
+          name: `ticket-${ticketNumber}`
+        }),
+      }
+    );
 
-    pdf.addImage(imgData, "PNG", x, y, imgWidth, imgHeight);
-    pdf.save(`ticket-${ticketNumber || "download"}.pdf`);
-  };
+    const result = await response.json();
+    console.log(result);
+
+    const base64 = result.response;
+    if (!base64) {
+      console.error("Base64 not returned");
+      return;
+    }
+
+    downloadBase64Pdf(base64, `ticket-${ticketNumber}.pdf`);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+
+const downloadBase64Pdf = (base64Data, fileName) => {
+  const byteCharacters = atob(base64Data);
+  const byteNumbers = new Array(byteCharacters.length);
+
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+
+  const byteArray = new Uint8Array(byteNumbers);
+  const blob = new Blob([byteArray], { type: "application/pdf" });
+
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  a.click();
+
+  URL.revokeObjectURL(url);
+};
+
+
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -92,9 +138,9 @@ const TicketView = () => {
 
   return (
     <div className="min-h-screen bg-background">
-  {/* Mobile Navbar */}
-  <div className="lg:hidden w-full p-3 flex justify-between items-center bg-card border-b border-primary/20 shadow-md">
-    <img src={logo} className="h-10 sm:h-12" alt="Logo" />
+      {/* Mobile Navbar */}
+      <div className="lg:hidden w-full p-3 flex justify-between items-center bg-card border-b border-primary/20 shadow-md">
+        <img src={logo} className="h-10 sm:h-12" alt="Logo" />
 
     <span
       className="cursor-pointer"
@@ -274,11 +320,22 @@ const TicketView = () => {
               Important Information
             </h3>
 
-            <ul className="space-y-1.5 sm:space-y-2 text-sm text-muted-foreground">
-              <li>• Please arrive 30 minutes early</li>
-              <li>• Valid photo ID required</li>
-              <li>• Non-transferable and non-refundable</li>
-            </ul>
+
+          {Array.isArray(data?.important_information) && data.important_information.length > 0 ? (
+                  <ul className="space-y-2 text-sm sm:text-base text-muted-foreground">
+                    {data.important_information.map((point: any, index: number) => (
+                      <li key={point.id ?? index} className="flex items-start gap-2">
+                        <span className="font-bold text-primary">•</span>
+                        <span>{point.name}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm sm:text-base text-muted-foreground italic">
+                    No important information available.
+                  </p>
+                )}
+
           </CardContent>
         </Card>
       </div>

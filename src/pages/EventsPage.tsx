@@ -87,21 +87,21 @@ const EventsPage = () => {
             nightlife.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-  <Link to="/signup">
-    <Button
-      size="lg"
-      className="
+            <Link to="/signup">
+              <Button
+                size="lg"
+                className="
         font-bold
         h-auto
         px-6 py-3 text-base      /* Mobile size */
         sm:px-8 sm:py-[20px] sm:text-lg   /* Desktop size */
       "
-    >
-      <Sparkles className="mr-2 h-5 w-5" />
-      Join the Movement
-    </Button>
-  </Link>
-</div>
+              >
+                <Sparkles className="mr-2 h-5 w-5" />
+                Join the Movement
+              </Button>
+            </Link>
+          </div>
 
         </div>
       </section>
@@ -165,62 +165,62 @@ const EventsPage = () => {
 
             return (
               <Card
-  key={event.id}
-  className="overflow-hidden hover-lift  group flex flex-col h-full"
->
-  <div className="relative h-40 sm:h-48 overflow-hidden">
-    <img
-      src={
-        event.feature_image ??
-        "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400"
-      }
-      alt={event.title}
-      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-    />
+                key={event.id}
+                className="overflow-hidden hover-lift  group flex flex-col h-full"
+              >
+                <div className="relative h-40 sm:h-48 overflow-hidden">
+                  <img
+                    src={
+                      event.feature_image ??
+                      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400"
+                    }
+                    alt={event.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  />
 
-    <Badge
-      className="absolute top-4 right-4 capitalize cursor-default"
-      variant={event.status === "upcoming" ? "default" : "secondary"}
-    >
-      {eventStatus}
-    </Badge>
-  </div>
+                  <Badge
+                    className="absolute top-4 right-4 capitalize cursor-default"
+                    variant={event.status === "upcoming" ? "default" : "secondary"}
+                  >
+                    {eventStatus}
+                  </Badge>
+                </div>
 
-  <CardContent className="p-6 flex flex-col flex-1">
-    <Link to={`/event/${eventSlug}`}><h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">
-      {event.title}
-    </h3></Link>
+                <CardContent className="p-6 flex flex-col flex-1">
+                  <Link to={`/event/${eventSlug}`}><h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">
+                    {event.title}
+                  </h3></Link>
 
-    <div className="space-y-2 text-sm text-muted-foreground mb-4 cursor-default">
-      {(event.date || event.start_date) && (
-        <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4" />
-          <span>{event.date ?? event.start_date}</span>
-        </div>
-      )}
-      {event.venue && (
-        <div className="flex items-center gap-2">
-          <MapPin className="h-4 w-4" />
-          <span>{event.venue}</span>
-        </div>
-      )}
-      {event.attending_peoples && (
-        <div className="flex items-center gap-2">
-          <Users className="h-4 w-4" />
-          <span>{event.attending_peoples}</span>
-        </div>
-      )}
-    </div>
+                  <div className="space-y-2 text-sm text-muted-foreground mb-4 cursor-default">
+                    {(event.date || event.start_date) && (
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        <span>{event.date ?? event.start_date}</span>
+                      </div>
+                    )}
+                    {event.venue && (
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        <span>{event.venue}</span>
+                      </div>
+                    )}
+                    {event.attending_peoples && (
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4" />
+                        <span>{event.attending_peoples}</span>
+                      </div>
+                    )}
+                  </div>
 
-    <div className="mt-auto flex gap-2">
-      <Link to={`/event/${eventSlug}`} className="flex-1">
-        <Button variant="outline" className="w-full">
-          View Details
-        </Button>
-      </Link>
-    </div>
-  </CardContent>
-</Card>
+                  <div className="mt-auto flex gap-2">
+                    <Link to={`/event/${eventSlug}`} className="flex-1">
+                      <Button variant="outline" className="w-full">
+                        View Details
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
 
             );
           })}
@@ -228,35 +228,35 @@ const EventsPage = () => {
       </div>
 
       {/* CTA Section */}
-     <section className="py-20 px-6">
-  <div className="max-w-4xl mx-auto text-center">
-    <div className="p-12 rounded-3xl gradient-card neon-border bg-gradient-to-br from-primary/30 via-card to-card shadow-[0_0_60px_hsl(330_81%_60%_/_0.4)]">
-      
-      <h2 className="text-3xl md:text-5xl font-bold mb-6">
-        Ready to Dive In?
-      </h2>
+      <section className="py-20 px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="p-12 rounded-3xl gradient-card neon-border bg-gradient-to-br from-primary/30 via-card to-card shadow-[0_0_60px_hsl(330_81%_60%_/_0.4)]">
 
-      <p className="text-xl text-muted-foreground mb-8">
-        Join thousands of ravers already vibing with QHQ
-      </p>
+            <h2 className="text-3xl md:text-5xl font-bold mb-6">
+              Ready to Dive In?
+            </h2>
 
-      <Link to="/signup">
-        <Button
-          size="lg"
-          className="
+            <p className="text-xl text-muted-foreground mb-8">
+              Join thousands of ravers already vibing with QHQ
+            </p>
+
+            <Link to="/signup">
+              <Button
+                size="lg"
+                className="
             font-bold
             h-auto
             px-6 py-3 text-base        /* Mobile */
             sm:px-12 sm:py-[20px] sm:text-lg   /* Desktop */
           "
-        >
-          Get Started Now
-        </Button>
-      </Link>
+              >
+                Get Started Now
+              </Button>
+            </Link>
 
-    </div>
-  </div>
-</section>
+          </div>
+        </div>
+      </section>
 
 
       {/* Footer */}

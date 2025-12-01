@@ -26,10 +26,18 @@ const UserTickets = () => {
       setLoadingBookings(true);
       try {
         const data = await getBookings();
-        setBookings(data?.data || []);
+        const fetched = data?.data || [];
+        setBookings(fetched);
+
+        const activeCount = fetched.filter((booking: any) => {
+          const status = (booking?.user_status || "").toLowerCase();
+          return status !== "cancel";
+        }).length;
+        localStorage.setItem("user_bookings_count", String(activeCount));
       } catch (error) {
         console.error("Error fetching bookings:", error);
         setBookings([]);
+        localStorage.setItem("user_bookings_count", "0");
       } finally {
         setLoadingBookings(false);
       }
@@ -37,6 +45,8 @@ const UserTickets = () => {
 
     if (user) {
       fetchBookings();
+    } else {
+      localStorage.removeItem("user_bookings_count");
     }
   }, [user]);
 

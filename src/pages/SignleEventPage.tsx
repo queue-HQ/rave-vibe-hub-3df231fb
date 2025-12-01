@@ -294,86 +294,70 @@ const SignleEventPage = () => {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Ticket Card */}
-            <Card className="sticky top-8">
-              <CardContent className="p-6 space-y-4">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-3xl font-bold text-primary">
-                    PKR {event?.price}
-                  </span>
-                  {/* <Badge variant="secondary">
-                    {event.attendees ?? 250} spots left
-                  </Badge> */}
-                </div>
+         {/* Sidebar */}
+<div className="lg:col-span-1">
+  <div className="space-y-6 sticky top-[100px] self-start max-h-[calc(100vh-100px)] overflow-y-auto">
+    {/* Ticket Card */}
+    <Card>
+      <CardContent className="p-6 space-y-4">
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-3xl font-bold text-primary">
+            PKR {event?.price}
+          </span>
+        </div>
 
-                {checkEventStatus(event?.date, event?.time) == "past" ? (
-                  ""
-                ) : (
-                  <Link to={`/book-ticket/${event.id}`}>
-                    <Button className="w-full h-12 text-lg font-bold">
-                      Buy Ticket
-                    </Button>
-                  </Link>
-                )}
+        {checkEventStatus(event?.date, event?.time) !== "past" && (
+          <Link to={`/book-ticket/${event.id}`}>
+            <Button className="w-full h-12 text-lg font-bold">
+              Buy Ticket
+            </Button>
+          </Link>
+        )}
 
-                {/* <Button variant="outline" className="w-full">
-                  <Share2 className="mr-2 h-4 w-4" />
-                  Share Event
-                </Button> */}
+        <div className="pt-4 border-t border-border space-y-3">
+          {event?.attending_peoples && (
+            <div className="flex items-center gap-3">
+              <Users className="h-5 w-5 text-muted-foreground" />
+              <span className="text-sm">{event?.attending_peoples}</span>
+            </div>
+          )}
+          {event?.event_duration && (
+            <div className="flex items-center gap-3">
+              <Clock className="h-5 w-5 text-muted-foreground" />
+              <span className="text-sm">{event?.event_duration}</span>
+            </div>
+          )}
+          {event?.event_type && (
+            <div className="flex items-center gap-3">
+              <MapPin className="h-5 w-5 text-muted-foreground" />
+              <span className="text-sm">{event?.event_type} venue</span>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
 
-                {/* <Button variant="ghost" className="w-full">
-                  <Calendar className="mr-2 h-4 w-4" />
-                  Add to Calendar
-                </Button> */}
-
-                <div className="pt-4 border-t border-border space-y-3">
-                  {event?.attending_peoples && (
-                    <div className="flex items-center gap-3">
-                      <Users className="h-5 w-5 text-muted-foreground" />
-                      <span className="text-sm">
-                        {event?.attending_peoples}
-                      </span>
-                    </div>
-                  )}
-                  {event?.event_duration && (
-                    <div className="flex items-center gap-3">
-                      <Clock className="h-5 w-5 text-muted-foreground" />
-                      <span className="text-sm">{event?.event_duration}</span>
-                    </div>
-                  )}
-                  {event?.event_type && (
-                    <div className="flex items-center gap-3">
-                      <MapPin className="h-5 w-5 text-muted-foreground" />
-                      <span className="text-sm">{event?.event_type} venue</span>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Organizer Card */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="font-bold mb-4">Organized by</h3>
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=organizer" />
-                    <AvatarFallback>QH</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-bold">QHQ Events</p>
-                    <p className="text-sm text-muted-foreground">
-                      Underground Collective
-                    </p>
-                  </div>
-                </div>
-                {/* <Button variant="outline" className="w-full mt-4">
-                  Follow
-                </Button> */}
-              </CardContent>
-            </Card>
+    {/* Organizer Card */}
+    <Card>
+      <CardContent className="p-6">
+        <h3 className="font-bold mb-4">Organized by</h3>
+        <div className="flex items-center gap-3">
+          <Avatar className="h-12 w-12">
+            <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=organizer" />
+            <AvatarFallback>QH</AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="font-bold">QHQ Events</p>
+            <p className="text-sm text-muted-foreground">
+              Underground Collective
+            </p>
           </div>
+        </div>
+      </CardContent>
+    </Card>
+  </div>
+</div>
+
         </div>
       </div>
       {/* CTA Section */}
