@@ -65,23 +65,34 @@ const PostsPage = () => {
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
 
-      <section className="pt-32 pb-20 px-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_hsl(330_81%_60%_/_0.15)_0%,_transparent_60%)]" />
-        <div className="absolute inset-0 bg-[conic-gradient(from_0deg_at_50%_50%,_transparent_0deg,_hsl(330_81%_60%_/_0.15)_60deg,_transparent_180deg)] opacity-40" />
+     <section className="pt-40 pb-16 px-4 sm:px-6 relative overflow-hidden">
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_hsl(330_81%_60%_/_0.15)_0%,_transparent_60%)]" />
+  <div className="absolute inset-0 bg-[conic-gradient(from_0deg_at_50%_50%,_transparent_0deg,_hsl(330_81%_60%_/_0.15)_60deg,_transparent_180deg)] opacity-40" />
 
-        <div className="max-w-5xl mx-auto text-center relative">
-          <p className="uppercase text-sm tracking-[0.3em] text-primary mb-4">
-            QHQ Blog
-          </p>
-          <h1 className="text-5xl md:text-7xl font-black mb-6 leading-tight">
-            Stories from the <span className="text-primary">Underground</span>
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-            Dive into interviews, scene reports, and behind-the-booth moments
-            curated by the QHQ collective.
-          </p>
-        </div>
-      </section>
+  <div className="max-w-5xl mx-auto text-center relative">
+    <p className="uppercase text-xs sm:text-sm tracking-[0.3em] text-primary mb-3 sm:mb-4">
+      QHQ Blog
+    </p>
+
+    {/* Mobile optimized heading */}
+    <h1 className="text-4xl sm:text-5xl md:text-7xl font-black mb-6 leading-tight px-2">
+      Stories from the{" "}
+      <span className="
+        text-primary
+        md:neon-text          
+        max-md:neon-text-mobile
+      ">
+        Underground
+      </span>
+    </h1>
+
+    <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto px-3">
+      Dive into interviews, scene reports, and behind-the-booth moments curated
+      by the QHQ collective.
+    </p>
+  </div>
+</section>
+
 
       <div className="max-w-6xl mx-auto px-6 mt-[50px]">
         <div className="mb-8 flex flex-col md:flex-row gap-4">
@@ -140,7 +151,7 @@ const PostsPage = () => {
                   />
                 </div>
                 <CardContent className="p-6 space-y-4">
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-3 text-sm text-muted-foreground cursor-default" >
                     {post.date && (
                       <span className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
@@ -155,12 +166,14 @@ const PostsPage = () => {
                     )}
                   </div>
 
+                  <Link to={`/blog/${postSlug}`}>
                   <h3 className="text-2xl font-bold group-hover:text-primary transition-colors">
                     {post.title}
                   </h3>
+                  </Link>
 
                   {post.excerpt && (
-                    <p className="text-muted-foreground line-clamp-3">
+                    <p className="text-muted-foreground line-clamp-3 cursor-default">
                       {post.excerpt}
                     </p>
                   )}
@@ -172,7 +185,7 @@ const PostsPage = () => {
                     if (categories.length === 0) return null;
 
                     return (
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-2 cursor-default">
                         {categories.map((category) => (
                           <Badge key={category} variant="secondary">
                             {category}
@@ -196,24 +209,36 @@ const PostsPage = () => {
         </div>
       </div>
 
-      {/* CTA Section */}
-      <section className="py-20 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="p-12 rounded-3xl gradient-card neon-border bg-gradient-to-br from-primary/30 via-card to-card shadow-[0_0_60px_hsl(330_81%_60%_/_0.4)]">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Ready to Dive In?
-            </h2>
-            <p className="text-xl text-muted-foreground mb-8">
-              Join thousands of ravers already vibing with QHQ
-            </p>
-            <Link to="/signup">
-              <Button size="lg" className="text-lg px-12 py-6 h-auto font-bold">
-                Get Started Now
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+     {/* CTA Section */}
+     <section className="py-20 px-6">
+  <div className="max-w-4xl mx-auto text-center">
+    <div className="p-12 rounded-3xl gradient-card neon-border bg-gradient-to-br from-primary/30 via-card to-card shadow-[0_0_60px_hsl(330_81%_60%_/_0.4)]">
+      
+      <h2 className="text-3xl md:text-5xl font-bold mb-6">
+        Ready to Dive In?
+      </h2>
+
+      <p className="text-xl text-muted-foreground mb-8">
+        Join thousands of ravers already vibing with QHQ
+      </p>
+
+      <Link to="/signup">
+        <Button
+          size="lg"
+          className="
+            font-bold
+            h-auto
+            px-6 py-3 text-base        /* Mobile */
+            sm:px-12 sm:py-[20px] sm:text-lg   /* Desktop */
+          "
+        >
+          Get Started Now
+        </Button>
+      </Link>
+
+    </div>
+  </div>
+</section>
 
       {/* Footer */}
       <Footer />

@@ -5,11 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Mail, Phone, MapPin, SendHorizontal } from "lucide-react";
+import { Mail, Phone, MapPin, SendHorizontal, Loader2 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import Footer from "@/components/Footer";
+import { sendContactForm } from "@/api/auth";
+import { useToast } from "@/hooks/use-toast";
 
 const ContactPage = () => {
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formState, setFormState] = useState({
     name: "",
     email: "",
@@ -24,35 +28,84 @@ const ContactPage = () => {
     setFormState((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // TODO: connect to backend endpoint
-    console.log("Contact form submitted", formState);
+    setIsSubmitting(true);
+
+    try {
+      const res = await sendContactForm(formState);
+
+      if (res.success) {
+        toast({
+          title: "Message Sent Successfully! 📩",
+          description: "We will get back to you shortly.",
+        });
+
+        // Reset form
+        setFormState({
+          name: "",
+          email: "",
+          subject: "",
+          message: "",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Failed to send message ❌",
+          description: "Please try again later.",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: "destructive",
+        title: "Network Error ⚠️",
+        description: "Unable to send message. Check your connection.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
 
-      <section className="pt-32 pb-12 px-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_hsl(330_81%_60%_/_0.15)_0%,_transparent_60%)]" />
-        <div className="absolute inset-0 bg-[conic-gradient(from_0deg_at_50%_50%,_transparent_0deg,_hsl(330_81%_60%_/_0.15)_60deg,_transparent_180deg)] opacity-40" />
+      <section className="pt-40 pb-12 px-4 sm:px-6 relative overflow-hidden">
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_hsl(330_81%_60%_/_0.15)_0%,_transparent_60%)]" />
+  <div className="absolute inset-0 bg-[conic-gradient(from_0deg_at_50%_50%,_transparent_0deg,_hsl(330_81%_60%_/_0.15)_60deg,_transparent_180deg)] opacity-40" />
 
-        <div className="relative max-w-4xl mx-auto text-center space-y-6">
-          <Badge className="px-6 py-2 text-sm uppercase tracking-[0.3em] bg-primary/20 text-primary">
-            Contact
-          </Badge>
-          <h1 className="text-5xl md:text-6xl font-black leading-tight">
-            Let's craft the next{" "}
-            <span className="text-primary">underground</span> moment.
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            Whether you're curating a rave, launching a collab, or just want to
-            vibe with the QHQ crew, drop us a line. We'll get back faster than
-            the bass drops.
-          </p>
-        </div>
-      </section>
+  <div className="relative max-w-4xl mx-auto text-center space-y-6">
+
+    {/* Badge */}
+    <Badge className="px-5 py-2 text-xs sm:text-sm uppercase tracking-[0.3em] bg-primary/20 text-primary">
+      Contact
+    </Badge>
+
+    {/* Heading with mobile-friendly sizes */}
+    <h1 className="text-4xl sm:text-5xl md:text-7xl font-black leading-tight px-2">
+      Let's craft the next{" "}
+      <span
+        className="
+          text-primary
+          md:neon-text
+          max-md:neon-text-mobile
+        "
+      >
+        underground
+      </span>{" "}
+      moment.
+    </h1>
+
+    {/* Paragraph */}
+    <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto px-3">
+      Whether you're curating a rave, launching a collab, or just want to vibe
+      with the QHQ crew, drop us a line. We'll get back faster than the bass drops.
+    </p>
+  </div>
+</section>
+
 
       <div className="relative z-10 max-w-6xl mx-auto px-6 pb-20 grid grid-cols-1 lg:grid-cols-2 gap-10 mt-[60px]">
         <Card className="bg-card/70 backdrop-blur">
@@ -93,7 +146,7 @@ const ContactPage = () => {
               <Textarea
                 name="message"
                 placeholder="Tell us about your idea, event, or project"
-                className="min-h-[150px]"
+                className="min-h-[90px]"
                 value={formState.message}
                 onChange={handleChange}
                 required
@@ -101,10 +154,20 @@ const ContactPage = () => {
 
               <Button
                 type="submit"
-                className="w-full h-12 text-lg font-semibold"
+                className="w-full h-12 text-lg font-semibold disabled:opacity-70 disabled:cursor-not-allowed"
+                disabled={isSubmitting}
               >
-                <SendHorizontal className="h-5 w-5 mr-2" />
-                Send Message
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <SendHorizontal className="h-5 w-5 mr-2" />
+                    Send Message
+                  </>
+                )}
               </Button>
             </form>
           </CardContent>
@@ -119,21 +182,21 @@ const ContactPage = () => {
                   <Mail className="h-5 w-5 text-primary" />
                   <div>
                     <p className="font-semibold text-foreground">Email</p>
-                    <p>hello@qhq.studio</p>
+                    <p>hello.jointhequeue@gmail.com</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
+                {/* <div className="flex items-start gap-3">
                   <Phone className="h-5 w-5 text-primary" />
                   <div>
                     <p className="font-semibold text-foreground">Phone</p>
                     <p>+92 300 123 4567</p>
                   </div>
-                </div>
+                </div> */}
                 <div className="flex items-start gap-3">
                   <MapPin className="h-5 w-5 text-primary" />
                   <div>
                     <p className="font-semibold text-foreground">Studio</p>
-                    <p>Karachi • Lahore • Remote</p>
+                    <p>Karachi</p>
                   </div>
                 </div>
               </div>
@@ -148,7 +211,7 @@ const ContactPage = () => {
                 direction? We're down for bold ideas and late-night brainstorms.
               </p>
               <Button variant="secondary" className="w-full" asChild>
-                <a href="mailto:bookings@qhq.studio">bookings@qhq.studio</a>
+                <a href="mailto:hello.jointhequeue@gmail.com">hello.jointhequeue@gmail.com</a>
               </Button>
             </CardContent>
           </Card>

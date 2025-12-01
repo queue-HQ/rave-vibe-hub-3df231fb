@@ -32,3 +32,4 @@ export const getQrDetails = async (qrId: string) => {
   });
   return res.data;
 };
+

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin, Users } from "lucide-react";
 import { useEvents } from "@/context/EventsContext";
+import { checkEventStatus } from "@/lib/utils";
 
 function HomePageEvents() {
   const { events, isLoading, error } = useEvents();
@@ -44,13 +45,71 @@ function HomePageEvents() {
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
         {upcomingEvents.map((event) => {
           const eventSlug = event.slug;
+          const eventStatus = checkEventStatus(event?.date, event?.time);
 
           return (
-            <Card
+            // <Card
+            //   key={event.id}
+            //   className="overflow-hidden hover-lift cursor-pointer group"
+            // >
+            //   <div className="relative h-48 overflow-hidden">
+            //     <img
+            //       src={
+            //         event.feature_image ??
+            //         "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400"
+            //       }
+            //       alt={event.title}
+            //       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+            //     />
+            //     <Badge
+            //       className="absolute top-4 right-4 capitalize"
+            //       variant="default"
+            //     >
+            //       upcoming
+            //     </Badge>
+            //   </div>
+
+            //   <CardContent className="p-6">
+            //     <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">
+            //       {event.title}
+            //     </h3>
+
+            //     <div className="space-y-2 text-sm text-muted-foreground mb-4">
+            //       {event.date && (
+            //         <div className="flex items-center gap-2">
+            //           <Calendar className="h-4 w-4" />
+            //           <span>{event.date}</span>
+            //         </div>
+            //       )}
+            //       {event.venue && (
+            //         <div className="flex items-center gap-2">
+            //           <MapPin className="h-4 w-4" />
+            //           <span>{event.venue}</span>
+            //         </div>
+            //       )}
+            //       {event.attending_peoples && (
+            //         <div className="flex items-center gap-2">
+            //           <Users className="h-4 w-4" />
+            //           <span>{event.attending_peoples}</span>
+            //         </div>
+            //       )}
+            //     </div>
+
+            //     <div className="flex gap-2">
+            //       <Link to={`/event/${eventSlug}`} className="flex-1">
+            //         <Button variant="outline" className="w-full">
+            //           View Details
+            //         </Button>
+            //       </Link>
+            //     </div>
+            //   </CardContent>
+            // </Card>
+
+             <Card
               key={event.id}
-              className="overflow-hidden hover-lift cursor-pointer group"
+              className="overflow-hidden hover-lift  group flex flex-col h-full"
             >
-              <div className="relative h-48 overflow-hidden">
+              <div className="relative h-40 sm:h-48 overflow-hidden">
                 <img
                   src={
                     event.feature_image ??
@@ -59,24 +118,25 @@ function HomePageEvents() {
                   alt={event.title}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                 />
+            
                 <Badge
-                  className="absolute top-4 right-4 capitalize"
-                  variant="default"
+                  className="absolute top-4 right-4 capitalize cursor-default"
+                  variant={event.status === "upcoming" ? "default" : "secondary"}
                 >
-                  upcoming
+                  {eventStatus}
                 </Badge>
               </div>
-
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">
+            
+              <CardContent className="p-6 flex flex-col flex-1">
+                <Link to={`/event/${eventSlug}`}><h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">
                   {event.title}
-                </h3>
-
-                <div className="space-y-2 text-sm text-muted-foreground mb-4">
-                  {event.date && (
+                </h3></Link>
+            
+                <div className="space-y-2 text-sm text-muted-foreground mb-4 cursor-default">
+                  {(event.date || event.start_date) && (
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
-                      <span>{event.date}</span>
+                      <span>{event.date ?? event.start_date}</span>
                     </div>
                   )}
                   {event.venue && (
@@ -92,8 +152,8 @@ function HomePageEvents() {
                     </div>
                   )}
                 </div>
-
-                <div className="flex gap-2">
+            
+                <div className="mt-auto flex gap-2">
                   <Link to={`/event/${eventSlug}`} className="flex-1">
                     <Button variant="outline" className="w-full">
                       View Details
@@ -109,7 +169,7 @@ function HomePageEvents() {
       {/* View More Button */}
       <div className="flex justify-center mt-12">
         <Link to="/events">
-          <Button size="lg" className="text-lg px-8 py-6 h-auto font-bold">
+          <Button size="lg" className="text-lg px-8 py-[20px] h-auto font-bold">
             View More
           </Button>
         </Link>

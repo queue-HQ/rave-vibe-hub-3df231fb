@@ -187,24 +187,37 @@ const SinglePostPage = () => {
         </article>
       </div>
 
-      {/* CTA Section */}
-      <section className="py-20 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="p-12 rounded-3xl gradient-card neon-border bg-gradient-to-br from-primary/30 via-card to-card shadow-[0_0_60px_hsl(330_81%_60%_/_0.4)]">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Ready to Dive In?
-            </h2>
-            <p className="text-xl text-muted-foreground mb-8">
-              Join thousands of ravers already vibing with QHQ
-            </p>
-            <Link to="/signup">
-              <Button size="lg" className="text-lg px-12 py-6 h-auto font-bold">
-                Get Started Now
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+        {/* CTA Section */}
+     <section className="py-20 px-6">
+  <div className="max-w-4xl mx-auto text-center">
+    <div className="p-12 rounded-3xl gradient-card neon-border bg-gradient-to-br from-primary/30 via-card to-card shadow-[0_0_60px_hsl(330_81%_60%_/_0.4)]">
+      
+      <h2 className="text-3xl md:text-5xl font-bold mb-6">
+        Ready to Dive In?
+      </h2>
+
+      <p className="text-xl text-muted-foreground mb-8">
+        Join thousands of ravers already vibing with QHQ
+      </p>
+
+      <Link to="/signup">
+        <Button
+          size="lg"
+          className="
+            font-bold
+            h-auto
+            px-6 py-3 text-base        /* Mobile */
+            sm:px-12 sm:py-[20px] sm:text-lg   /* Desktop */
+          "
+        >
+          Get Started Now
+        </Button>
+      </Link>
+
+    </div>
+  </div>
+</section>
+
 
       {/* Footer */}
       <Footer />

@@ -101,183 +101,165 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Mobile Navbar */}
-      <div className="lg:hidden w-full p-4 flex justify-between items-center bg-card border-b border-primary/20 shadow-md">
-        <img src={logo} className="h-12" alt="Logo" />
 
-        <span
-          className="cursor-pointer"
-          onClick={() => setMobileSidebarOpen(true)}
-        >
-          <Logs />
-        </span>
+  {/* Mobile Navbar */}
+  <div className="lg:hidden w-full p-4 flex justify-between items-center bg-card border-b border-primary/20 shadow-md">
+    <img src={logo} className="h-10 sm:h-12" alt="Logo" />
+
+    <span className="cursor-pointer" onClick={() => setMobileSidebarOpen(true)}>
+      <Logs className="h-7 w-7" />
+    </span>
+  </div>
+
+  {/* Mobile Sidebar */}
+  {mobileSidebarOpen && (
+    <>
+      <div
+        className="fixed inset-0 bg-black/50 z-40"
+        onClick={() => setMobileSidebarOpen(false)}
+      />
+      <AppSidebar isMobile onClose={() => setMobileSidebarOpen(false)} />
+    </>
+  )}
+
+  {/* Desktop Sidebar */}
+  <div className="hidden lg:block">
+    <AppSidebar />
+  </div>
+
+  {/* Main Content */}
+  <main className="ml-0 lg:ml-64 p-4 sm:p-6">
+    <div className="max-w-6xl mx-auto">
+
+      {/* Header */}
+      <div className="mb-8">
+        {isLoading ? (
+          <>
+            <Skeleton className="h-8 w-52 mb-2" />
+            <Skeleton className="h-5 w-72" />
+          </>
+        ) : (
+          <>
+            <h1 className="pt-4 text-2xl sm:text-4xl font-bold mb-2 leading-tight">
+              Welcome back,{" "}
+              <span className="text-primary">{user?.first_name + " " + user?.last_name}</span> 🎉
+            </h1>
+            <p className="text-muted-foreground text-base sm:text-lg">
+              Ready to discover the underground scene?
+            </p>
+          </>
+        )}
       </div>
 
-      {/* Mobile Sidebar */}
-      {mobileSidebarOpen && (
-        <>
-          <div
-            className="fixed inset-0 bg-black/50 z-40"
-            onClick={() => setMobileSidebarOpen(false)}
-          />
-          <AppSidebar isMobile onClose={() => setMobileSidebarOpen(false)} />
-        </>
-      )}
-      {/* Sidebar */}
-      <AppSidebar />
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
+        
+        {/* Card 1 */}
+        <Card className="gradient-card neon-border hover-lift bg-gradient-to-br from-primary/10 via-card to-card">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between text-lg sm:text-xl">
+              <span>Upcoming Events</span>
+              <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+            </CardTitle>
+          </CardHeader>
 
-      {/* Main Content */}
-      <main className="ml-0 lg:ml-64 p-4 sm:p-6">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
+          <CardContent>
             {isLoading ? (
               <>
-                <Skeleton className="h-10 w-72 mb-3" />
-                <Skeleton className="h-6 w-96" />
+                <Skeleton className="h-8 w-20" />
+                <Skeleton className="h-4 w-32 mt-2" />
               </>
             ) : (
               <>
-                {/* <h1 className="text-4xl font-bold mb-2">
-                  Welcome back, <span className="text-primary">{userName}</span>{" "}
-                  🎉
-                </h1> */}
-
-                <h1 className="text-4xl font-bold mb-2">
-                  Welcome back, <span className="text-primary">{user?.first_name + " " + user?.last_name}</span>{" "}
-                  🎉
-                </h1>
-                <p className="text-muted-foreground text-lg">
-                  Ready to discover the underground scene?
+                <p className="text-3xl sm:text-4xl font-bold text-primary">
+                  {upcomingEvents.count}
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  {upcomingEvents.subtitle}
                 </p>
               </>
             )}
-          </div>
+          </CardContent>
+        </Card>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mb-8">
-            <Card className="gradient-card neon-border hover-lift bg-gradient-to-br from-primary/10 via-card to-card">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Upcoming Events</span>
-                  <Calendar className="h-6 w-6 text-primary" />
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <>
-                    <Skeleton className="h-10 w-20" />
-                    <Skeleton className="h-4 w-32 mt-3" />
-                  </>
-                ) : (
-                  <>
-                    <p className="text-4xl font-bold text-primary">{upcomingEvents.count}</p>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      {upcomingEvents.subtitle}
-                    </p>
-                  </>
-                )}
-              </CardContent>
-            </Card>
+        {/* Card 2 */}
+        <Card className="gradient-card neon-border hover-lift bg-gradient-to-br from-primary/10 via-card to-card">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between text-lg sm:text-xl">
+              <span>Tickets Owned</span>
+              <Ticket className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />
+            </CardTitle>
+          </CardHeader>
 
-            <Card className="gradient-card neon-border hover-lift bg-gradient-to-br from-primary/10 via-card to-card">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Tickets Owned</span>
-                  <Ticket className="h-6 w-6 text-accent" />
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <>
-                    <Skeleton className="h-10 w-20" />
-                    <Skeleton className="h-4 w-24 mt-3" />
-                  </>
-                ) : (
-                  <>
-                    <p className="text-4xl font-bold text-accent">{ticketsOwned}</p>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Ready to party
-                    </p>
-                  </>
-                )}
-              </CardContent>
-            </Card>
+          <CardContent>
+            {isLoading ? (
+              <>
+                <Skeleton className="h-8 w-20" />
+                <Skeleton className="h-4 w-20 mt-2" />
+              </>
+            ) : (
+              <>
+                <p className="text-3xl sm:text-4xl font-bold text-accent">
+                  {ticketsOwned}
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Ready to party
+                </p>
+              </>
+            )}
+          </CardContent>
+        </Card>
 
-            {/* <Card className="gradient-card neon-border hover-lift bg-gradient-to-br from-primary/5 via-card to-card">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Events Created</span>
-                  <User className="h-6 w-6" />
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {isLoading ? (
-                  <>
-                    <Skeleton className="h-10 w-16" />
-                    <Skeleton className="h-4 w-28 mt-3" />
-                  </>
-                ) : (
-                  <>
-                    <p className="text-4xl font-bold">3</p>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      You're a host!
-                    </p>
-                  </>
-                )}
-              </CardContent>
-            </Card> */}
-          </div>
+      </div>
 
-          {/* Recent Events */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">Your Recent Events</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div className="space-y-4">
-                  {[1, 2, 3].map((i) => (
-                    <Skeleton key={i} className="h-20 w-full" />
-                  ))}
+      {/* Recent Events */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl sm:text-2xl">Your Recent Events</CardTitle>
+        </CardHeader>
+
+        <CardContent>
+          {isLoading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-20 w-full" />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {events?.slice(0, 3).map((event, index) => (
+                <div
+                  key={index}
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary/20 rounded-lg flex items-center justify-center">
+                      <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+                    </div>
+
+                    <div>
+                      <h3 className="font-bold text-lg">{event.title}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {event.date} • {event.venue}
+                      </p>
+                    </div>
+                  </div>
+
+                  <Link to={`/event/${event.slug}`} className="w-full sm:w-auto">
+                    <Button className="w-full sm:w-auto">View Details</Button>
+                  </Link>
+
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  {events &&
-                    events
-                      .slice(0, 3) // 👈 Only first 3 events
-                      .map((event, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between p-4 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                        >
-                          <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-primary/20 rounded-lg flex items-center justify-center">
-                              <Calendar className="h-8 w-8 text-primary" />
-                            </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-                            <div>
-                              <h3 className="font-bold text-lg">
-                                {event.title}
-                              </h3>
-                              <p className="text-sm text-muted-foreground">
-                                {event.date} • {event.venue}
-                              </p>
-                            </div>
-                          </div>
-
-                          <Link to={`/event/${event.slug}`}>
-                            <Button>View Details</Button>
-                          </Link>
-                        </div>
-                      ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </main>
     </div>
+  </main>
+</div>
+
   );
 };
 

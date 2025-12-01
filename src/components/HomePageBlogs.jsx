@@ -50,7 +50,7 @@ function HomePageBlogs() {
 
             return (
               <Card key={post.id} className="overflow-hidden hover-lift group">
-                <div className="relative h-48 overflow-hidden">
+                <div className="relative h-48 overflow-hidden cursor-default">
                   <img
                     src={
                       post.featured_image ??
@@ -62,7 +62,7 @@ function HomePageBlogs() {
                 </div>
 
                 <CardContent className="p-6 space-y-4">
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-3 cursor-default text-sm text-muted-foreground">
                     {post.date && (
                       <span className="flex items-center gap-1">
                         <Calendar className="h-4 w-4" />
@@ -77,18 +77,19 @@ function HomePageBlogs() {
                     )}
                   </div>
 
+                  <Link to={`/blog/${postSlug}`}>
                   <h3 className="text-2xl font-bold group-hover:text-primary transition-colors">
                     {post.title}
-                  </h3>
+                  </h3></Link>
 
                   {post.excerpt && (
-                    <p className="text-muted-foreground line-clamp-3">
+                    <p className="text-muted-foreground line-clamp-3 cursor-default">
                       {post.excerpt}
                     </p>
                   )}
 
                   {categories.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 cursor-default">
                       {categories.map((category) => (
                         <Badge key={category} variant="secondary">
                           {category}
@@ -113,7 +114,7 @@ function HomePageBlogs() {
       {/* View More Button */}
       <div className="flex justify-center mt-12">
         <Link to="/blogs">
-          <Button size="lg" className="text-lg px-8 py-6 h-auto font-bold">
+          <Button size="lg" className="text-lg px-8 py-[20px] h-auto font-bold">
             View More
           </Button>
         </Link>

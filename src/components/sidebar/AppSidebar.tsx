@@ -64,7 +64,7 @@ export default function AppSidebar({
         <Link to="/events" onClick={onClose}>
           <Button variant="ghost" className="w-full justify-start text-lg">
             <Calendar className="mr-3 h-5 w-5" />
-            My Events
+            Events
           </Button>
         </Link>
 
