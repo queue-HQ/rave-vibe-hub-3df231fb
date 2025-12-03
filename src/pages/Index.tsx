@@ -25,7 +25,7 @@ const Index = () => {
         <div className="max-w-6xl mx-auto text-center relative">
           {/* Heading */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight">
-            The Underground
+            The Underground g
             <br />
             <span className="
   text-primary

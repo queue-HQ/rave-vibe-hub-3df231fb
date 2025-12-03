@@ -168,7 +168,7 @@ const Signup = () => {
           <div className="absolute inset-0 pointer-events-none select-none bg-[radial-gradient(circle_at_center,_hsl(330_81%_60%_/_0.2)_0%,_transparent_50%)] animate-pulse-neon" />
           <div className="absolute inset-0 pointer-events-none select-none bg-[conic-gradient(from_0deg_at_50%_50%,_transparent_0deg,_hsl(330_81%_60%_/_0.1)_60deg,_transparent_120deg)] opacity-30" />
 
-          <div className="w-full max-w-xl relative z-10">
+          <div className="w-full max-w-[800px] relative z-10">
             <div className="gradient-card neon-border rounded-2xl p-8 backdrop-blur-xl shadow-[0_0_50px_hsl(330_81%_60%_/_0.3)]">
               <div className="flex justify-center mb-8">
                 <img
@@ -179,19 +179,32 @@ const Signup = () => {
                 />
               </div>
 
-              <h1 className="text-3xl font-bold text-center mb-2">
-                Join the Underground
+              <h1 className="text-3xl font-bold text-center mb-2 text-[#FC0090]">
+                The Queue.
               </h1>
-              <p className="text-muted-foreground text-center mb-8">
-                Create your account and discover raves
+              <h1 className="text-2xl font-bold text-center mb-2 text-[#FC0090]">
+                But before you enter it… 
+              </h1>
+              <p className=" text-center mb-8 text-[#FC0090]">
+                Welcome to the application that stands between you and a real good time. 
+We’re curating energy, not just a guest list - so show us who you are. No pressure (but actually yes).
               </p>
 
-              <form onSubmit={handleSignup} className="space-y-6">
+              <form onSubmit={handleSignup} className="space-y-6 color-form--pinkLabel">
                 {/* Username & Name */}
+
+               <div className="flex items-center w-full">
+  <span className="flex-grow h-px bg-[#E93394]"></span>
+  <span className="px-3 text-[#E93394] text-2xl font-[700]">The Basics (duh)</span>
+  <span className="flex-grow h-px bg-[#E93394]"></span>
+</div>
 
                 <div className="flex gap-2">
                   <div className="flex-1 space-y-2">
-                    <Label>Username</Label>
+                    <div className="flex flex-col gap-2">
+                      <Label>Username</Label>
+                    <span className="label2">Enter your username</span>
+                    </div>
                     <Input
                       type="text"
                       placeholder="johndoe"
@@ -204,7 +217,11 @@ const Signup = () => {
                     />
                   </div>
                   <div className="flex-1 space-y-2">
-                    <Label>Email</Label>
+                   
+                    <div className="flex flex-col gap-2">
+                      <Label>Email</Label>
+                    <span className="label2">so we can hit you up if you pass the vibe check</span>
+                    </div>
                     <Input
                       type="email"
                       placeholder="Email Address"
@@ -220,7 +237,11 @@ const Signup = () => {
 
                 <div className="flex gap-2">
                   <div className="flex-1 space-y-2">
-                    <Label>First Name</Label>
+                   
+                     <div className="flex flex-col gap-2">
+                       <Label>First Name</Label>
+                    <span className="label2">govt or rave alias, we don’t judge (but govt preferably, pls)</span>
+                    </div>
                     <Input
                       type="text"
                       placeholder="John"
@@ -233,7 +254,10 @@ const Signup = () => {
                     />
                   </div>
                   <div className="flex-1 space-y-2">
-                    <Label>Last Name</Label>
+                    <div className="flex flex-col gap-2">
+                       <Label>Last Name</Label>
+                    <span className="label2">govt or rave alias, we don’t judge (but govt preferably, pls)</span>
+                    </div>
                     <Input
                       type="text"
                       placeholder="Doe"
@@ -247,9 +271,13 @@ const Signup = () => {
                   </div>
                 </div>
 
-                {/* Gender */}
-                <div className="space-y-2">
-                  <Label>Gender</Label>
+                <div className="flex gap-2">
+                  <div className="flex-1 space-y-2">
+                   
+                     <div className="flex flex-col gap-2">
+                      <Label>Gender</Label>
+                    <span className="label2">Select your Gender</span>
+                    </div>
                   <Select
                     value={formData.gender}
                     onValueChange={(value) =>
@@ -266,12 +294,12 @@ const Signup = () => {
                       <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
-
-                {/* Merged Setup Profile Fields */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label>Instagram Handle</Label>
+                  </div>
+                  <div className="flex-1 space-y-2">
+                     <div className="flex flex-col gap-2">
+                      <Label>Instagram Handle</Label>
+                    <span className="label2">we might stalk you a little. just a lil. </span>
+                    </div>
                     <Input
                       type="text"
                       placeholder="@yourhandle"
@@ -283,9 +311,13 @@ const Signup = () => {
                       required
                     />
                   </div>
+                </div>
 
-                  <div className="space-y-2">
-                    <Label>Flex your Instagram</Label>
+                <div className="space-y-2">
+                     <div className="flex flex-col gap-2">
+                      <Label>Flex your Instagram</Label>
+                    <span className="label2">{`For verification and safety, please upload a screenshot of your Instagram making sure your bio and 9 recent posts are visible. We wanna see how cool you are (no really) <3`}</span>
+                    </div>
                     <Input
                       type="file"
                       accept="image/*"
@@ -299,8 +331,16 @@ const Signup = () => {
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label>Age</Label>
+              
+
+                {/* Merged Setup Profile Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  
+                  <div className="space-y-2 ">
+                    <div className="flex flex-col gap-2">
+                      <Label>Age</Label>
+                    <span className="label2">we know it doesn't matter, but tell us (just in case hehe) </span>
+                    </div>
                     <Input
                       type="number"
                       placeholder="21"
@@ -312,8 +352,11 @@ const Signup = () => {
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label>How did you hear about QHQ?</Label>
+                  <div className="space-y-2 ">
+                    <div className="flex flex-col gap-2">
+                      <Label>How did you hear about QHQ?</Label>
+                    <span className="label2">Friends, IG, fate, alien radio signals? also do u think we're cool? 👉👈</span>
+                    </div>
                     <Input
                       type="text"
                       placeholder="friends, IG, fate..."
@@ -326,32 +369,45 @@ const Signup = () => {
                   </div>
                 </div>
 
+                   <div className="flex items-center w-full">
+  <span className="flex-grow h-px bg-[#E93394]"></span>
+  <span className="px-3 text-[#E93394] text-3xl font-[700]">Rave resume (but chill)</span>
+  <span className="flex-grow h-px bg-[#E93394]"></span>
+</div>
+
                 {/* Textareas */}
                 {[
-                  { label: "Rave Resume", key: "rave_resume", height: "h-28" },
+                  { label: "Rave Resume", label2: "Tell us what makes you Queue-core. ", key: "rave_resume", height: "h-28" },
                   {
                     label: "Why do you wanna join the Queue?",
+                    label2: "Don't overthink it. Just keep it ✨real✨",
                     key: "why_join",
                     height: "h-28",
                   },
                   {
                     label: "Your ideal night out vibe",
+                    label2: "",
                     key: "vibe",
                     height: "h-24",
                   },
                   {
-                    label: "Your fave music artists / DJs",
+                    label: "Drop a link / name of your fave music artists / DJs",
+                    label2: "We're kinda curious ngl",
                     key: "artists",
                     height: "h-24",
                   },
                   {
                     label: "Which event(s) do you want to experience?",
+                    label2: "Tell us what makes you Queue-core. ",
                     key: "events",
                     height: "h-28",
                   },
                 ].map((f, i) => (
                   <div key={i} className="space-y-2">
-                    <Label>{f.label}</Label>
+                    <div className="flex flex-col gap-2">
+                      <Label>{f.label}</Label>
+                    <span className="label2">{f.label2}</span>
+                    </div>
                     <textarea
                       className={`w-full bg-black/40 border border-white/10 text-white placeholder:text-white/40 rounded-md p-3 ${f.height}`}
                       value={formData[f.key]}
@@ -365,7 +421,12 @@ const Signup = () => {
 
                 {/* Vibe Detector */}
                 <div className="space-y-2">
-                  <Label>Weird Vibe Detector</Label>
+                   <div className="flex flex-col gap-2">
+                      <Label>Weird Vibe Detector™</Label>
+                    <span className="label2">Let’s be real. We’ve all met someone who ruins the mood. Don’t be that person.
+Answer honestly, or risk eternal side-eyes from the rave gods. </span>
+<Label>Ever been kicked out of a party?</Label>
+                    </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     {["Yes", "No", "I plead the fifth"].map((text) => (
                       <label key={text} className="flex gap-2 items-center">
@@ -416,6 +477,25 @@ const Signup = () => {
                 </div>
 
                 {/* Agree rules */}
+                <p className="text-[#E93394] text-[20px] font-bold mb-0"> I solemnly swear I’m not a buzzkill and agree to community guidelines:</p>
+                <p className="mt-0 text-[#E93394]">• Respect personal space & boundaries<br />
+• No harassment, creeper energy, or unsafe behavior<br />
+• No "do you know who I am" vibes <br />
+• Zero tolerance for discrimination of any <br />
+• Basically, don’t be a weirdo</p>
+
+<h1 className="text-[#E93394] text-[20px] font-bold mb-0">The Fine Print (yeah, read it)</h1>
+<p
+  className="mt-0 text-[#E93394]"
+  dangerouslySetInnerHTML={{
+    __html: `
+      • I understand that not all applications will be approved (and that’s okay </3)<br />
+      • I’m sharing this info willingly and with consent<br />
+      • I won’t throw a tantrum if I don’t make the cut<br />
+      • My information will stay private and won’t be shared anywhere shady 👀 
+    `,
+  }}
+></p>
                 <label className="flex gap-3 items-start">
                   <input
                     type="checkbox"
@@ -428,9 +508,9 @@ const Signup = () => {
                     }
                     required
                   />
-                  <span className="leading-tight text-white">
-                    I solemnly swear I'm not a buzzkill & I agree to community
-                    guidelines
+                  <span className="leading-tight label">
+                   I agree. I’m chill. I wanna rave responsibly.<br />
+                  I’ve read the above and I’m still cool with it. Let’s party.
                   </span>
                 </label>
 

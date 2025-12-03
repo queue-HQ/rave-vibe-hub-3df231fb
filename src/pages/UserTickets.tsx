@@ -50,15 +50,50 @@ const UserTickets = () => {
     }
   }, [user]);
 
-  const getEventDate = (bookingDate?: string) => {
-    if (!bookingDate) return null;
-    const parsed = Date.parse(bookingDate);
+  const sanitizeEventTime = (timeString?: string) => {
+    if (!timeString) return undefined;
+    const parts = timeString.split("-");
+    if (parts.length === 0) return undefined;
+    const start = parts[0]?.trim();
+    return start || undefined;
+  };
+
+  const normalizeDateString = (dateString?: string) => {
+    if (!dateString) return null;
+    const trimmed = dateString.trim();
+    if (/^\d{8}$/.test(trimmed)) {
+      const year = trimmed.slice(0, 4);
+      const month = trimmed.slice(4, 6);
+      const day = trimmed.slice(6, 8);
+      return `${year}-${month}-${day}`;
+    }
+    return trimmed;
+  };
+
+  const parseDateTime = (dateString?: string, timeString?: string) => {
+    const normalizedDate = normalizeDateString(dateString);
+    if (!normalizedDate) return null;
+    const sanitizedTime = sanitizeEventTime(timeString);
+    const combined = sanitizedTime
+      ? `${normalizedDate} ${sanitizedTime}`
+      : normalizedDate;
+    const parsed = Date.parse(combined);
     if (Number.isNaN(parsed)) return null;
     return new Date(parsed);
   };
 
+  const getEventDate = (booking) => {
+    if (!booking) return null;
+
+    return (
+      parseDateTime(booking?.event_date, booking?.event_time) ||
+      parseDateTime(booking?.booking_date) ||
+      parseDateTime(booking?.registered_at)
+    );
+  };
+
   const isPastEvent = (booking) => {
-    const eventDate = getEventDate(booking?.booking_date || booking?.registered_at);
+    const eventDate = getEventDate(booking);
     if (!eventDate) return false;
     const now = new Date();
     const diff = now.getTime() - eventDate.getTime();

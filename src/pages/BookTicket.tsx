@@ -60,6 +60,17 @@ const BookTicket = () => {
 
   const event = events.find((item) => String(item.id) === String(id));
 
+  const capacityLimit = Number(event?.capacity_limit) || 0;
+  const bookedTickets = Number(event?.booked_tickets) || 0;
+  const availableTickets =
+    typeof event?.available_tickets === "number"
+      ? event.available_tickets
+      : capacityLimit > 0
+        ? Math.max(capacityLimit - bookedTickets, 0)
+        : null;
+  const isSoldOut =
+    typeof availableTickets === "number" && availableTickets <= 0;
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -74,6 +85,15 @@ const BookTicket = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isSoldOut) {
+      toast({
+        title: "Tickets unavailable",
+        description: "This event is sold out.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     if (!paymentProof) {
       toast({
@@ -204,7 +224,7 @@ const BookTicket = () => {
           </div>
 
           {/* Price */}
-          <div className="border-t pt-4">
+          <div className="border-t pt-4 space-y-2">
             <div className="flex justify-between items-center mb-2">
               <span className="text-muted-foreground text-sm sm:text-base">
                 Ticket Price
@@ -213,6 +233,16 @@ const BookTicket = () => {
                 PKR {event?.price}
               </span>
             </div>
+
+            {capacityLimit ? (
+              <p className="text-sm text-muted-foreground">
+                {Math.max(availableTickets ?? 0, 0)} seats left out of {capacityLimit}
+              </p>) : null}
+            {isSoldOut && (
+              <p className="text-sm text-destructive font-semibold">
+                This event is sold out.
+              </p>
+            )}
           </div>
 
         </div>
@@ -303,7 +333,7 @@ const BookTicket = () => {
           <Button
             type="submit"
             className="w-full h-12 gradient-primary text-white font-semibold rounded-xl text-base sm:text-lg"
-            disabled={submitting}
+            disabled={submitting || isSoldOut}
           >
             {submitting ? (
               <span className="flex items-center justify-center gap-2">
@@ -311,7 +341,7 @@ const BookTicket = () => {
                 Processing...
               </span>
             ) : (
-              "Complete Booking"
+              isSoldOut ? "Sold Out" : "Complete Booking"
             )}
           </Button>
 
