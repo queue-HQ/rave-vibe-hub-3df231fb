@@ -178,7 +178,11 @@ const SinglePostPage = () => {
 
         <article className="prose prose-invert max-w-none">
           {post.content ? (
-            <div dangerouslySetInnerHTML={{ __html: post.content }} />
+            // <div dangerouslySetInnerHTML={{ __html: post.content }} />
+            <div
+                    className="text-muted-foreground leading-relaxed space-y-4"
+                    dangerouslySetInnerHTML={{ __html: post.content }}
+                  />
           ) : (
             <p className="text-muted-foreground">
               Full content will appear here once the post is ready.

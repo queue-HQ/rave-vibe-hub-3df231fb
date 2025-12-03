@@ -19,10 +19,12 @@ import { useEvents } from "@/context/EventsContext";
 import slugify from "@/lib/slugify";
 import { checkEventStatus } from "@/lib/utils";
 import Footer from "@/components/Footer";
+import { useToast } from "@/hooks/use-toast";
 
 const SignleEventPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { events, isLoading, error, refetch } = useEvents();
+  const { toast } = useToast();
 
   const event = events.find((item) => {
     if (!slug) return false;
@@ -38,9 +40,31 @@ const SignleEventPage = () => {
     return String(item.id) === slug;
   });
 
+  const capacityLimit = Number(event?.capacity_limit) || 0;
+  const bookedTickets = Number(event?.booked_tickets) || 0;
+  const availableTickets =
+    typeof event?.available_tickets === "number"
+      ? event.available_tickets
+      : capacityLimit > 0
+        ? Math.max(capacityLimit - bookedTickets, 0)
+        : null;
+  const isSoldOut =
+    typeof availableTickets === "number" && availableTickets <= 0;
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
+
+  const handleBuyTicketClick = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+    if (isSoldOut) {
+      e.preventDefault();
+      toast({
+        title: "Tickets unavailable",
+        description: "This event is sold out.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const heroImage =
     event?.feature_image ??
@@ -306,21 +330,50 @@ const SignleEventPage = () => {
           </span>
         </div>
 
+      
+
         {checkEventStatus(event?.date, event?.time) !== "past" && (
-          <Link to={`/book-ticket/${event.id}`}>
+          <Link to={`/book-ticket/${event.id}`} onClick={handleBuyTicketClick}>
             <Button className="w-full h-12 text-lg font-bold">
-              Buy Ticket
+              {isSoldOut ? "Sold Out" : "Buy Ticket"}
             </Button>
           </Link>
         )}
 
         <div className="pt-4 border-t border-border space-y-3">
-          {event?.attending_peoples && (
+
+           {/* {capacityLimit ? (
+          <div className="flex flex-col gap-1 text-sm">
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Users className="h-4 w-4" />
+              <span>
+                {Math.max(availableTickets ?? 0, 0)} seats left / {capacityLimit} total
+              </span>
+            </div>
+            {isSoldOut && (
+              <p className="text-xs text-destructive">Sold out</p>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Users className="h-4 w-4" />
+            <span>{event?.attending_peoples}</span>
+          </div>
+        )} */}
+
+
+        {capacityLimit && (
+            <div className="flex items-center gap-3">
+              <Users className="h-5 w-5 text-muted-foreground" />
+              <span className="text-sm">{Math.max(availableTickets ?? 0, 0)} ticket left / {capacityLimit} total</span>
+            </div>
+          )}
+          {/* {event?.attending_peoples && (
             <div className="flex items-center gap-3">
               <Users className="h-5 w-5 text-muted-foreground" />
               <span className="text-sm">{event?.attending_peoples}</span>
             </div>
-          )}
+          )} */}
           {event?.event_duration && (
             <div className="flex items-center gap-3">
               <Clock className="h-5 w-5 text-muted-foreground" />
