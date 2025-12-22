@@ -19,9 +19,12 @@ import { Loader2 } from "lucide-react";
 const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [pageLoader, setPageLoader] = useState(true);
+  const [openModal, setOpenModal] = useState(false);
+  const [vibeDropdownOpen, setVibeDropdownOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     username: "",
+    full_name: "",
     first_name: "",
     last_name: "",
     email: "", // Keep empty, used in setup profile
@@ -39,7 +42,17 @@ const Signup = () => {
     hear_about: "",
     events: "",
     agree_rules: false,
+    agree_rules_1: false, // 👈 UI checkbox 1
+  agree_rules_2: false, // 👈 UI checkbox 2
   });
+
+  const vibeOptions = [
+    "Losing it to techno",
+    "Vibing in the back w a cig & cool shades",
+    "I show up when it’s already chaos",
+    "Wherever the bass hits",
+    "I am the party",
+  ];
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -183,27 +196,27 @@ const Signup = () => {
                 The Queue.
               </h1>
               <h1 className="text-2xl font-bold text-center mb-2 text-[#FC0090]">
-                But before you enter it… 
+                But before you enter it…
               </h1>
               <p className=" text-center mb-8 text-[#FC0090]">
-                Welcome to the application that stands between you and a real good time. 
-We’re curating energy, not just a guest list - so show us who you are. No pressure (but actually yes).
+                Welcome to the application that stands between you and a real good time.
+                We’re curating energy, not just a guest list - so show us who you are. No pressure (but actually yes).
               </p>
 
               <form onSubmit={handleSignup} className="space-y-6 color-form--pinkLabel">
                 {/* Username & Name */}
 
-               <div className="flex items-center w-full">
-  <span className="flex-grow h-px bg-[#E93394]"></span>
-  <span className="px-3 text-[#E93394] text-2xl font-[700]">The Basics (duh)</span>
-  <span className="flex-grow h-px bg-[#E93394]"></span>
-</div>
+                <div className="flex items-center w-full">
+                  <span className="flex-grow h-px bg-[#E93394]"></span>
+                  <span className="px-3 text-[#E93394] text-2xl font-[700]">The Basics (duh)</span>
+                  <span className="flex-grow h-px bg-[#E93394]"></span>
+                </div>
 
                 <div className="flex gap-2">
                   <div className="flex-1 space-y-2">
                     <div className="flex flex-col gap-2">
                       <Label>Username</Label>
-                    <span className="label2">Enter your username</span>
+                      <span className="label2">Enter your username</span>
                     </div>
                     <Input
                       type="text"
@@ -217,10 +230,10 @@ We’re curating energy, not just a guest list - so show us who you are. No pres
                     />
                   </div>
                   <div className="flex-1 space-y-2">
-                   
+
                     <div className="flex flex-col gap-2">
                       <Label>Email</Label>
-                    <span className="label2">so we can hit you up if you pass the vibe check</span>
+                      <span className="label2">so we can hit you up if you pass the vibe check</span>
                     </div>
                     <Input
                       type="email"
@@ -236,7 +249,7 @@ We’re curating energy, not just a guest list - so show us who you are. No pres
                 </div>
 
                 <div className="flex gap-2">
-                  <div className="flex-1 space-y-2">
+                  {/* <div className="flex-1 space-y-2">
                    
                      <div className="flex flex-col gap-2">
                        <Label>First Name</Label>
@@ -268,37 +281,88 @@ We’re curating energy, not just a guest list - so show us who you are. No pres
                       className="h-12"
                       required
                     />
+                  </div> */}
+
+
+
+
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex flex-col gap-2">
+                    <Label>Full Name</Label>
+                    <span className="label2">
+                      Govt name preferred. Space do agar last name bhi hai.
+                    </span>
                   </div>
+
+                  <Input
+                    type="text"
+                    placeholder="Haris Ali"
+                    value={formData.full_name}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      const parts = value.trim().split(" ");
+
+                      const firstName = parts[0] || "";
+                      const lastName = parts.slice(1).join(" ");
+
+                      setFormData({
+                        ...formData,
+                        full_name: value,
+                        first_name: firstName,
+                        last_name: lastName,
+                      });
+                    }}
+                    className="h-12"
+                    required
+                  />
                 </div>
 
                 <div className="flex gap-2">
                   <div className="flex-1 space-y-2">
-                   
-                     <div className="flex flex-col gap-2">
+
+                    <div className="flex flex-col gap-2">
                       <Label>Gender</Label>
-                    <span className="label2">Select your Gender</span>
+                      <span className="label2">Select your Gender</span>
                     </div>
-                  <Select
-                    value={formData.gender}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, gender: value })
-                    }
-                    required
-                  >
-                    <SelectTrigger className="h-12">
-                      <SelectValue placeholder="Select your gender" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="male">Male</SelectItem>
-                      <SelectItem value="female">Female</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <Select
+                      value={
+                        formData.gender === "male" || formData.gender === "female"
+                          ? formData.gender
+                          : formData.gender
+                            ? "other"
+                            : ""
+                      }
+                      onValueChange={(value) => {
+                        if (value === "other") {
+                          setFormData({
+                            ...formData,
+                            gender: "", // 👈 user type karega
+                          });
+                        } else {
+                          setFormData({
+                            ...formData,
+                            gender: value, // male / female
+                          });
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="h-12">
+                        <SelectValue placeholder="Select your gender" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+
                   </div>
                   <div className="flex-1 space-y-2">
-                     <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2">
                       <Label>Instagram Handle</Label>
-                    <span className="label2">we might stalk you a little. just a lil. </span>
+                      <span className="label2">we might stalk you a little. just a lil. </span>
                     </div>
                     <Input
                       type="text"
@@ -313,33 +377,67 @@ We’re curating energy, not just a guest list - so show us who you are. No pres
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                     <div className="flex flex-col gap-2">
-                      <Label>Flex your Instagram</Label>
-                    <span className="label2">{`For verification and safety, please upload a screenshot of your Instagram making sure your bio and 9 recent posts are visible. We wanna see how cool you are (no really) <3`}</span>
-                    </div>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          insta_screenshot: e.target.files[0],
-                        })
-                      }
-                      required
-                    />
-                  </div>
+                {formData.gender !== "male" &&
+                  formData.gender !== "female" &&
+                  formData.gender !== "" && false}
 
-              
+                {(formData.gender === "" ||
+                  (formData.gender !== "male" && formData.gender !== "female")) && (
+                    <div className="space-y-2 mt-2">
+                      <div className="flex flex-col gap-2">
+                        <Label>Please specify</Label>
+                        <span className="label2">Type your gender</span>
+                      </div>
+
+                      <Input
+                        type="text"
+                        placeholder="Type your gender"
+                        value={formData.gender}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            gender: e.target.value,
+                          })
+                        }
+                        className="h-12"
+                        required
+                      />
+                    </div>
+                  )}
+
+
+                <div className="space-y-2">
+                  <div className="flex flex-col gap-2">
+                    <Label>Flex your Instagram</Label>
+                    <span className="label2">{`For verification and safety, please upload a screenshot of your Instagram making sure your bio and 9 recent posts are visible. We wanna see how cool you are (no really) <3`} <span
+                      className="underline cursor-pointer text-[#FC0090] hover:opacity-80"
+                      onClick={() => setOpenModal(true)}
+                    >
+                      (can use queuehq screenshot)
+                    </span></span>
+                  </div>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        insta_screenshot: e.target.files[0],
+                      })
+                    }
+                    required
+                  />
+                </div>
+
+
 
                 {/* Merged Setup Profile Fields */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  
+
                   <div className="space-y-2 ">
                     <div className="flex flex-col gap-2">
                       <Label>Age</Label>
-                    <span className="label2">we know it doesn't matter, but tell us (just in case hehe) </span>
+                      <span className="label2">we know it doesn't matter, but tell us (just in case hehe) </span>
                     </div>
                     <Input
                       type="number"
@@ -355,7 +453,7 @@ We’re curating energy, not just a guest list - so show us who you are. No pres
                   <div className="space-y-2 ">
                     <div className="flex flex-col gap-2">
                       <Label>How did you hear about QHQ?</Label>
-                    <span className="label2">Friends, IG, fate, alien radio signals? also do u think we're cool? 👉👈</span>
+                      <span className="label2">Friends, IG, fate, alien radio signals? also do u think we're cool? 👉👈</span>
                     </div>
                     <Input
                       type="text"
@@ -369,14 +467,14 @@ We’re curating energy, not just a guest list - so show us who you are. No pres
                   </div>
                 </div>
 
-                   <div className="flex items-center w-full">
-  <span className="flex-grow h-px bg-[#E93394]"></span>
-  <span className="px-3 text-[#E93394] text-3xl font-[700]">Rave resume (but chill)</span>
-  <span className="flex-grow h-px bg-[#E93394]"></span>
-</div>
+                <div className="flex items-center w-full">
+                  <span className="flex-grow h-px bg-[#E93394]"></span>
+                  <span className="px-3 text-[#E93394] text-3xl font-[700]">Rave resume (but chill)</span>
+                  <span className="flex-grow h-px bg-[#E93394]"></span>
+                </div>
 
                 {/* Textareas */}
-                {[
+                {/* {[
                   { label: "Rave Resume", label2: "Tell us what makes you Queue-core. ", key: "rave_resume", height: "h-28" },
                   {
                     label: "Why do you wanna join the Queue?",
@@ -406,7 +504,7 @@ We’re curating energy, not just a guest list - so show us who you are. No pres
                   <div key={i} className="space-y-2">
                     <div className="flex flex-col gap-2">
                       <Label>{f.label}</Label>
-                    <span className="label2">{f.label2}</span>
+                      <span className="label2">{f.label2}</span>
                     </div>
                     <textarea
                       className={`w-full bg-black/40 border border-white/10 text-white placeholder:text-white/40 rounded-md p-3 ${f.height}`}
@@ -417,16 +515,153 @@ We’re curating energy, not just a guest list - so show us who you are. No pres
                       required
                     />
                   </div>
-                ))}
+                ))} */}
+
+                {/* Rave Resume */}
+                <div className="space-y-2">
+                  <div className="flex flex-col gap-2">
+                    <Label>Rave Resume</Label>
+                    <span className="label2">Tell us what makes you Queue-core.</span>
+                  </div>
+                  <textarea
+                    className="w-full bg-black/40 border border-white/10 text-white placeholder:text-white/40 rounded-md p-3 h-28"
+                    value={formData.rave_resume}
+                    onChange={(e) =>
+                      setFormData({ ...formData, rave_resume: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                {/* Why do you wanna join the Queue? */}
+                <div className="space-y-2">
+                  <div className="flex flex-col gap-2">
+                    <Label>Why do you wanna join the Queue?</Label>
+                    <span className="label2">Don't overthink it. Just keep it ✨real✨</span>
+                  </div>
+                  <textarea
+                    className="w-full bg-black/40 border border-white/10 text-white placeholder:text-white/40 rounded-md p-3 h-28"
+                    value={formData.why_join}
+                    onChange={(e) =>
+                      setFormData({ ...formData, why_join: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                {/* Drop a link / name of your fave music artists / DJs */}
+                <div className="space-y-2">
+                  <div className="flex flex-col gap-2">
+                    <Label>Drop a link / name of your fave music artists / DJs</Label>
+                    <span className="label2">We're kinda curious ngl</span>
+                  </div>
+                  <textarea
+                    className="w-full bg-black/40 border border-white/10 text-white placeholder:text-white/40 rounded-md p-3 h-24"
+                    value={formData.artists}
+                    onChange={(e) =>
+                      setFormData({ ...formData, artists: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+                {/* Which event(s) do you want to experience? */}
+                <div className="space-y-2">
+                  <div className="flex flex-col gap-2">
+                    <Label>Which event(s) do you want to experience?</Label>
+                    <span className="label2">Tell us what makes you Queue-core.</span>
+                  </div>
+                  <textarea
+                    className="w-full bg-black/40 border border-white/10 text-white placeholder:text-white/40 rounded-md p-3 h-28"
+                    value={formData.events}
+                    onChange={(e) =>
+                      setFormData({ ...formData, events: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+
+
+                {/* Your ideal night out vibe */}
+                <div className="space-y-2 relative">
+                  <Label>Your ideal night out vibe</Label>
+                  <span className="label2">Select all that apply</span>
+
+                  {/* Selected tags & trigger */}
+                  <div
+                    className="w-full bg-black/40 border border-white/10 text-white rounded-md p-2 flex flex-wrap gap-1 min-h-[48px] cursor-pointer items-center"
+                    onClick={() => setVibeDropdownOpen((prev) => !prev)}
+                  >
+                    {formData.vibe
+                      ? formData.vibe.split(", ").map((v) => (
+                        <span
+                          key={v}
+                          className="bg-[#E932A2] text-white px-4 py-[6px] rounded-full flex items-center gap-1 text-sm"
+                        >
+                          {v}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation(); // prevent dropdown toggle
+                              const current = formData.vibe
+                                .split(", ")
+                                .filter((val) => val !== v);
+                              setFormData({ ...formData, vibe: current.join(", ") });
+                            }}
+                            className="text-white hover:text-red-400 text-xs font-bold"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))
+                      : <span className="text-white/50">Select your vibe(s)</span>}
+                  </div>
+
+                  {/* Dropdown options */}
+                  {vibeDropdownOpen && (
+                    <div className="absolute z-20 w-full bg-black/90 border border-white/20 mt-1 rounded-md max-h-48 overflow-y-auto">
+                      {vibeOptions.map((option) => {
+                        const selected = formData.vibe.split(", ").includes(option);
+
+                        return (
+                          <div
+                            key={option}
+                            className={`px-3 py-2 cursor-pointer hover:bg-white/10 flex justify-between items-center ${selected ? "bg-white/20 font-semibold" : ""
+                              }`}
+                            onClick={() => {
+                              let current = formData.vibe.split(", ").filter(Boolean);
+                              if (selected) current = current.filter((v) => v !== option);
+                              else current.push(option);
+                              setFormData({ ...formData, vibe: current.join(", ") });
+                            }}
+                          >
+                            <span>{option}</span>
+                            {selected && <span className="text-sm">✔</span>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Outside click to close */}
+                  {vibeDropdownOpen && (
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setVibeDropdownOpen(false)}
+                    />
+                  )}
+                </div>
+
+
 
                 {/* Vibe Detector */}
                 <div className="space-y-2">
-                   <div className="flex flex-col gap-2">
-                      <Label>Weird Vibe Detector™</Label>
+                  <div className="flex flex-col gap-2">
+                    <Label>Weird Vibe Detector™</Label>
                     <span className="label2">Let’s be real. We’ve all met someone who ruins the mood. Don’t be that person.
-Answer honestly, or risk eternal side-eyes from the rave gods. </span>
-<Label>Ever been kicked out of a party?</Label>
-                    </div>
+                      Answer honestly, or risk eternal side-eyes from the rave gods. </span>
+                    <Label>Ever been kicked out of a party?</Label>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     {["Yes", "No", "I plead the fifth"].map((text) => (
                       <label key={text} className="flex gap-2 items-center">
@@ -453,7 +688,7 @@ Answer honestly, or risk eternal side-eyes from the rave gods. </span>
                 </div>
 
                 {/* Kicked Out */}
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label>Ever been kicked out of a party?</Label>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     {[
@@ -474,45 +709,73 @@ Answer honestly, or risk eternal side-eyes from the rave gods. </span>
                       </label>
                     ))}
                   </div>
-                </div>
+                </div> */}
 
                 {/* Agree rules */}
-                <p className="text-[#E93394] text-[20px] font-bold mb-0"> I solemnly swear I’m not a buzzkill and agree to community guidelines:</p>
-                <p className="mt-0 text-[#E93394]">• Respect personal space & boundaries<br />
-• No harassment, creeper energy, or unsafe behavior<br />
-• No "do you know who I am" vibes <br />
-• Zero tolerance for discrimination of any <br />
-• Basically, don’t be a weirdo</p>
+               {/* First Agreement */}
+<div className="space-y-2 mt-6">
+  <p className="text-[#E93394] text-[20px] font-bold mb-0">
+    I solemnly swear I’m not a buzzkill and agree to community guidelines:
+  </p>
+  <ul className="mt-1 text-[#E93394] list-disc list-inside space-y-1">
+    <li>Respect personal space & boundaries</li>
+    <li>No harassment, creeper energy, or unsafe behavior</li>
+    <li>No "do you know who I am" vibes</li>
+    <li>Zero tolerance for discrimination of any</li>
+    <li>Basically, don’t be a weirdo</li>
+  </ul>
+  <label className="flex gap-3 items-start mt-2">
+    <input
+      type="checkbox"
+      checked={formData.agree_rules_1 || false}
+      onChange={(e) =>
+        setFormData({
+          ...formData,
+          agree_rules_1: e.target.checked,
+        })
+      }
+      required
+    />
+    <span className="leading-tight label">
+      I agree. I’m chill. I wanna rave responsibly.
+    </span>
+  </label>
+</div>
 
-<h1 className="text-[#E93394] text-[20px] font-bold mb-0">The Fine Print (yeah, read it)</h1>
-<p
-  className="mt-0 text-[#E93394]"
-  dangerouslySetInnerHTML={{
-    __html: `
-      • I understand that not all applications will be approved (and that’s okay </3)<br />
-      • I’m sharing this info willingly and with consent<br />
-      • I won’t throw a tantrum if I don’t make the cut<br />
-      • My information will stay private and won’t be shared anywhere shady 👀 
-    `,
-  }}
-></p>
-                <label className="flex gap-3 items-start">
-                  <input
-                    type="checkbox"
-                    checked={formData.agree_rules}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        agree_rules: e.target.checked,
-                      })
-                    }
-                    required
-                  />
-                  <span className="leading-tight label">
-                   I agree. I’m chill. I wanna rave responsibly.<br />
-                  I’ve read the above and I’m still cool with it. Let’s party.
-                  </span>
-                </label>
+{/* Second Agreement */}
+<div className="space-y-2 mt-6">
+  <p className="text-[#E93394] text-[20px] font-bold mb-0">
+    The Fine Print (yeah, read it)
+  </p>
+  <ul
+    className="mt-1 text-[#E93394] list-disc list-inside space-y-1"
+    dangerouslySetInnerHTML={{
+      __html: `
+        <li>I understand that not all applications will be approved (and that’s okay </li>
+        <li>I’m sharing this info willingly and with consent</li>
+        <li>I won’t throw a tantrum if I don’t make the cut</li>
+        <li>My information will stay private and won’t be shared anywhere shady 👀</li>
+      `,
+    }}
+  />
+  <label className="flex gap-3 items-start mt-2">
+    <input
+      type="checkbox"
+      checked={formData.agree_rules_2 || false}
+      onChange={(e) =>
+        setFormData({
+          ...formData,
+          agree_rules_2: e.target.checked,
+        })
+      }
+      required
+    />
+    <span className="leading-tight label">
+      I’ve read the above and I’m still cool with it. Let’s party.
+    </span>
+  </label>
+</div>
+
 
                 <Button
                   type="submit"
@@ -540,6 +803,50 @@ Answer honestly, or risk eternal side-eyes from the rave gods. </span>
           </div>
         </div>
       )}
+
+
+      {/* Modals */}
+      {openModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          onClick={() => setOpenModal(false)}
+        >
+          <div
+            className="
+        relative bg-black rounded-2xl p-4 w-full shadow-xl
+        max-w-3xl
+        max-h-[75vh] overflow-y-auto
+        md:max-h-none md:overflow-visible
+      "
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Icon */}
+            <button
+              onClick={() => setOpenModal(false)}
+              className="absolute top-3 right-3 text-white text-xl hover:opacity-70"
+            >
+              ✕
+            </button>
+
+            {/* Images */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+              <img
+                src="/sample1.jpeg"
+                alt="Sample 1"
+                className="w-full rounded-xl object-cover"
+              />
+
+              <img
+                src="/sample2.jpeg"
+                alt="Sample 2"
+                className="w-full rounded-xl object-cover"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+
     </>
   );
 };
