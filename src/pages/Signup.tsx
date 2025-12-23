@@ -413,7 +413,7 @@ const Signup = () => {
                       className="underline cursor-pointer text-[#FC0090] hover:opacity-80"
                       onClick={() => setOpenModal(true)}
                     >
-                      (can use queuehq screenshot)
+                      (example)
                     </span></span>
                   </div>
                   <Input
@@ -566,7 +566,7 @@ const Signup = () => {
                 </div>
 
                 {/* Which event(s) do you want to experience? */}
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <div className="flex flex-col gap-2">
                     <Label>Which event(s) do you want to experience?</Label>
                     <span className="label2">Tell us what makes you Queue-core.</span>
@@ -579,7 +579,7 @@ const Signup = () => {
                     }
                     required
                   />
-                </div>
+                </div> */}
 
 
                 {/* Your ideal night out vibe */}
@@ -721,7 +721,7 @@ const Signup = () => {
     <li>Respect personal space & boundaries</li>
     <li>No harassment, creeper energy, or unsafe behavior</li>
     <li>No "do you know who I am" vibes</li>
-    <li>Zero tolerance for discrimination of any</li>
+    <li>Zero tolerance for discrimination of any kid</li>
     <li>Basically, don’t be a weirdo</li>
   </ul>
   <label className="flex gap-3 items-start mt-2">
