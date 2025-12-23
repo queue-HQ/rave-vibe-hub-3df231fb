@@ -710,6 +710,7 @@ const Signup = () => {
                     ))}
                   </div>
                 </div> */}
+                
 
                 {/* Agree rules */}
                {/* First Agreement */}
