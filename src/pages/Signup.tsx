@@ -22,6 +22,8 @@ const Signup = () => {
   const [openModal, setOpenModal] = useState(false);
   const [vibeDropdownOpen, setVibeDropdownOpen] = useState(false);
 
+  const MAX_SCREENSHOTS = 2;
+
   const [formData, setFormData] = useState({
     username: "",
     full_name: "",
@@ -31,7 +33,7 @@ const Signup = () => {
     gender: "",
     profile_picture: `${mediaUrl}/2025/11/Untitled-design.png`,
     instagram: "",
-    insta_screenshot: null,
+    insta_screenshots: [] as File[],
     age: "",
     rave_resume: "",
     why_join: "",
@@ -138,16 +140,42 @@ const Signup = () => {
     return json.url;
   }
 
+  async function uploadScreenshots(files: File[]) {
+    if (!files?.length) return [];
+    const uploads = await Promise.all(files.map((file) => uploadScreenshot(file)));
+    return uploads.filter(Boolean);
+  }
+
   const handleSignup = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const fileUrl = await uploadScreenshot(formData.insta_screenshot);
+      if (!formData.insta_screenshots?.length) {
+        toast.error("Please upload at least one Instagram screenshot.");
+        setLoading(false);
+        return;
+      }
+
+      if (formData.insta_screenshots.length > MAX_SCREENSHOTS) {
+        toast.error(`You can upload a maximum of ${MAX_SCREENSHOTS} screenshots.`);
+        setLoading(false);
+        return;
+      }
+
+      const fileUrls = await uploadScreenshots(formData.insta_screenshots);
+
+      if (!fileUrls.length) {
+        toast.error("We couldn't upload your screenshots. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      const { insta_screenshots, ...rest } = formData;
 
       const payload = {
-        ...formData,
-        insta_screenshot: fileUrl,
+        ...rest,
+        insta_screenshot: fileUrls,
       };
       console.log("Signup payload:", payload);
       // return;
@@ -419,14 +447,33 @@ const Signup = () => {
                   <Input
                     type="file"
                     accept="image/*"
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        insta_screenshot: e.target.files[0],
-                      })
-                    }
+                    multiple
+                    onChange={(e) => {
+                      const incomingFiles = Array.from(e.target.files || []);
+                      if (incomingFiles.length > MAX_SCREENSHOTS) {
+                        toast.error(`You can upload a maximum of ${MAX_SCREENSHOTS} screenshots.`);
+                      }
+
+                      const selected = incomingFiles.slice(0, MAX_SCREENSHOTS);
+                      setFormData((prev) => ({
+                        ...prev,
+                        insta_screenshots: selected,
+                      }));
+                    }}
                     required
                   />
+                  <div className="label2 text-xs text-white/70">
+                    {`Selected ${formData.insta_screenshots.length}/${MAX_SCREENSHOTS} screenshots`}
+                    {formData.insta_screenshots.length > 0 && (
+                      <ul className="mt-1 space-y-1">
+                        {formData.insta_screenshots.map((file, idx) => (
+                          <li key={`${file.name}-${idx}`} className="truncate">
+                            {file.name}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 </div>
 
 
