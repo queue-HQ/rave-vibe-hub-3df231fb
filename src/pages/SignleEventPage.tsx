@@ -419,11 +419,11 @@ const SignleEventPage = () => {
           <div className="p-12 rounded-3xl gradient-card neon-border bg-gradient-to-br from-primary/30 via-card to-card shadow-[0_0_60px_hsl(330_81%_60%_/_0.4)]">
 
             <h2 className="text-3xl md:text-5xl font-bold mb-6">
-              Ready to Dive In?
+              Think You Belong Here?
             </h2>
 
             <p className="text-xl text-muted-foreground mb-8">
-              Join thousands of ravers already vibing with QHQ
+              Stand in the right line.
             </p>
 
             <Link to="/signup">
@@ -436,7 +436,7 @@ const SignleEventPage = () => {
             sm:px-12 sm:py-[20px] sm:text-lg   /* Desktop */
           "
               >
-                Get Started Now
+                Join The Queue
               </Button>
             </Link>
 
