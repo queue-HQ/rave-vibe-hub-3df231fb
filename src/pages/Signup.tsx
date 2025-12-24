@@ -14,7 +14,7 @@ import logo from "@/assets/logo.png";
 import { toast } from "sonner";
 import { registerUser } from "@/api/auth";
 import { mediaUrl, apiUrl } from "@/lib/apiURL";
-import { Loader2 } from "lucide-react";
+import { Italic, Loader2 } from "lucide-react";
 
 const Signup = () => {
   const [loading, setLoading] = useState(false);
@@ -292,7 +292,7 @@ const Signup = () => {
                   <div className="flex flex-col gap-2">
                     <Label>Full Name</Label>
                     <span className="label2">
-                      Govt name preferred. Space do agar last name bhi hai.
+                      govt or rave alias, we don’t judge (but govt preferably, pls)
                     </span>
                   </div>
 
@@ -362,7 +362,7 @@ const Signup = () => {
                   <div className="flex-1 space-y-2">
                     <div className="flex flex-col gap-2">
                       <Label>Instagram Handle</Label>
-                      <span className="label2">we might stalk you a little. just a lil. </span>
+                      <span className="label2">we might stalk you a little. <i>just a lil.</i></span>
                     </div>
                     <Input
                       type="text"
@@ -468,10 +468,14 @@ const Signup = () => {
                 </div>
 
                 <div className="flex items-center w-full">
-                  <span className="flex-grow h-px bg-[#E93394]"></span>
-                  <span className="px-3 text-[#E93394] text-3xl font-[700]">Rave resume (but chill)</span>
-                  <span className="flex-grow h-px bg-[#E93394]"></span>
+                <span className="flex-grow h-px bg-[#E93394]"></span>
+                <div className="py-10 flex flex-col items-center px-3 text-[#E93394]">
+                  <span className="text-3xl font-[700]">Rave resume (but chill)</span>
+                  <span className="text font-[500]">Tell us what makes you Queue-core.</span>
                 </div>
+                <span className="flex-grow h-px bg-[#E93394]"></span>
+                </div>
+
 
                 {/* Textareas */}
                 {/* {[
@@ -518,7 +522,7 @@ const Signup = () => {
                 ))} */}
 
                 {/* Rave Resume */}
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <div className="flex flex-col gap-2">
                     <Label>Rave Resume</Label>
                     <span className="label2">Tell us what makes you Queue-core.</span>
@@ -531,7 +535,7 @@ const Signup = () => {
                     }
                     required
                   />
-                </div>
+                </div> */}
 
                 {/* Why do you wanna join the Queue? */}
                 <div className="space-y-2">
@@ -553,7 +557,7 @@ const Signup = () => {
                 <div className="space-y-2">
                   <div className="flex flex-col gap-2">
                     <Label>Drop a link / name of your fave music artists / DJs</Label>
-                    <span className="label2">We're kinda curious ngl</span>
+                    <span className="label2"><i>We're kinda curious ngl</i></span>
                   </div>
                   <textarea
                     className="w-full bg-black/40 border border-white/10 text-white placeholder:text-white/40 rounded-md p-3 h-24"
@@ -585,7 +589,7 @@ const Signup = () => {
                 {/* Your ideal night out vibe */}
                 <div className="space-y-2 relative">
                   <Label>Your ideal night out vibe</Label>
-                  <span className="label2">Select all that apply</span>
+                  <span className="label2"><br/>Select all that apply</span>
 
                   {/* Selected tags & trigger */}
                   <div
@@ -722,7 +726,7 @@ const Signup = () => {
     <li>Respect personal space & boundaries</li>
     <li>No harassment, creeper energy, or unsafe behavior</li>
     <li>No "do you know who I am" vibes</li>
-    <li>Zero tolerance for discrimination of any kid</li>
+    <li>Zero tolerance for discrimination of any kind</li>
     <li>Basically, don’t be a weirdo</li>
   </ul>
   <label className="flex gap-3 items-start mt-2">
@@ -752,7 +756,7 @@ const Signup = () => {
     className="mt-1 text-[#E93394] list-disc list-inside space-y-1"
     dangerouslySetInnerHTML={{
       __html: `
-        <li>I understand that not all applications will be approved (and that’s okay </li>
+        <li>I understand that not all applications will be approved (and that’s okay 💔)</li>
         <li>I’m sharing this info willingly and with consent</li>
         <li>I won’t throw a tantrum if I don’t make the cut</li>
         <li>My information will stay private and won’t be shared anywhere shady 👀</li>

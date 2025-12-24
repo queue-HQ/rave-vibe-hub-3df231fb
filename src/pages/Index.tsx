@@ -25,13 +25,13 @@ const Index = () => {
         <div className="max-w-6xl mx-auto text-center relative">
           {/* Heading */}
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight">
-            The Underground
+            The Queue Starts
             <br />
             <span className="
   text-primary
   md:neon-text          
   max-md:neon-text-mobile
-">Awaits</span>
+">Here</span>
           </h1>
 
           {/* Subheading */}
@@ -48,7 +48,7 @@ const Index = () => {
                 className="text-sm sm:text-base px-4 sm:px-8 py-3 sm:py-[20px] h-auto font-bold flex items-center justify-center w-full"
               >
                 <Sparkles className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                Join the Movement
+                Join The Queue
               </Button>
             </Link>
             <Link to="/events" className="w-full sm:w-auto">
@@ -57,7 +57,7 @@ const Index = () => {
                 variant="outline"
                 className="text-sm sm:text-base px-4 sm:px-8 py-3 sm:py-[20px] h-auto w-full sm:w-auto"
               >
-                Explore Events
+                View Events
               </Button>
             </Link>
           </div>
@@ -71,7 +71,7 @@ const Index = () => {
       <section className="py-20 px-6 bg-gradient-to-b from-background via-card/20 to-background">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
-            Why <span className="text-primary">QHQ</span>?
+            This Is How We <span className="text-primary">Move</span>
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -79,10 +79,9 @@ const Index = () => {
               <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Calendar className="h-8 w-8 text-primary" />
               </div>
-              <h3 className="text-2xl font-bold mb-4">Exclusive Events</h3>
+              <h3 className="text-2xl font-bold mb-4">Curated Access</h3>
               <p className="text-muted-foreground">
-                Access underground raves and secret locations that you won't
-                find anywhere else.
+                Not every night is public. We handpick events and limit capacity to protect the room, the music, and the energy.
               </p>
             </div>
 
@@ -90,10 +89,9 @@ const Index = () => {
               <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Users className="h-8 w-8 text-primary" />
               </div>
-              <h3 className="text-2xl font-bold mb-4">Community Driven</h3>
+              <h3 className="text-2xl font-bold mb-4">Cloud &gt; Clout</h3>
               <p className="text-muted-foreground">
-                Connect with like-minded ravers and build your crew in the
-                underground scene.
+                 The people matter as much as the lineup. QHQ is built around respect, shared taste, and community — not follower counts.
               </p>
             </div>
 
@@ -101,10 +99,9 @@ const Index = () => {
               <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Zap className="h-8 w-8 text-primary" />
               </div>
-              <h3 className="text-2xl font-bold mb-4">Instant Tickets</h3>
+              <h3 className="text-2xl font-bold mb-4">Seamless Entry</h3>
               <p className="text-muted-foreground">
-                Secure your spot with digital tickets delivered instantly to
-                your phone.
+                No chaos at the gate. Approved access, clear communication, and smooth entry with digital tickets delivered instantly to your phone. 
               </p>
             </div>
           </div>
@@ -120,11 +117,11 @@ const Index = () => {
     <div className="p-12 rounded-3xl gradient-card neon-border bg-gradient-to-br from-primary/30 via-card to-card shadow-[0_0_60px_hsl(330_81%_60%_/_0.4)]">
       
       <h2 className="text-3xl md:text-5xl font-bold mb-6">
-        Ready to Dive In?
+        Think You Belong Here?
       </h2>
 
       <p className="text-xl text-muted-foreground mb-8">
-        Join thousands of ravers already vibing with QHQ
+        Stand in the right line.
       </p>
 
       <Link to="/signup">
@@ -137,7 +134,7 @@ const Index = () => {
             sm:px-12 sm:py-[20px] sm:text-lg   /* Desktop */
           "
         >
-          Get Started Now
+          Join The Queue
         </Button>
       </Link>
 

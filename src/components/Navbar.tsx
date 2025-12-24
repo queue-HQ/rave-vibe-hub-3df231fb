@@ -1,13 +1,26 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import { isAuthenticated } from "@/lib/auth";
 import { Button } from "./ui/button";
-import { Menu, X } from "lucide-react"; // hamburger & close icons
+import { Menu, X } from "lucide-react";
 
 export const Navbar = () => {
   const isAuth = isAuthenticated();
   const [isOpen, setIsOpen] = useState(false);
+
+  const navLinkClass = ({ isActive }) =>
+    `
+    transition-all duration-300
+    hover:text-[#DD4390]
+    md:hover:neon-text
+    max-md:hover:neon-text-mobile
+    ${
+      isActive
+        ? "text-[#DD4390] font-semibold md:neon-text max-md:neon-text-mobile"
+        : ""
+    }
+  `;
 
   return (
     <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-md border-b border-primary/30 z-50 shadow-[0_0_20px_hsl(330_81%_60%_/_0.1)]">
@@ -20,15 +33,15 @@ export const Navbar = () => {
 
           {/* Desktop Links */}
           <div className="hidden md:flex gap-6 mx-7">
-            <Link to="/events" className="hover:text-[#DD4390]">
+            <NavLink to="/events" className={navLinkClass}>
               Events
-            </Link>
-            <Link to="/blogs" className="hover:text-[#DD4390]">
+            </NavLink>
+            <NavLink to="/blogs" className={navLinkClass}>
               Blogs
-            </Link>
-            <Link to="/contact" className="hover:text-[#DD4390]">
+            </NavLink>
+            <NavLink to="/contact" className={navLinkClass}>
               Contact Us
-            </Link>
+            </NavLink>
           </div>
         </div>
 
@@ -67,27 +80,35 @@ export const Navbar = () => {
       {/* Mobile Menu */}
       {isOpen && (
         <div className="md:hidden bg-background/95 backdrop-blur-md border-t border-primary/30 px-6 py-4 space-y-4">
-          <Link
+          <NavLink
             to="/events"
-            className="block hover:text-[#DD4390]"
+            className={(props) =>
+              `block ${navLinkClass(props)}`
+            }
             onClick={() => setIsOpen(false)}
           >
             Events
-          </Link>
-          <Link
+          </NavLink>
+
+          <NavLink
             to="/blogs"
-            className="block hover:text-[#DD4390]"
+            className={(props) =>
+              `block ${navLinkClass(props)}`
+            }
             onClick={() => setIsOpen(false)}
           >
             Blogs
-          </Link>
-          <Link
+          </NavLink>
+
+          <NavLink
             to="/contact"
-            className="block hover:text-[#DD4390]"
+            className={(props) =>
+              `block ${navLinkClass(props)}`
+            }
             onClick={() => setIsOpen(false)}
           >
             Contact Us
-          </Link>
+          </NavLink>
 
           {isAuth ? (
             <Link to="/dashboard" onClick={() => setIsOpen(false)}>

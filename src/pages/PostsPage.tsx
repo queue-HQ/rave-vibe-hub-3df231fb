@@ -70,9 +70,9 @@ const PostsPage = () => {
   <div className="absolute inset-0 bg-[conic-gradient(from_0deg_at_50%_50%,_transparent_0deg,_hsl(330_81%_60%_/_0.15)_60deg,_transparent_180deg)] opacity-40" />
 
   <div className="max-w-5xl mx-auto text-center relative">
-    <p className="uppercase text-xs sm:text-sm tracking-[0.3em] text-primary mb-3 sm:mb-4">
+    {/* <p className="uppercase text-xs sm:text-sm tracking-[0.3em] text-primary mb-3 sm:mb-4">
       QHQ Blog
-    </p>
+    </p> */}
 
     {/* Mobile optimized heading */}
     <h1 className="text-4xl sm:text-5xl md:text-7xl font-black mb-6 leading-tight px-2">

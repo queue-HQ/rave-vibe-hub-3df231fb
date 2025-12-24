@@ -79,9 +79,9 @@ const ContactPage = () => {
   <div className="relative max-w-4xl mx-auto text-center space-y-6">
 
     {/* Badge */}
-    <Badge className="px-5 py-2 text-xs sm:text-sm uppercase tracking-[0.3em] bg-primary/20 text-primary">
+    {/* <Badge className="px-5 py-2 text-xs sm:text-sm uppercase tracking-[0.3em] bg-primary/20 text-primary">
       Contact
-    </Badge>
+    </Badge> */}
 
     {/* Heading with mobile-friendly sizes */}
     <h1 className="text-4xl sm:text-5xl md:text-7xl font-black leading-tight px-2">
@@ -176,27 +176,27 @@ const ContactPage = () => {
         <div className="space-y-6">
           <Card className="bg-card/70 backdrop-blur">
             <CardContent className="p-6 space-y-4">
-              <h3 className="text-xl font-bold">Talk to a human</h3>
+              <h3 className="text-xl font-bold">Your QHQ Plug</h3>
               <div className="space-y-4 text-muted-foreground">
-                <div className="flex items-start gap-3">
+                <div className="flex items-center gap-3">
                   <Mail className="h-5 w-5 text-primary" />
                   <div>
                     <p className="font-semibold text-foreground">Email</p>
                     <p>hello.jointhequeue@gmail.com</p>
                   </div>
                 </div>
-                {/* <div className="flex items-start gap-3">
+                {/* <div className="flex items-center gap-3">
                   <Phone className="h-5 w-5 text-primary" />
                   <div>
                     <p className="font-semibold text-foreground">Phone</p>
                     <p>+92 300 123 4567</p>
                   </div>
                 </div> */}
-                <div className="flex items-start gap-3">
-                  <MapPin className="h-5 w-5 text-primary" />
+                <div className="flex items-center gap-3">
+                  <MapPin className="h-10 w-10 text-primary" />
                   <div>
                     <p className="font-semibold text-foreground">Studio</p>
-                    <p>Karachi</p>
+                    <p>Sajid Moosani, 1st Floor, 4th Zamzama Lane, Zamzama Commercial Area, Defence Phase V, Karachi, 75600</p>
                   </div>
                 </div>
               </div>
