@@ -62,6 +62,7 @@ const Signup = () => {
   const userVerify = localStorage.getItem("user-verify");
   const userSetupProfile = localStorage.getItem("user-setup-profile");
 
+  
   useEffect(() => {
     if (userRegister) {
       setTimeout(() => {
