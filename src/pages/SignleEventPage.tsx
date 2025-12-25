@@ -269,7 +269,7 @@ const SignleEventPage = () => {
               </CardContent>
             </Card>
 
-            {/* Related Events */}
+            {/* Related Event */}
             <Card>
               <CardContent className="p-6">
                 <h2 className="text-2xl font-bold mb-4">You Might Also Like</h2>
