@@ -74,6 +74,8 @@ const SignleEventPage = () => {
   const relatedEvents = useMemo(() => {
     if (!event) return [];
 
+
+ 
     const candidates = events.filter(
       (item) => String(item.id) !== String(event.id)
     );
@@ -96,6 +98,8 @@ const SignleEventPage = () => {
 
     return prioritized.slice(0, 2);
   }, [events, event]);
+
+     console.log('relatedEvents', relatedEvents)
 
   if (isLoading && !event) {
     return (
@@ -282,7 +286,7 @@ const SignleEventPage = () => {
                           <img
                             src={
                               item.image ??
-                              item.featured_image ??
+                              item.feature_image ??
                               "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=400"
                             }
                             alt={item.title ?? "Related event"}
