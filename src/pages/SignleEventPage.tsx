@@ -51,6 +51,26 @@ const SignleEventPage = () => {
   const isSoldOut =
     typeof availableTickets === "number" && availableTickets <= 0;
 
+  const organizerInfo =
+    event && typeof event === "object" && typeof event.organizer === "object"
+      ? (event.organizer as { name?: string; tagline?: string; avatar?: string })
+      : null;
+
+  const organizerName = organizerInfo?.name?.trim() || event?.created_by || "QHQ Events";
+  const organizerTagline = organizerInfo?.tagline?.trim() || event?.address || "Event host";
+  const organizerAvatar = organizerInfo?.avatar?.trim()
+    ? organizerInfo.avatar
+    : `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(organizerName ?? "organizer")}`;
+  const organizerInitials = organizerName
+    ? organizerName
+        .split(" ")
+        .filter(Boolean)
+        .map((word) => word[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : "QH";
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
@@ -400,14 +420,16 @@ const SignleEventPage = () => {
         <h3 className="font-bold mb-4">Organized by</h3>
         <div className="flex items-center gap-3">
           <Avatar className="h-12 w-12">
-            <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=organizer" />
-            <AvatarFallback>QH</AvatarFallback>
+            <AvatarImage src={organizerAvatar} />
+            <AvatarFallback>{organizerInitials}</AvatarFallback>
           </Avatar>
           <div>
-            <p className="font-bold">QHQ Events</p>
-            <p className="text-sm text-muted-foreground">
-              Underground Collective
-            </p>
+            <p className="font-bold">{organizerName}</p>
+            {organizerTagline && (
+              <p className="text-sm text-muted-foreground">
+                {organizerTagline}
+              </p>
+            )}
           </div>
         </div>
       </CardContent>
