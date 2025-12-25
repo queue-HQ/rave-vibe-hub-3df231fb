@@ -194,7 +194,7 @@ const SignleEventPage = () => {
               {event.title}
             </h1>
 
-            {/* Details */}
+            {/* Details*/}
             <div className="flex flex-wrap gap-3 sm:gap-4 text-sm sm:text-base md:text-lg">
               {event.date && (
                 <div className="flex items-center gap-2">
