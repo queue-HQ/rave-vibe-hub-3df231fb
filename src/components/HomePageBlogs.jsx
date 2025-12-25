@@ -18,7 +18,7 @@ function HomePageBlogs() {
   return (
  <section className="px-6">
       <h2 className="text-4xl md:text-5xl font-bold text-center mb-16">
-        Hot Off <span className="text-primary">The Decks</span>
+        Hot Off The<span className="text-primary"> Decks</span>
       </h2>
 
      
