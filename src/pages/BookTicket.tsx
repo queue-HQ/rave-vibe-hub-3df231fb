@@ -42,6 +42,8 @@ const BookTicket = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  console.log("USER", user);
+
   const [paymentProof, setPaymentProof] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -230,7 +232,7 @@ const BookTicket = () => {
                 Ticket Price
               </span>
               <span className="text-xl sm:text-2xl font-bold text-primary">
-                PKR {event?.price}
+                PKR {event?.price*2}
               </span>
             </div>
 
