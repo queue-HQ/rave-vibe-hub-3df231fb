@@ -750,7 +750,7 @@ const Signup = () => {
                     ].map(([val, text]) => (
                       <label key={val} className="flex gap-2 items-center">
                         <input
-                          type="radio"
+                          type ="radio"
                           name="kicked"
                           value={val}
                           onChange={(e) =>
