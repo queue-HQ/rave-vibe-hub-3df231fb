@@ -42,7 +42,7 @@ const BookTicket = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  console.log("USER", user);
+  console.log("USER:", user);
 
   const [paymentProof, setPaymentProof] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
