@@ -238,7 +238,7 @@ const BookTicket = () => {
                 Ticket Price
               </span>
               <span className="text-xl sm:text-2xl font-bold text-primary">
-                PKR {event?.price*2}
+                PKR {event?.price}
               </span>
             </div>
 
