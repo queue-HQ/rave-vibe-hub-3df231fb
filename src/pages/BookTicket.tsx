@@ -231,7 +231,7 @@ const BookTicket = () => {
             </div>
           </div>
 
-          {/* Price */}
+          {/* Price*/}
           <div className="border-t pt-4 space-y-2">
             <div className="flex justify-between items-center mb-2">
               <span className="text-muted-foreground text-sm sm:text-base">
