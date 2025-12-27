@@ -49,6 +49,8 @@ const BookTicket = () => {
 
   const [formData, setFormData] = useState({
     phone: user?.phone || "",
+    nic: user?.nic || "",
+    carNumber: user?.car_number || "",
   });
 
   const fullName = [user?.first_name, user?.last_name]
@@ -61,6 +63,8 @@ const BookTicket = () => {
   }, [user?.phone]);
 
   const event = events.find((item) => String(item.id) === String(id));
+
+  console.log("EVENT", event);
 
   const capacityLimit = Number(event?.capacity_limit) || 0;
   const bookedTickets = Number(event?.booked_tickets) || 0;
@@ -119,6 +123,8 @@ const BookTicket = () => {
         event_id: event?.id,
         date: currentDate,
         phone: formData.phone,
+        nic: formData.nic,
+        carNumber: formData.carNumber,
         payment_image: proofUrl,
       };
 
@@ -280,6 +286,23 @@ const BookTicket = () => {
                   required
                 />
               </div>
+              <div className="space-y-2 md:col-span-2">
+                <Label>CNIC Number *</Label>
+                <Input
+                  placeholder="1234567890123"
+                  value={formData.nic}
+                  onChange={(e) => handleChange("nic", e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <Label>Car Number Plate (Optional)</Label>
+                <Input
+                  placeholder="ABC123"
+                  value={formData.carNumber}
+                  onChange={(e) => handleChange("carNumber", e.target.value)}
+                />
+              </div>
             </div>
           </div>
 
@@ -329,6 +352,30 @@ const BookTicket = () => {
                 </p>
               )}
             </div>
+          </div>
+
+          {/* Important Information */}
+          <div className="border-t pt-6">
+            <h3 className="text-lg sm:text-xl font-semibold mb-4">
+              Important Information
+            </h3>
+
+           {Array.isArray(event?.important_information) && event.important_information.length > 0 ? (
+                  <ul className="space-y-2 text-sm sm:text-base text-muted-foreground">
+                    {event.important_information.map((point: any, index: number) => (
+                      <li key={point.id ?? index} className="flex items-start gap-2">
+                        <span className="font-bold text-primary">•</span>
+                        <span>{point.name}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm sm:text-base text-muted-foreground italic">
+                    No important information available.
+                  </p>
+                )}
+
+           
           </div>
 
           {/* Submit Button */}
