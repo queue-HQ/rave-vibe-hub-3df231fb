@@ -289,7 +289,7 @@ const BookTicket = () => {
               <div className="space-y-2 md:col-span-2">
                 <Label>CNIC Number *</Label>
                 <Input
-                  placeholder="1234567890123"
+                  placeholder="xxxx-xxxxxx-x"
                   value={formData.nic}
                   onChange={(e) => handleChange("nic", e.target.value)}
                   required
