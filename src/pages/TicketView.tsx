@@ -250,20 +250,20 @@ const downloadBase64Pdf = (base64Data, fileName) => {
 
                 <div>
                   <p className="text-muted-foreground mb-1">Date & Time</p>
-                  <p className="font-semibold">Dec 18, 2024 • 10:00 PM</p>
+                  <p className="font-semibold">{data?.event_date} • {data?.event_time}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground mb-1">Location</p>
-                  <p className="font-semibold">Brooklyn Warehouse, NY</p>
+                  <p className="font-semibold">{data?.event_location}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground mb-1">Ticket Holder</p>
-                  <p className="font-semibold">Alex Rivera</p>
+                  <p className="font-semibold">{data?.user_name}</p>
                 </div>
-                <div>
+                {/* <div>
                   <p className="text-muted-foreground mb-1">Ticket Type</p>
                   <p className="font-semibold">General Admission</p>
-                </div>
+                </div> */}
               </div>
             </div>
 

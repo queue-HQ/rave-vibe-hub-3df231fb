@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Calendar,
@@ -35,14 +35,33 @@ async function uploadScreenshot(file: File) {
 }
 // ⬆⬆⬆ Upload Function
 
+const getNumericPrice = (value: unknown): number => {
+  if (typeof value === "number" && !Number.isNaN(value)) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const normalized = value.replace(/[^0-9.]/g, "");
+    return normalized ? Number(normalized) : 0;
+  }
+
+  return 0;
+};
+
+const formatPriceLabel = (amount: number, fallback?: string) => {
+  if (amount > 0) {
+    return `PKR ${amount.toLocaleString("en-PK")}`;
+  }
+
+  return fallback ?? "N/A";
+};
+
 const BookTicket = () => {
   const { user } = useUserProfile();
   const { id } = useParams(); // event ID from URL
   const { events, isLoading } = useEvents();
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  console.log("USER", user);
 
   const [paymentProof, setPaymentProof] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -51,6 +70,7 @@ const BookTicket = () => {
     phone: user?.phone || "",
     nic: user?.nic || "",
     carNumber: user?.car_number || "",
+    additionalPerson: null as { name: string; email: string; phone: string; nic: string; carNumber: string } | null,
   });
 
   const fullName = [user?.first_name, user?.last_name]
@@ -59,12 +79,13 @@ const BookTicket = () => {
     .trim() || user?.display_name || user?.username || "";
 
   useEffect(() => {
-    setFormData((prev) => ({ ...prev, phone: user?.phone || "" }));
+    setFormData((prev) => ({
+      ...prev,
+      phone: (user?.phone as string) || "",
+    }));
   }, [user?.phone]);
 
   const event = events.find((item) => String(item.id) === String(id));
-
-  console.log("EVENT", event);
 
   const capacityLimit = Number(event?.capacity_limit) || 0;
   const bookedTickets = Number(event?.booked_tickets) || 0;
@@ -77,6 +98,18 @@ const BookTicket = () => {
   const isSoldOut =
     typeof availableTickets === "number" && availableTickets <= 0;
 
+  const userGender =
+    typeof user?.gender === "string" ? user.gender.toLowerCase() : "";
+  const isMaleUser = userGender === "male";
+  const baseTicketPrice = useMemo(
+    () => getNumericPrice(event?.price),
+    [event?.price]
+  );
+  const hasAdditionalPerson = Boolean(formData.additionalPerson);
+  const isCoupleBooking = isMaleUser || hasAdditionalPerson;
+  const totalPrice = baseTicketPrice * (isCoupleBooking ? 2 : 1);
+  const coupleFieldsRequired = Boolean(formData.additionalPerson);
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -84,6 +117,60 @@ const BookTicket = () => {
       </div>
     );
   }
+
+
+  const addPerson = () => {
+    setFormData((prev) => ({
+      ...prev,
+      additionalPerson: {
+        name: "",
+        email: "",
+        phone: "",
+        nic: "",
+        carNumber: "",
+      },
+    }));
+  };
+
+  const removePerson = () => {
+    setFormData((prev) => ({
+      ...prev,
+      additionalPerson: null,
+    }));
+  };
+
+  const handlePersonChange = (
+    field: "name" | "email" | "phone" | "nic" | "carNumber",
+    value: string,
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      additionalPerson: prev.additionalPerson
+        ? { ...prev.additionalPerson, [field]: value }
+        : null,
+    }));
+  };
+
+  useEffect(() => {
+    if (!isMaleUser) return;
+
+    setFormData((prev) => {
+      if (prev.additionalPerson) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        additionalPerson: {
+          name: "",
+          email: "",
+          phone: "",
+          nic: "",
+          carNumber: "",
+        },
+      };
+    });
+  }, [isMaleUser]);
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -110,6 +197,29 @@ const BookTicket = () => {
       return;
     }
 
+    if (isMaleUser && !formData.additionalPerson) {
+      toast({
+        title: "Couple information required",
+        description: "Male attendees must provide couple details.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.additionalPerson) {
+      const { name, email, phone, nic } = formData.additionalPerson;
+
+      if (!name || !email || !phone || !nic) {
+        toast({
+          title: "Incomplete couple information",
+          description:
+            "Please provide name, email, phone, and CNIC for the invited guest.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     try {
       setSubmitting(true);
       // Upload screenshot
@@ -119,6 +229,8 @@ const BookTicket = () => {
         timeZone: "Asia/Karachi",
       });
 
+      const coupleDetails = formData.additionalPerson ? { ...formData.additionalPerson } : null;
+
       const finalData = {
         event_id: event?.id,
         date: currentDate,
@@ -126,6 +238,10 @@ const BookTicket = () => {
         nic: formData.nic,
         carNumber: formData.carNumber,
         payment_image: proofUrl,
+        additionalPerson: coupleDetails,
+        couple_details: coupleDetails,
+        is_couple_booking: isCoupleBooking,
+        ticket_price: totalPrice,
       };
 
       // API request
@@ -237,10 +353,31 @@ const BookTicket = () => {
               <span className="text-muted-foreground text-sm sm:text-base">
                 Ticket Price
               </span>
-              <span className="text-xl sm:text-2xl font-bold text-primary">
-                PKR {event?.price}
+              <span className="text-xl sm:text-xl font-bold text-primary">
+                {formatPriceLabel(baseTicketPrice, event?.price)}
               </span>
             </div>
+
+            {isCoupleBooking ? (
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-muted-foreground text-sm ">
+                  Total Price {isMaleUser ? "(Mandatory Couple)" : "(With Couple)"}
+                </span>
+                <span className="text-xl sm:text-2xl font-bold text-primary">
+                  {formatPriceLabel(totalPrice, event?.price)}
+                </span>
+              </div>
+            ) : null}
+
+            {isMaleUser ? (
+              <p className="text-xs text-destructive">
+                Male attendees must book as a couple. Please complete the guest details below.
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Add a partner only if you want to attend as a couple; pricing will update automatically.
+              </p>
+            )}
 
             {capacityLimit ? (
               <p className="text-sm text-muted-foreground">
@@ -277,7 +414,7 @@ const BookTicket = () => {
                 <Input value={user?.email} disabled />
               </div>
 
-              <div className="space-y-2 md:col-span-2">
+              <div className="space-y-2">
                 <Label>Phone Number *</Label>
                 <Input
                   placeholder="+92 300 0000000"
@@ -286,7 +423,7 @@ const BookTicket = () => {
                   required
                 />
               </div>
-              <div className="space-y-2 md:col-span-2">
+              <div className="space-y-2">
                 <Label>CNIC Number *</Label>
                 <Input
                   placeholder="xxxx-xxxxxx-x"
@@ -305,6 +442,80 @@ const BookTicket = () => {
               </div>
             </div>
           </div>
+          
+            {/* Additional Person */}
+          <div className="border-t pt-6">
+            <h3 className="text-lg sm:text-xl font-semibold mb-4">Couple Information</h3>
+
+            {formData.additionalPerson ? (
+              <div className="grid gap-4 md:grid-cols-2 items-end mb-4">
+                <div className="space-y-2">
+                  <Label>Full Name *</Label>
+                  <Input
+                    value={formData.additionalPerson.name}
+                    onChange={(e) => handlePersonChange("name", e.target.value)}
+                    placeholder="Full Name"
+                    required={coupleFieldsRequired}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Email *</Label>
+                  <Input
+                    type="email"
+                    value={formData.additionalPerson.email}
+                    onChange={(e) => handlePersonChange("email", e.target.value)}
+                    placeholder="Email"
+                    required={coupleFieldsRequired}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Phone Number *</Label>
+                  <Input
+                    placeholder="+92 300 0000000"
+                    value={formData.additionalPerson.phone}
+                    onChange={(e) => handlePersonChange("phone", e.target.value)}
+                    required={coupleFieldsRequired}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>CNIC Number *</Label>
+                  <Input
+                    placeholder="xxxx-xxxxxx-x"
+                    value={formData.additionalPerson.nic}
+                    onChange={(e) => handlePersonChange("nic", e.target.value)}
+                    required={coupleFieldsRequired}
+                  />
+                </div>
+
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Car Number Plate (Optional)</Label>
+                  <Input
+                    placeholder="ABC123"
+                    value={formData.additionalPerson.carNumber}
+                    onChange={(e) => handlePersonChange("carNumber", e.target.value)}
+                  />
+                </div>
+
+                {!isMaleUser && (
+                  <div className="flex items-center">
+                    <Button type="button" variant="destructive" onClick={removePerson}>
+                      Remove
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              !isMaleUser && (
+                <Button type="button" onClick={addPerson}>
+                  + Add Person
+                </Button>
+              )
+            )}
+          </div>
+
 
           {/* Payment Proof */}
           <div className="border-t pt-6">
@@ -382,7 +593,7 @@ const BookTicket = () => {
           <Button
             type="submit"
             className="w-full h-12 gradient-primary text-white font-semibold rounded-xl text-base sm:text-lg"
-            disabled={submitting || isSoldOut}
+            disabled={submitting || isSoldOut || (isMaleUser && !formData.additionalPerson)}
           >
             {submitting ? (
               <span className="flex items-center justify-center gap-2">
