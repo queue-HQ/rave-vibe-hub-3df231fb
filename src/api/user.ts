@@ -33,3 +33,8 @@ export const getQrDetails = async (qrId: string) => {
   return res.data;
 };
 
+export const respondToInvite = async (data: { booking_id: number; action: "accept" | "reject" }) => {
+  const res = await api.post("/invite-response", data);
+  return res.data;
+};
+

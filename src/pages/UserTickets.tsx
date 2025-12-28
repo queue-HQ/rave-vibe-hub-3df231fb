@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Calendar, Logs } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import logo from "@/assets/logo.png";
 import { Skeleton } from "@/components/ui/skeleton";
 import AppSidebar from "@/components/sidebar/AppSidebar";
 import { useUserProfile } from "@/context/UserProfileContext";
-import { getBookings } from "@/api/user";
+import { getBookings, respondToInvite } from "@/api/user";
 import { useToast } from "@/hooks/use-toast";
 
 const UserTickets = () => {
@@ -15,40 +15,41 @@ const UserTickets = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [bookings, setBookings] = useState<any[]>([]);
   const [loadingBookings, setLoadingBookings] = useState(true);
-  const [activeTab, setActiveTab] = useState<"current" | "past" | "cancel">("current");
+  const [activeTab, setActiveTab] = useState<"current" | "past" | "cancel" | "invite">("current");
+  const [processingInviteId, setProcessingInviteId] = useState<number | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const userName = user?.display_name || user?.username || "";
 
+  const fetchBookings = useCallback(async () => {
+    setLoadingBookings(true);
+    try {
+      const data = await getBookings();
+      const fetched = data?.data || [];
+      setBookings(fetched);
+
+      const activeCount = fetched.filter((booking: any) => {
+        const status = (booking?.user_status || "").toLowerCase();
+        return status !== "cancel";
+      }).length;
+      localStorage.setItem("user_bookings_count", String(activeCount));
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+      setBookings([]);
+      localStorage.setItem("user_bookings_count", "0");
+    } finally {
+      setLoadingBookings(false);
+    }
+  }, []);
+
   useEffect(() => {
-    const fetchBookings = async () => {
-      setLoadingBookings(true);
-      try {
-        const data = await getBookings();
-        const fetched = data?.data || [];
-        setBookings(fetched);
-
-        const activeCount = fetched.filter((booking: any) => {
-          const status = (booking?.user_status || "").toLowerCase();
-          return status !== "cancel";
-        }).length;
-        localStorage.setItem("user_bookings_count", String(activeCount));
-      } catch (error) {
-        console.error("Error fetching bookings:", error);
-        setBookings([]);
-        localStorage.setItem("user_bookings_count", "0");
-      } finally {
-        setLoadingBookings(false);
-      }
-    };
-
     if (user) {
       fetchBookings();
     } else {
       localStorage.removeItem("user_bookings_count");
     }
-  }, [user]);
+  }, [fetchBookings, user]);
 
   const sanitizeEventTime = (timeString?: string) => {
     if (!timeString) return undefined;
@@ -92,6 +93,66 @@ const UserTickets = () => {
     );
   };
 
+  const handleInviteAction = async (
+    bookingId: number,
+    action: "accept" | "reject",
+  ) => {
+    if (processingInviteId) return;
+    setProcessingInviteId(bookingId);
+    try {
+      const res = await respondToInvite({ booking_id: bookingId, action });
+      toast({
+        title:
+          res?.message || (action === "accept" ? "Invitation accepted" : "Invitation rejected"),
+      });
+      await fetchBookings();
+    } catch (error: any) {
+      const apiMessage =
+        error?.response?.data?.message || error?.message || "Unable to update invitation.";
+      toast({ title: "Action failed", description: apiMessage, variant: "destructive" });
+    } finally {
+      setProcessingInviteId(null);
+    }
+  };
+
+  const renderInviteCard = (booking: any) => {
+    const isProcessing = processingInviteId === booking?.booking_id;
+    return (
+      <div
+        key={booking.booking_id}
+        className="flex flex-col gap-4 p-4 rounded-lg bg-muted/50 border border-primary/20"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h3 className="font-semibold text-lg">{booking.event_title}</h3>
+            <p className="text-sm text-muted-foreground">
+              Invited by {booking.invited_by_email || booking.couple_name || "Unknown"}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Event Date: {booking.event_date || "TBA"}
+              {booking.event_time ? ` • ${booking.event_time}` : ""}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              disabled={isProcessing}
+              onClick={() => handleInviteAction(booking.booking_id, "reject")}
+            >
+              Reject
+            </Button>
+            <Button
+              disabled={isProcessing}
+              onClick={() => handleInviteAction(booking.booking_id, "accept")}
+            >
+              {isProcessing ? "Processing..." : "Accept"}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const isPastEvent = (booking) => {
     const eventDate = getEventDate(booking);
     if (!eventDate) return false;
@@ -106,11 +167,19 @@ const UserTickets = () => {
       current: [] as any[],
       past: [] as any[],
       cancel: [] as any[],
+      invite: [] as any[],
     };
 
     bookings.forEach((booking) => {
       const status = (booking?.user_status || "").toLowerCase();
-      if (status === "cancel") {
+      const isGuestEntry = Boolean(booking?.is_guest_entry);
+
+      if (isGuestEntry && status === "waiting approval") {
+        groups.invite.push(booking);
+        return;
+      }
+
+      if (status === "cancel" || status === "approval rejected") {
         groups.cancel.push(booking);
         return;
       }
@@ -131,7 +200,7 @@ const UserTickets = () => {
 
   const hanldeView = (status, id) => {
     console.log(status);
-    if (status === "Pending") {
+    if (status === "Pending" || status === "Waiting Approval") {
       toast({
         title: "Waiting for Approval",
         description: "Please wait until your booking is approved.",
@@ -159,7 +228,10 @@ const UserTickets = () => {
     console.log("View Ticket Clicked");
   };
 
-  const renderTabButton = (value: "current" | "past" | "cancel", label: string) => (
+  const renderTabButton = (
+    value: "current" | "past" | "cancel" | "invite",
+    label: string,
+  ) => (
     <Button
       key={value}
       variant={activeTab === value ? "default" : "ghost"}
@@ -239,6 +311,7 @@ const UserTickets = () => {
             {renderTabButton("current", "Current Bookings")}
             {renderTabButton("past", "Past Bookings")}
             {renderTabButton("cancel", "Cancel Bookings")}
+            {renderTabButton("invite", "Invitations")}
           </div>
 
           {/* Loading */}
@@ -257,6 +330,10 @@ const UserTickets = () => {
 
               {/* Booking Items */}
               {filteredBookings.map((booking) => {
+                if (activeTab === "invite") {
+                  return renderInviteCard(booking);
+                }
+
                 const status = booking?.user_status || "Pending";
                 const normalizedStatus = status.toLowerCase();
                 const pastEvent = activeTab === "past" || isPastEvent(booking);
@@ -273,6 +350,8 @@ const UserTickets = () => {
                     ? "Booking Cancelled"
                     : normalizedStatus === "pending"
                     ? "Pending Approval"
+                    : normalizedStatus === "waiting approval"
+                    ? "Waiting Approval"
                     : status;
 
                 return (

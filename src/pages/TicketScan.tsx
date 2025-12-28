@@ -4,9 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle, ArrowLeft, CalendarDays, MapPin, Mail, Phone, User, CreditCard, CheckCircle } from "lucide-react";
+import { AlertCircle, ArrowLeft, CalendarDays, MapPin, Mail, Phone, User, CreditCard, CheckCircle, CarFront, IdCard } from "lucide-react";
 import { getQrDetails } from "@/api/user";
 import logo from "@/assets/logo.png";
+
+interface CoupleDetails {
+  name?: string;
+  email?: string;
+  phone?: string;
+  nic?: string;
+  car_number?: string;
+  invited_by_email?: string;
+}
 
 interface QrTicketResponse {
   status: boolean;
@@ -18,7 +27,9 @@ interface QrTicketResponse {
       email?: string;
       booking_date?: string;
       phone?: string;
+      nic?: string;
       price?: string;
+      carNumber?: string;
       venue?: string;
       image?: string;
       qr_id?: string;
@@ -29,11 +40,17 @@ interface QrTicketResponse {
     name?: string;
     email?: string;
     phone?: string;
+    nic?: string;
+    carNumber?: string;
     qr_id?: string;
     event?: string;
     venue?: string;
     date?: string;
     price?: string;
+    attendee_type?: "primary" | "guest";
+    is_guest_entry?: boolean;
+    invited_by_email?: string;
+    couple?: CoupleDetails;
   };
   message?: string;
 }
@@ -81,6 +98,8 @@ const TicketScan = () => {
   const attendeeName = booking?.username || ticket?.name || "Guest";
   const attendeeEmail = booking?.email || ticket?.email || "Not available";
   const attendeePhone = booking?.phone || ticket?.phone || "N/A";
+  const attendeeNic = booking?.nic || ticket?.nic || "N/A";
+  const attendeeCarNumber = booking?.carNumber || ticket?.carNumber || "N/A";
   const eventTitle = booking?.event_name || ticket?.event || "Event";
   const venue = booking?.venue || ticket?.venue || "Venue";
   const bookingDate = booking?.booking_date || ticket?.date;
@@ -88,7 +107,18 @@ const TicketScan = () => {
   const price = booking?.price || ticket?.price;
   const status = booking?.user_status || booking?.status;
   const proofImage = booking?.image;
+  const attendeeType = ticket?.attendee_type || (ticket?.is_guest_entry ? "guest" : "primary");
+  const coupleDetails = ticket?.couple;
+  const hasCoupleDetails = Boolean(
+    coupleDetails &&
+      (coupleDetails.name ||
+        coupleDetails.email ||
+        coupleDetails.phone ||
+        coupleDetails.nic ||
+        coupleDetails.car_number)
+  );
 
+  // console.log('coupleDetails', coupleDetails.name)
   return (
     <div className="min-h-screen bg-slate-950/95 text-white p-4 flex flex-col items-center justify-center">
       <img src={logo} alt="Rave Vibe Hub" className="h-16 mb-6" />
@@ -146,6 +176,11 @@ const TicketScan = () => {
                       <div>
                         <p className="font-semibold text-lg">{attendeeName}</p>
                         <p className="text-sm text-muted-foreground">{attendeeEmail}</p>
+                        {attendeeType && (
+                          <Badge className="mt-2 bg-primary/20 text-primary border border-primary/40">
+                            {attendeeType === "guest" ? "Guest" : "Primary"} Attendee
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -159,6 +194,14 @@ const TicketScan = () => {
                       <div className="flex items-center gap-2">
                         <Phone className="h-4 w-4 text-primary" />
                         <span>{attendeePhone}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <IdCard className="h-4 w-4 text-primary" />
+                        <span>{attendeeNic}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CarFront className="h-4 w-4 text-primary" />
+                        <span>{attendeeCarNumber}</span>
                       </div>
                     </div>
                   </div>
@@ -188,7 +231,51 @@ const TicketScan = () => {
                       </div>
                     </div>
                   </div>
+
+                
                 </div>
+
+                {coupleDetails?.name && (
+               <>
+                  <hr />
+                  <div className="p-4 rounded-xl bg-white/5 border border-white/10 md:col-span-2">
+                    <p className="text-xs text-muted-foreground uppercase">Couple / Partner Details</p>
+                    <div className="grid gap-3 mt-3 md:grid-cols-2">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Name</p>
+                        <p className="font-semibold">{coupleDetails?.name || "N/A"}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Email</p>
+                        <p className="break-all">{coupleDetails?.email || "N/A"}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Phone</p>
+                        <p>{coupleDetails?.phone || "N/A"}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">CNIC</p>
+                        <p>{coupleDetails?.nic || "N/A"}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Car Number</p>
+                        <p>{coupleDetails?.car_number || "N/A"}</p>
+                      </div>                    
+                      <div>
+                        <p className="text-sm text-muted-foreground">Invited By</p>
+                        <p>{attendeeName}</p>
+                      </div>
+                      {/* {coupleDetails?.invited_by_email && (
+                        <div>
+                          <p className="text-sm text-muted-foreground">Invited By</p>
+                          <p className="break-all">{coupleDetails.invited_by_email}</p>
+                        </div>
+                      )} */}
+                    </div>
+                  </div>
+               </>
+                )}
+
 
                 {/* {proofImage && (
                   <div className="p-4 rounded-xl bg-white/5 border border-white/10">
@@ -202,36 +289,44 @@ const TicketScan = () => {
                 )} */}
               </div>
 
-              <div className="space-y-4 p-4 rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/30">
-                <p className="text-xs text-muted-foreground uppercase">Summary</p>
-                <div className="space-y-3 text-sm">
-                  <div>
-                    <p className="text-muted-foreground text-xs">Booking ID</p>
-                    <p className="text-lg font-semibold">#{booking?.id || "N/A"}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground text-xs">Created At</p>
-                    <p className="font-medium">{formatDate(createdAt, { dateStyle: "medium", timeStyle: "short" })}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground text-xs">QR ID</p>
-                    <p className="font-medium">{ticketNumber}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground text-xs">Status</p>
-                    <Badge
-                      className={`mt-1 px-3 py-1 ${
-                        (status || "").toLowerCase() === "confirm"
-                          ? "bg-emerald-500"
-                          : (status || "").toLowerCase() === "cancel"
-                          ? "bg-red-500"
-                          : "bg-yellow-500"
-                      }`}
-                    >
-                      {status || "Unknown"}
-                    </Badge>
+              <div className="flex flex-col justify-between items-start space-y-4 p-4 rounded-xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/30">
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase">Summary</p>
+                  <div className="space-y-3 text-sm">
+                    <div>
+                      <p className="text-muted-foreground text-xs">Booking ID</p>
+                      <p className="text-lg font-semibold">#{booking?.id || "N/A"}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground text-xs">Created At</p>
+                      <p className="font-medium">{formatDate(createdAt, { dateStyle: "medium", timeStyle: "short" })}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground text-xs">QR ID</p>
+                      <p className="font-medium">{ticketNumber}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground text-xs">Status</p>
+                      <Badge
+                        className={`mt-1 px-3 py-1 ${
+                          (status || "").toLowerCase() === "confirm"
+                            ? "bg-emerald-500"
+                            : (status || "").toLowerCase() === "cancel"
+                            ? "bg-red-500"
+                            : "bg-yellow-500"
+                        }`}
+                      >
+                        {status || "Unknown"}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
+                {coupleDetails?.name && (
+                <Badge className="text-base px-4 py-1 bg-primary/20 text-primary border border-primary/40">
+                  Couple Entry Pass
+                </Badge>)}
+
+                
               </div>
             </div>
 
