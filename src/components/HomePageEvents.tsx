@@ -25,16 +25,25 @@ function HomePageEvents() {
     );
   }
 
-  // Filter upcoming events only
-  //   const upcomingEvents = events
-  //     .filter((event) => new Date(event.date) >= new Date()) // future events
-  //     .sort((a, b) => new Date(a.date) - new Date(b.date)) // sort ascending
-  //     .slice(0, 3); // first 3 events
+  // ✅ Start of today (ignore time)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
+  // ✅ Upcoming + Today events
   const upcomingEvents = events
-    .filter((event) => new Date(event.date) >= new Date()) // future events
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()) // sort ascending
-    .slice(0, 3); // first 3 events
+    .filter((event) => {
+      if (!event.date) return false;
+
+      const eventDate = new Date(event.date);
+      eventDate.setHours(0, 0, 0, 0);
+
+      return eventDate >= today;
+    })
+    .sort(
+      (a, b) =>
+        new Date(a.date).getTime() - new Date(b.date).getTime()
+    )
+    .slice(0, 3);
 
   return (
     <section className="pt-20 px-6">
@@ -48,66 +57,9 @@ function HomePageEvents() {
           const eventStatus = checkEventStatus(event?.date, event?.time);
 
           return (
-            // <Card
-            //   key={event.id}
-            //   className="overflow-hidden hover-lift cursor-pointer group"
-            // >
-            //   <div className="relative h-48 overflow-hidden">
-            //     <img
-            //       src={
-            //         event.feature_image ??
-            //         "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400"
-            //       }
-            //       alt={event.title}
-            //       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-            //     />
-            //     <Badge
-            //       className="absolute top-4 right-4 capitalize"
-            //       variant="default"
-            //     >
-            //       upcoming
-            //     </Badge>
-            //   </div>
-
-            //   <CardContent className="p-6">
-            //     <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">
-            //       {event.title}
-            //     </h3>
-
-            //     <div className="space-y-2 text-sm text-muted-foreground mb-4">
-            //       {event.date && (
-            //         <div className="flex items-center gap-2">
-            //           <Calendar className="h-4 w-4" />
-            //           <span>{event.date}</span>
-            //         </div>
-            //       )}
-            //       {event.venue && (
-            //         <div className="flex items-center gap-2">
-            //           <MapPin className="h-4 w-4" />
-            //           <span>{event.venue}</span>
-            //         </div>
-            //       )}
-            //       {event.attending_peoples && (
-            //         <div className="flex items-center gap-2">
-            //           <Users className="h-4 w-4" />
-            //           <span>{event.attending_peoples}</span>
-            //         </div>
-            //       )}
-            //     </div>
-
-            //     <div className="flex gap-2">
-            //       <Link to={`/event/${eventSlug}`} className="flex-1">
-            //         <Button variant="outline" className="w-full">
-            //           View Details
-            //         </Button>
-            //       </Link>
-            //     </div>
-            //   </CardContent>
-            // </Card>
-
-             <Card
+            <Card
               key={event.id}
-              className="overflow-hidden hover-lift  group flex flex-col h-full"
+              className="overflow-hidden hover-lift group flex flex-col h-full"
             >
               <div className="relative h-40 sm:h-48 overflow-hidden">
                 <img
@@ -118,20 +70,24 @@ function HomePageEvents() {
                   alt={event.title}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                 />
-            
+
                 <Badge
                   className="absolute top-4 right-4 capitalize cursor-default"
-                  variant={event.status === "upcoming" ? "default" : "secondary"}
+                  variant={
+                    eventStatus === "upcoming" ? "default" : "secondary"
+                  }
                 >
                   {eventStatus}
                 </Badge>
               </div>
-            
+
               <CardContent className="p-6 flex flex-col flex-1">
-                <Link to={`/event/${eventSlug}`}><h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">
-                  {event.title}
-                </h3></Link>
-            
+                <Link to={`/event/${eventSlug}`}>
+                  <h3 className="text-xl font-bold mb-3 group-hover:text-primary transition-colors">
+                    {event.title}
+                  </h3>
+                </Link>
+
                 <div className="space-y-2 text-sm text-muted-foreground mb-4 cursor-default">
                   {(event.date || event.start_date) && (
                     <div className="flex items-center gap-2">
@@ -139,12 +95,14 @@ function HomePageEvents() {
                       <span>{event.date ?? event.start_date}</span>
                     </div>
                   )}
+
                   {event.venue && (
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4" />
                       <span>{event.venue}</span>
                     </div>
                   )}
+
                   {event.attending_peoples && (
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4" />
@@ -152,7 +110,7 @@ function HomePageEvents() {
                     </div>
                   )}
                 </div>
-            
+
                 <div className="mt-auto flex gap-2">
                   <Link to={`/event/${eventSlug}`} className="flex-1">
                     <Button variant="outline" className="w-full">
