@@ -527,10 +527,10 @@ const BookTicket = () => {
 
             <p className="text-sm sm:text-base leading-relaxed">
               <strong>Bank Details:</strong><br />
-              Account Title: Mehmood Ahmed<br />
+              Account Title: ZAIM SAJID MOOSANI<br />
               Bank: Meezan Bank<br />
-              Account Number: 99330105878574<br />
-              IBAN: PK91MEZN0099330105878574
+              Account Number: 99040112528546<br />
+              IBAN: PK33MEZN0099040112528546
             </p>
 
             <div className="border-2 border-dashed border-primary/30 rounded-lg p-6 sm:p-8 text-center group cursor-pointer mt-6">
