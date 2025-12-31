@@ -565,8 +565,8 @@ const BookTicket = () => {
             </div>
           </div>
 
-          {/* Important Information */}
-          <div className="border-t pt-6">
+          {/* Important Informatio */}
+          {/* <div className="border-t pt-6">
             <h3 className="text-lg sm:text-xl font-semibold mb-4">
               Important Information
             </h3>
@@ -587,7 +587,7 @@ const BookTicket = () => {
                 )}
 
            
-          </div>
+          </div> */}
 
           {/* Submit Button */}
           <Button
