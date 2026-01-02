@@ -35,23 +35,42 @@ interface AnalyticsChartProps {
   loading?: boolean;
 }
 
-export function AnalyticsChart({ data, range, onRangeChange, rangeOptions, loading }: AnalyticsChartProps) {
+export function AnalyticsChart({
+  data,
+  range,
+  onRangeChange,
+  rangeOptions,
+  loading,
+}: AnalyticsChartProps) {
   const safeData = data ?? [];
-  const totalRegistrations = safeData.reduce((sum, item) => sum + (item.registrations || 0), 0);
-  const totalTickets = safeData.reduce((sum, item) => sum + (item.tickets || 0), 0);
+  const totalRegistrations = safeData.reduce(
+    (sum, item) => sum + (item.registrations || 0),
+    0
+  );
+  const totalTickets = safeData.reduce(
+    (sum, item) => sum + (item.tickets || 0),
+    0
+  );
   const isEmpty = !loading && safeData.length === 0;
 
   return (
-    <div className="bg-card rounded-lg p-6 shadow-card h-full  animate-fade-in" style={{ animationDelay: "200ms" }}>
+    <div
+      className="bg-card rounded-lg p-6 shadow-card h-full  animate-fade-in"
+      style={{ animationDelay: "200ms" }}
+    >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-foreground">Full Analytics</h3>
+          <h3 className="text-lg font-semibold text-foreground">Analytics</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            Monitor registrations and ticket confirmations over your selected window.
+            Monitor registrations and ticket confirmations over your selected
+            window.
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Select value={String(range)} onValueChange={(value) => onRangeChange(Number(value))}>
+          <Select
+            value={String(range)}
+            onValueChange={(value) => onRangeChange(Number(value))}
+          >
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Select range" />
             </SelectTrigger>
@@ -75,8 +94,15 @@ export function AnalyticsChart({ data, range, onRangeChange, rangeOptions, loadi
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={safeData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(0, 0%, 90%)" vertical={false} />
+            <LineChart
+              data={safeData}
+              margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="hsl(0, 0%, 90%)"
+                vertical={false}
+              />
               <XAxis
                 dataKey="label"
                 axisLine={false}
@@ -119,10 +145,16 @@ export function AnalyticsChart({ data, range, onRangeChange, rangeOptions, loadi
 
       <div className="mt-4 grid gap-2 border-t border-border pt-4 text-sm text-muted-foreground sm:grid-cols-2">
         <p>
-          Total registrations: <span className="font-semibold text-foreground">{loading ? "-" : totalRegistrations.toLocaleString()}</span>
+          Total registrations:{" "}
+          <span className="font-semibold text-foreground">
+            {loading ? "-" : totalRegistrations.toLocaleString()}
+          </span>
         </p>
         <p>
-          Total tickets confirmed: <span className="font-semibold text-foreground">{loading ? "-" : totalTickets.toLocaleString()}</span>
+          Total tickets confirmed:{" "}
+          <span className="font-semibold text-foreground">
+            {loading ? "-" : totalTickets.toLocaleString()}
+          </span>
         </p>
       </div>
     </div>

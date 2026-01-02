@@ -1,9 +1,32 @@
 import { useEffect, useMemo, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { LineChart, CartesianGrid, XAxis, YAxis, Line, ResponsiveContainer } from "recharts";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import {
+  LineChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Line,
+  ResponsiveContainer,
+} from "recharts";
 import EditorLayout from "@/components/layouts/EditorLayout";
 import { getAdminOverview } from "@/api/admin";
 import { toast } from "sonner";
@@ -62,7 +85,9 @@ export default function EditorDashboard() {
         }
       } catch (error: any) {
         if (isMounted) {
-          toast.error(error.response?.data?.message || "Failed to load overview");
+          toast.error(
+            error.response?.data?.message || "Failed to load overview"
+          );
         }
       } finally {
         if (isMounted) {
@@ -104,13 +129,17 @@ export default function EditorDashboard() {
           {summaryCards.map((stat) => (
             <Card key={stat.key} className="shadow-sm">
               <CardHeader>
-                <CardTitle className="text-base text-muted-foreground">{stat.label}</CardTitle>
+                <CardTitle className="text-base text-muted-foreground">
+                  {stat.label}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 {loading ? (
                   <Skeleton className="h-10 w-24" />
                 ) : (
-                  <p className="text-3xl font-semibold">{data ? data[stat.key] ?? "-" : "-"}</p>
+                  <p className="text-3xl font-semibold">
+                    {data ? data[stat.key] ?? "-" : "-"}
+                  </p>
                 )}
               </CardContent>
             </Card>
@@ -121,13 +150,17 @@ export default function EditorDashboard() {
           {insightCards.map((stat) => (
             <Card key={stat.key} className="border-primary/20 shadow-sm">
               <CardHeader>
-                <CardDescription className="uppercase text-xs tracking-wide text-primary/80">{stat.label}</CardDescription>
+                <CardDescription className="uppercase text-xs tracking-wide text-primary/80">
+                  {stat.label}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 {loading ? (
                   <Skeleton className="h-8 w-24" />
                 ) : (
-                  <p className="text-2xl font-semibold">{data ? data[stat.key] ?? "-" : "-"}</p>
+                  <p className="text-2xl font-semibold">
+                    {data ? data[stat.key] ?? "-" : "-"}
+                  </p>
                 )}
               </CardContent>
             </Card>
@@ -137,10 +170,15 @@ export default function EditorDashboard() {
         <Card className="shadow-sm">
           <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle>Full Analytics</CardTitle>
-              <CardDescription>Registrations vs ticket confirmations over time.</CardDescription>
+              <CardTitle>Analytics</CardTitle>
+              <CardDescription>
+                Registrations vs ticket confirmations over time.
+              </CardDescription>
             </div>
-            <Select value={String(range)} onValueChange={(value) => setRange(Number(value))}>
+            <Select
+              value={String(range)}
+              onValueChange={(value) => setRange(Number(value))}
+            >
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select range" />
               </SelectTrigger>
@@ -157,17 +195,49 @@ export default function EditorDashboard() {
             {loading ? (
               <Skeleton className="h-64 w-full" />
             ) : chartData.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Not enough data for the selected range.</p>
+              <p className="text-sm text-muted-foreground">
+                Not enough data for the selected range.
+              </p>
             ) : (
               <ChartContainer config={chartConfig} className="h-[360px]">
                 <ResponsiveContainer>
-                  <LineChart data={chartData} margin={{ left: 12, right: 12, top: 12, bottom: 12 }}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="label" stroke="currentColor" className="text-xs" tickLine={false} axisLine={false} />
-                    <YAxis stroke="currentColor" className="text-xs" allowDecimals={false} tickLine={false} axisLine={false} />
+                  <LineChart
+                    data={chartData}
+                    margin={{ left: 12, right: 12, top: 12, bottom: 12 }}
+                  >
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      className="stroke-muted"
+                    />
+                    <XAxis
+                      dataKey="label"
+                      stroke="currentColor"
+                      className="text-xs"
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <YAxis
+                      stroke="currentColor"
+                      className="text-xs"
+                      allowDecimals={false}
+                      tickLine={false}
+                      axisLine={false}
+                    />
                     <ChartTooltip content={<ChartTooltipContent />} />
-                    <Line type="monotone" dataKey="registrations" stroke="var(--color-registrations, hsl(var(--primary)))" strokeWidth={2} dot={false} />
-                    <Line type="monotone" dataKey="tickets" stroke="var(--color-tickets, hsl(var(--chart-2, 12 85% 59%)))" strokeWidth={2} dot={false} />
+                    <Line
+                      type="monotone"
+                      dataKey="registrations"
+                      stroke="var(--color-registrations, hsl(var(--primary)))"
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="tickets"
+                      stroke="var(--color-tickets, hsl(var(--chart-2, 12 85% 59%)))"
+                      strokeWidth={2}
+                      dot={false}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </ChartContainer>
