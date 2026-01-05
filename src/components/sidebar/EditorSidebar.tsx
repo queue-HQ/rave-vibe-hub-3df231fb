@@ -10,6 +10,7 @@ import {
   Image as ImageIcon,
   Users,
   UserPlus,
+  FileText,
   LogOut,
 } from "lucide-react";
 
@@ -17,6 +18,8 @@ const links = [
   { to: "/editor", label: "Dashboard", icon: LayoutDashboard },
   { to: "/editor/events", label: "Events", icon: Calendar },
   { to: "/editor/events/new", label: "Add Event", icon: PlusCircle },
+  { to: "/editor/posts", label: "Posts", icon: FileText },
+  { to: "/editor/posts/new", label: "Add Post", icon: PlusCircle },
   { to: "/editor/bookings", label: "Bookings", icon: Ticket },
   { to: "/editor/media", label: "Media Gallery", icon: ImageIcon },
   { to: "/editor/users", label: "All Users", icon: Users },

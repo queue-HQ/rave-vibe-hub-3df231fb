@@ -35,7 +35,7 @@ interface UserFilters {
 }
 
 const statusOptions = ["pending", "approved", "rejected"] as const;
-const PER_PAGE = 15;
+const PER_PAGE = 10;
 
 export default function EditorUsers() {
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -242,7 +242,7 @@ export default function EditorUsers() {
                     ? `Showing ${firstItemIndex}-${lastItemIndex} of ${paginationInfo.total} users`
                     : "No matching users"}
                 </p>
-                <Pagination>
+                <Pagination className="justify-end">
                   <PaginationContent>
                     <PaginationItem>
                       <PaginationPrevious

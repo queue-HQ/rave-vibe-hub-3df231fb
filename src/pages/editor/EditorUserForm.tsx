@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import EditorLayout from "@/components/layouts/EditorLayout";
 import { createAdminUser, updateAdminUser } from "@/api/admin";
 import { apiUrl } from "@/lib/apiURL";
@@ -23,7 +24,8 @@ const vibeOptions = [
 const vibeDetectorOptions = ["Yes", "No", "I plead the fifth"];
 const hearAboutOptions = ["Instagram", "Facebook", "Friends", "Events", "Other"];
 const genderOptions = ["male", "female", "other"];
-const roleOptions = ["subscriber", "editor", "administrator"];
+// const roleOptions = ["subscriber", "editor", "administrator"];
+const roleOptions = ["subscriber"];
 const statusOptions = ["approved", "pending", "rejected"];
 const MAX_SCREENSHOTS = 2;
 
@@ -61,6 +63,7 @@ export default function EditorUserForm() {
   const [profilePicturePreview, setProfilePicturePreview] = useState<string>("");
   const [instaScreenshots, setInstaScreenshots] = useState<File[]>([]);
   const [screenshotPreviews, setScreenshotPreviews] = useState<string[]>([]);
+  const [activeScreenshot, setActiveScreenshot] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -427,8 +430,14 @@ export default function EditorUserForm() {
                 />
                 <div className="flex gap-3">
                   {screenshotPreviews.map((preview, index) => (
-                    <div key={preview} className="relative h-24 w-20 overflow-hidden rounded-md border">
-                      <img src={preview} alt={`Screenshot ${index + 1}`} className="h-full w-full object-cover" />
+                    <div key={`${preview}-${index}`} className="relative h-24 w-20 overflow-hidden rounded-md border">
+                      <button
+                        type="button"
+                        className="h-full w-full cursor-zoom-in"
+                        onClick={() => setActiveScreenshot(preview)}
+                      >
+                        <img src={preview} alt={`Screenshot ${index + 1}`} className="h-full w-full object-cover" />
+                      </button>
                       <button
                         type="button"
                         className="absolute right-1 top-1 rounded-full bg-black/70 px-1 text-xs text-white"
@@ -441,6 +450,15 @@ export default function EditorUserForm() {
                     </div>
                   ))}
                 </div>
+                <Dialog open={Boolean(activeScreenshot)} onOpenChange={(open) => !open && setActiveScreenshot(null)}>
+                  <DialogContent className="max-w-3xl">
+                    {activeScreenshot && (
+                      <div className="max-h-[80vh] overflow-hidden rounded-lg border bg-muted">
+                        <img src={activeScreenshot} alt="Screenshot preview" className="h-full w-full object-contain" />
+                      </div>
+                    )}
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
 

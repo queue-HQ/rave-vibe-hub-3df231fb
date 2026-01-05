@@ -51,15 +51,15 @@ export default function EditorMedia() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-              {[1, 2, 3, 4].map((i) => (
+            <div className="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-8 gap-4">
+              {[1, 2, 3, 4, 5, 6, 7, 8 ].map((i) => (
                 <Skeleton key={i} className="h-32 w-full" />
               ))}
             </div>
           ) : media.length === 0 ? (
             <p className="text-muted-foreground">No media items found.</p>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-3 md:grid-cols-6 lg:grid-cols-8 gap-4">
               {media.map((item) => (
                 <button
                   key={item.id}

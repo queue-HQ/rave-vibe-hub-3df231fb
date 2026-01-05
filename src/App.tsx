@@ -34,6 +34,8 @@ import TicketScan from "@/pages/TicketScan";
 import EditorDashboard from "@/pages/editor/EditorDashboard";
 import EditorEvents from "@/pages/editor/EditorEvents";
 import EditorEventForm from "@/pages/editor/EditorEventForm";
+import EditorPosts from "@/pages/editor/EditorPosts";
+import EditorPostForm from "@/pages/editor/EditorPostForm";
 import EditorBookings from "@/pages/editor/EditorBookings";
 import EditorUsers from "@/pages/editor/EditorUsers";
 import EditorUserForm from "@/pages/editor/EditorUserForm";
@@ -41,6 +43,7 @@ import EditorViewUserDetails from "@/pages/editor/EditorViewUserDetails";
 import EditorMedia from "@/pages/editor/EditorMedia";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
+import EditorViewBookings from "@/pages/editor/EditorViewBookings";
 
 const queryClient = new QueryClient();
 
@@ -230,6 +233,50 @@ const App = () => (
               />
 
               <Route
+                path="/editor/events/:id/edit"
+                element={
+                  <ProtectedRoute>
+                    <RoleGuard allowed={["administrator"]}>
+                      <EditorEventForm />
+                    </RoleGuard>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/editor/posts"
+                element={
+                  <ProtectedRoute>
+                    <RoleGuard allowed={["administrator"]}>
+                      <EditorPosts />
+                    </RoleGuard>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/editor/posts/new"
+                element={
+                  <ProtectedRoute>
+                    <RoleGuard allowed={["administrator"]}>
+                      <EditorPostForm />
+                    </RoleGuard>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/editor/posts/:id/edit"
+                element={
+                  <ProtectedRoute>
+                    <RoleGuard allowed={["administrator"]}>
+                      <EditorPostForm />
+                    </RoleGuard>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
                 path="/editor/bookings"
                 element={
                   <ProtectedRoute>
@@ -239,6 +286,18 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+
+              <Route
+                path="/editor/view-booking/:id"
+                element={
+                  <ProtectedRoute>
+                    <RoleGuard allowed={["administrator"]}>
+                      <EditorViewBookings />
+                    </RoleGuard>
+                  </ProtectedRoute>
+                }
+              />
+              
 
               <Route
                 path="/editor/users"

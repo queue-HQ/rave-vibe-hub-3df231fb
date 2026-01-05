@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { getAdminUserDetail, updateAdminUser } from "@/api/admin";
 import { apiUrl } from "@/lib/apiURL";
 
@@ -87,6 +88,7 @@ export default function EditorViewUserDetails() {
   const [newScreenshots, setNewScreenshots] = useState<File[]>([]);
   const [existingScreenshots, setExistingScreenshots] = useState<string[]>([]);
   const [newScreenshotPreviews, setNewScreenshotPreviews] = useState<string[]>([]);
+  const [activeScreenshot, setActiveScreenshot] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -450,7 +452,13 @@ export default function EditorViewUserDetails() {
         <div className="flex flex-wrap gap-3">
           {existingScreenshots.map((url) => (
             <div key={url} className="relative h-24 w-20 overflow-hidden rounded-md border">
-              <img src={url} alt="Screenshot" className="h-full w-full object-cover" />
+              <button
+                type="button"
+                className="h-full w-full cursor-zoom-in"
+                onClick={() => setActiveScreenshot(url)}
+              >
+                <img src={url} alt="Screenshot" className="h-full w-full object-cover" />
+              </button>
               <button
                 type="button"
                 className="absolute right-1 top-1 rounded-full bg-black/70 px-1 text-xs text-white"
@@ -462,17 +470,34 @@ export default function EditorViewUserDetails() {
           ))}
           {newScreenshotPreviews.map((preview, idx) => (
             <div key={`${preview}-${idx}`} className="relative h-24 w-20 overflow-hidden rounded-md border">
-              <img src={preview} alt="New screenshot" className="h-full w-full object-cover" />
+              <button
+                type="button"
+                className="h-full w-full cursor-zoom-in"
+                onClick={() => setActiveScreenshot(preview)}
+              >
+                <img src={preview} alt="New screenshot" className="h-full w-full object-cover" />
+              </button>
               <button
                 type="button"
                 className="absolute right-1 top-1 rounded-full bg-black/70 px-1 text-xs text-white"
-                onClick={() => setNewScreenshots((prev) => prev.filter((file) => URL.createObjectURL(file) !== preview))}
+                onClick={() =>
+                  setNewScreenshots((prev) => prev.filter((_, fileIdx) => fileIdx !== idx))
+                }
               >
                 ×
               </button>
             </div>
           ))}
         </div>
+        <Dialog open={Boolean(activeScreenshot)} onOpenChange={(open) => !open && setActiveScreenshot(null)}>
+          <DialogContent className="max-w-3xl">
+            {activeScreenshot && (
+              <div className="max-h-[80vh] overflow-hidden rounded-lg border bg-muted">
+                <img src={activeScreenshot} alt="Screenshot preview" className="h-full w-full object-contain" />
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
