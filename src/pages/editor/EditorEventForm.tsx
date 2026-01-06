@@ -14,6 +14,8 @@ import { cn } from "@/lib/utils";
 import EditorLayout from "@/components/layouts/EditorLayout";
 import { createAdminEvent, getAdminEventDetail, updateAdminEvent, uploadPublicFile } from "@/api/admin";
 import { toast } from "sonner";
+import JoditEditor from "jodit-react";
+import "jodit/es2021/jodit.min.css";
 
 type EventFormState = {
   title: string;
@@ -165,6 +167,25 @@ export default function EditorEventForm() {
   const { id } = useParams();
   const eventId = id ? Number(id) : null;
   const isEditing = Boolean(eventId);
+
+  const descriptionEditorConfig = useMemo(
+    () => ({
+      readonly: saving,
+      height: 320,
+      placeholder: "Describe the event details...",
+      uploader: { insertImageAsBase64URI: true },
+       // ✅ Default text color black
+    style: {
+      // color: "#000000",
+      backgroundColor: "#141414"
+    },
+    }),
+    [saving],
+  );
+
+  const handleDescriptionChange = (value: string) => {
+    setForm((prev) => ({ ...prev, description: value }));
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -439,7 +460,13 @@ export default function EditorEventForm() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
-                <Textarea id="description" name="description" value={form.description} onChange={handleChange} rows={6} placeholder="Supports HTML" />
+                <div>
+                  <JoditEditor
+                    value={form.description}
+                    config={descriptionEditorConfig}
+                    onChange={handleDescriptionChange}
+                  />
+                </div>
               </div>
             </section>
 

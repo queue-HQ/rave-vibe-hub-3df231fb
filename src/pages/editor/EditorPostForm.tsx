@@ -27,6 +27,8 @@ import {
 import { uploadPublicFile } from "@/api/admin";
 import { toast } from "sonner";
 import { Loader2, Upload } from "lucide-react";
+import JoditEditor from "jodit-react";
+import "jodit/es2021/jodit.min.css";
 
 const POST_STATUSES = ["publish", "draft", "pending", "future", "private"] as const;
 
@@ -58,6 +60,20 @@ export default function EditorPostForm() {
   const [saving, setSaving] = useState(false);
   const [featureUploading, setFeatureUploading] = useState(false);
   const featureInputRef = useRef<HTMLInputElement | null>(null);
+
+  const contentEditorConfig = useMemo(
+    () => ({
+      readonly: saving,
+      height: 400,
+      placeholder: "Write your post content...",
+      uploader: { insertImageAsBase64URI: true },
+    }),
+    [saving],
+  );
+
+  const handleContentChange = (value: string) => {
+    setForm((prev) => ({ ...prev, content: value }));
+  };
 
   useEffect(() => {
     if (!isEditing || !id) return;
@@ -235,14 +251,9 @@ export default function EditorPostForm() {
 
               <section className="space-y-2">
                 <Label htmlFor="content">Content (HTML supported)</Label>
-                <Textarea
-                  id="content"
-                  name="content"
-                  value={form.content}
-                  onChange={handleChange}
-                  rows={12}
-                  placeholder="Main article body"
-                />
+                <div className="rounded-md border">
+                  <JoditEditor value={form.content} config={contentEditorConfig} onChange={handleContentChange} />
+                </div>
               </section>
 
               <section className="grid gap-4 sm:grid-cols-2">
