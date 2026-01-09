@@ -114,6 +114,7 @@ const TicketView = () => {
         canvas.width,
         sliceHeight
       );
+
       
 
       const sliceImgData = tempCanvas.toDataURL("image/png");
