@@ -102,6 +102,8 @@ const SinglePostPage = () => {
   const categories = toStringArray(post.categories as unknown);
   const tags = toStringArray(post.tags as unknown);
 
+  console.log(post.content)
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />

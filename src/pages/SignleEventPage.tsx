@@ -71,6 +71,27 @@ const SignleEventPage = () => {
         .toUpperCase()
     : "QH";
 
+  const partnerInfo =
+    event && typeof event === "object" && typeof (event as any).partner === "object" && (event as any).partner
+      ? ((event as any).partner as { full_name?: string; username?: string; image?: string })
+      : null;
+
+  const partnerName = partnerInfo?.full_name?.trim() || partnerInfo?.username?.trim() || "";
+  const partnerAvatar = partnerInfo?.image?.trim()
+    ? partnerInfo.image
+    : partnerName
+      ? `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(partnerName)}`
+      : "";
+  const partnerInitials = partnerName
+    ? partnerName
+        .split(" ")
+        .filter(Boolean)
+        .map((word) => word[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : "";
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
@@ -435,6 +456,24 @@ const SignleEventPage = () => {
         </div>
       </CardContent>
     </Card>
+
+    {/* Partner Card */}
+    {partnerInfo && partnerName && (
+      <Card>
+        <CardContent className="p-6">
+          <h3 className="font-bold mb-4">Partner</h3>
+          <div className="flex items-center gap-3">
+            <Avatar className="h-12 w-12">
+              <AvatarImage src={partnerAvatar} />
+              <AvatarFallback>{partnerInitials || "P"}</AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="font-bold">{partnerName}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )}
   </div>
 </div>
 

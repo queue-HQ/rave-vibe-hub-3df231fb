@@ -216,7 +216,7 @@ const EditorDashboard = () => {
   }, [recentEvents]);
 
   return (
-    <EditorLayout title="Editor Dashboard">
+    <EditorLayout title="Admin Dashboard">
       <div className="min-h-screen bg-background">
       <main className="p-6 max-w-7xl mx-auto">
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">

@@ -162,3 +162,28 @@ export const getAdminMedia = async (params: { page?: number; per_page?: number }
   const res = await api.get("/admin/media", { params });
   return res.data;
 };
+
+export interface PartnerQueryParams {
+  page?: number;
+  per_page?: number;
+  search?: string;
+}
+
+export const getAdminPartners = async (params: PartnerQueryParams = {}) => {
+  const res = await api.get("/admin/partners", { params });
+  return res.data;
+};
+
+export type CreatePartnerPayload = {
+  full_name: string;
+  email: string;
+  phone?: string;
+  profile_picture?: string;
+  password: string;
+  confirm_password: string;
+};
+
+export const createAdminPartner = async (data: CreatePartnerPayload) => {
+  const res = await api.post("/admin/partners", data);
+  return res.data;
+};

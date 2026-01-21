@@ -60,6 +60,18 @@ export default function EditorPostForm() {
   const [saving, setSaving] = useState(false);
   const [featureUploading, setFeatureUploading] = useState(false);
   const featureInputRef = useRef<HTMLInputElement | null>(null);
+  const [isSlugEdited, setIsSlugEdited] = useState(false);
+
+
+const slugify = (text: string) =>
+  text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+
+
 
   const contentEditorConfig = useMemo(
     () => ({
@@ -67,6 +79,9 @@ export default function EditorPostForm() {
       height: 400,
       placeholder: "Write your post content...",
       uploader: { insertImageAsBase64URI: true },
+      style: {
+        background: '#000'
+      }
     }),
     [saving],
   );
@@ -114,12 +129,31 @@ export default function EditorPostForm() {
 
   const headerTitle = useMemo(() => (isEditing ? "Edit Post" : "Add Post"), [isEditing]);
 
-  const handleChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = event.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
+  // const handleChange = (
+  //   event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  // ) => {
+  //   const { name, value } = event.target;
+  //   setForm((prev) => ({ ...prev, [name]: value }));
+  // };
+
+const handleChange = (
+  event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+) => {
+  const { name, value } = event.target;
+
+  setForm((prev) => {
+    if (name === "title") {
+      return {
+        ...prev,
+        title: value,
+        slug: slugify(value),
+      };
+    }
+
+    return { ...prev, [name]: value };
+  });
+};
+
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -208,13 +242,22 @@ export default function EditorPostForm() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="slug">Slug</Label>
-                  <Input
+                  {/* <Input
                     id="slug"
                     name="slug"
                     value={form.slug}
                     onChange={handleChange}
                     placeholder="auto-generated from title"
+                  /> */}
+                 <Input
+                    id="slug"
+                    name="slug"
+                    value={form.slug}
+                    readOnly
+                    className="bg-muted cursor-not-allowed"
+                    placeholder="Auto-generated from title"
                   />
+
                 </div>
                 <div className="space-y-2">
                   <Label>Status</Label>

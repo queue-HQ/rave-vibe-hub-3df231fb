@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import EditorLayout from "@/components/layouts/EditorLayout";
-import { createAdminEvent, getAdminEventDetail, updateAdminEvent, uploadPublicFile } from "@/api/admin";
+import { createAdminEvent, getAdminEventDetail, getAdminPartners, updateAdminEvent, uploadPublicFile } from "@/api/admin";
 import { toast } from "sonner";
 import JoditEditor from "jodit-react";
 import "jodit/es2021/jodit.min.css";
@@ -37,6 +37,7 @@ type EventFormState = {
   organizer_tagline: string;
   organizer_avatar: string;
   publish_date: string;
+  partner_id: string;
 };
 
 type LineupForm = {
@@ -104,6 +105,7 @@ const initialState: EventFormState = {
   organizer_tagline: "",
   organizer_avatar: "",
   publish_date: "",
+  partner_id: "",
 };
 
 const emptyLineup = (): LineupForm => ({ name: "", content: "", profile_picture: "" });
@@ -113,7 +115,7 @@ const formatDateForMeta = (value: string) => {
   if (!value) return "";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return value.replaceAll("-", "");
+    return value.split("-").join("");
   }
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -156,6 +158,7 @@ export default function EditorEventForm() {
   const [lineups, setLineups] = useState<LineupForm[]>([emptyLineup()]);
   const [importantInfo, setImportantInfo] = useState<ImportantInfoForm[]>([emptyImportantInfo()]);
   const [sliderImages, setSliderImages] = useState<string[]>([""]);
+  const [partners, setPartners] = useState<{ id: number; label: string }[]>([]);
   const [eventDate, setEventDate] = useState<Date | undefined>(undefined);
   const [featureUploading, setFeatureUploading] = useState(false);
   const [sliderUploadingIndex, setSliderUploadingIndex] = useState<number | null>(null);
@@ -220,6 +223,25 @@ export default function EditorEventForm() {
     setImportantInfo([emptyImportantInfo()]);
     setSliderImages([""]);
     setEventDate(undefined);
+  };
+
+  const loadPartners = async () => {
+    try {
+      const res = await getAdminPartners({ page: 1, per_page: 100 });
+      if (res?.success) {
+        const items = Array.isArray(res.data) ? res.data : [];
+        setPartners(
+          items
+            .map((p: any) => ({
+              id: Number(p.id),
+              label: String(p.display_name || p.username || p.email || `Partner #${p.id}`),
+            }))
+            .filter((p: any) => Number.isFinite(p.id) && p.id > 0)
+        );
+      }
+    } catch {
+      // ignore, dropdown is optional
+    }
   };
 
   const handleDateSelect = (date?: Date) => {
@@ -333,6 +355,7 @@ export default function EditorEventForm() {
       organizer_tagline: form.organizer_tagline,
       organizer_avatar: form.organizer_avatar,
       publish_date: form.publish_date,
+      partner_id: form.partner_id ? Number(form.partner_id) : 0,
     };
 
     try {
@@ -391,6 +414,7 @@ export default function EditorEventForm() {
         organizer_tagline: data.organizer_tagline || "",
         organizer_avatar: data.organizer_avatar || "",
         publish_date: data.publish_date || "",
+        partner_id: data.partner_id ? String(data.partner_id) : "",
       }));
       if (data.event_date) {
         const parsed = new Date(data.event_date.length === 8 ? `${data.event_date.slice(0, 4)}-${data.event_date.slice(4, 6)}-${data.event_date.slice(6)}` : data.event_date);
@@ -411,6 +435,7 @@ export default function EditorEventForm() {
   };
 
   useEffect(() => {
+    loadPartners();
     if (isEditing) {
       loadEvent();
     } else {
@@ -552,6 +577,29 @@ export default function EditorEventForm() {
                 <Label htmlFor="event_price">Ticket Event Price (PKR)</Label>
                 <Input id="event_price" name="event_price" value={form.event_price} onChange={handleChange} placeholder="6899" />
               </div>
+
+              <div className="space-y-2">
+                <Label>Partner Collaboration (optional)</Label>
+                <Select
+                  value={form.partner_id || "none"}
+                  onValueChange={(value) =>
+                    setForm((prev) => ({ ...prev, partner_id: value === "none" ? "" : value }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select partner" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No partner</SelectItem>
+                    {partners.map((p) => (
+                      <SelectItem key={p.id} value={String(p.id)}>
+                        {p.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="space-y-2">
                 <Label>Feature Image</Label>
                 <div className="flex flex-col gap-2">

@@ -24,6 +24,7 @@ interface AdminUser {
   username: string;
   display_name: string;
   email: string;
+  event_type?: string;
   role: string;
   status: string;
   registered_at: string;
@@ -188,6 +189,7 @@ export default function EditorUsers() {
                     <th className="py-3">Name</th>
                     <th className="py-3">Username</th>
                     <th className="py-3">Email</th>
+                    <th className="py-3">Event Type</th>
                     <th className="py-3">Role</th>
                     <th className="py-3">Status</th>
                     <th className="py-3">Registered</th>
@@ -200,6 +202,7 @@ export default function EditorUsers() {
                       <td className="py-3 font-medium">{user.display_name || "-"}</td>
                       <td className="py-3">{user.username}</td>
                       <td className="py-3">{user.email}</td>
+                      <td className="py-3">{user.event_type || "BNC"}</td>
                       <td className="py-3 capitalize">{user.role}</td>
                       <td className="py-3">
                         <Select

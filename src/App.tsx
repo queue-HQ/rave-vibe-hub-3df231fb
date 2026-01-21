@@ -44,6 +44,12 @@ import EditorMedia from "@/pages/editor/EditorMedia";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import EditorViewBookings from "@/pages/editor/EditorViewBookings";
+import EditorPartners from "@/pages/editor/EditorPartners";
+import EditorPartnerForm from "@/pages/editor/EditorPartnerForm";
+import EditorPartnersAccess from "@/pages/editor/EditorPartnersAccess";
+import PartnerDashboard from "@/pages/partner/PartnerDashboard";
+import PartnerEvents from "@/pages/partner/PartnerEvents";
+import PartnerBookings from "@/pages/partner/PartnerBookings";
 
 const queryClient = new QueryClient();
 
@@ -338,6 +344,72 @@ const App = () => (
                   <ProtectedRoute>
                     <RoleGuard allowed={["administrator"]}>
                       <EditorMedia />
+                    </RoleGuard>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/editor/partners"
+                element={
+                  <ProtectedRoute>
+                    <RoleGuard allowed={["administrator"]}>
+                      <EditorPartners />
+                    </RoleGuard>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/editor/partners/new"
+                element={
+                  <ProtectedRoute>
+                    <RoleGuard allowed={["administrator"]}>
+                      <EditorPartnerForm />
+                    </RoleGuard>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/editor/partners/access"
+                element={
+                  <ProtectedRoute>
+                    <RoleGuard allowed={["administrator"]}>
+                      <EditorPartnersAccess />
+                    </RoleGuard>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/partner"
+                element={
+                  <ProtectedRoute>
+                    <RoleGuard allowed={["partner"]}>
+                      <PartnerDashboard />
+                    </RoleGuard>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/partner/events"
+                element={
+                  <ProtectedRoute>
+                    <RoleGuard allowed={["partner"]}>
+                      <PartnerEvents />
+                    </RoleGuard>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/partner/bookings"
+                element={
+                  <ProtectedRoute>
+                    <RoleGuard allowed={["partner"]}>
+                      <PartnerBookings />
                     </RoleGuard>
                   </ProtectedRoute>
                 }

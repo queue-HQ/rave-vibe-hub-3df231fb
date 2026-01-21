@@ -57,7 +57,10 @@ const Login = () => {
         );
 
         await refetch();
-        navigate(redirectPath, { replace: true });
+        const fromState = (location.state as { from?: string } | null)?.from;
+        const role = res.data?.user?.role ? String(res.data.user.role).split(",")[0]?.trim() : "";
+        const defaultDestination = role === "administrator" ? "/editor" : role === "partner" ? "/partner" : "/dashboard";
+        navigate(fromState || defaultDestination, { replace: true });
       } else {
         toast.error(res.data.message || "Login failed!");
       }

@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { logout } from "@/lib/logout";
 import logo from "@/assets/logo.png";
+import { useUserProfile } from "@/context/UserProfileContext";
 import {
   LayoutDashboard,
   Calendar,
@@ -14,18 +15,6 @@ import {
   LogOut,
 } from "lucide-react";
 
-const links = [
-  { to: "/editor", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/editor/events", label: "Events", icon: Calendar },
-  { to: "/editor/events/new", label: "Add Event", icon: PlusCircle },
-  { to: "/editor/posts", label: "Posts", icon: FileText },
-  { to: "/editor/posts/new", label: "Add Post", icon: PlusCircle },
-  { to: "/editor/bookings", label: "Bookings", icon: Ticket },
-  { to: "/editor/media", label: "Media Gallery", icon: ImageIcon },
-  { to: "/editor/users", label: "All Users", icon: Users },
-  { to: "/editor/users/new", label: "Add User", icon: UserPlus },
-];
-
 interface EditorSidebarProps {
   isMobile?: boolean;
   onClose?: () => void;
@@ -34,6 +23,28 @@ interface EditorSidebarProps {
 export default function EditorSidebar({ isMobile = false, onClose }: EditorSidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { role } = useUserProfile();
+
+  const links = role === "partner"
+    ? [
+        { to: "/partner", label: "Dashboard", icon: LayoutDashboard },
+        { to: "/partner/events", label: "Events", icon: Calendar },
+        { to: "/partner/bookings", label: "Bookings", icon: Ticket },
+      ]
+    : [
+        { to: "/editor", label: "Dashboard", icon: LayoutDashboard },
+        { to: "/editor/events", label: "Events", icon: Calendar },
+        { to: "/editor/events/new", label: "Add Event", icon: PlusCircle },
+        { to: "/editor/posts", label: "Posts", icon: FileText },
+        { to: "/editor/posts/new", label: "Add Post", icon: PlusCircle },
+        { to: "/editor/bookings", label: "Bookings", icon: Ticket },
+        { to: "/editor/media", label: "Media Gallery", icon: ImageIcon },
+        { to: "/editor/users", label: "All Users", icon: Users },
+        { to: "/editor/users/new", label: "Add User", icon: UserPlus },
+        { to: "/editor/partners/new", label: "Add Partner", icon: UserPlus },
+        { to: "/editor/partners", label: "Partner Lists", icon: Users },
+        { to: "/editor/partners/access", label: "Partners Access", icon: Users },
+      ];
 
   const handleLogout = () => {
     logout();
