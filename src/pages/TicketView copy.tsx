@@ -14,7 +14,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { QRCodeCanvas } from "qrcode.react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import styles from "./TicketView.module.css";
+// import html2canvas from "html2canvas";
+// import html2pdf from "html2pdf.js";
+// import domtoimage from "dom-to-image-more";
+// import jsPDF from "jspdf";
 
 const TicketView = () => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -43,6 +46,98 @@ const TicketView = () => {
     window.print();
   };
 
+    const downloadDivAsPDF = async () => {
+    const element = ticketRef.current;
+
+    const canvas = await html2canvas(element, {
+      scale: 2, // Higher quality
+      useCORS: true, // Allow external images
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdf = new jsPDF("p", "mm", "a4");
+
+    const pdfWidth = 210;
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+
+    pdf.save("div-content.pdf");
+  };
+
+
+  
+const handleDownloadPdf = async () => {
+  try {
+    const response = await fetch(
+      "https://us1.pdfgeneratorapi.com/api/v4/documents/generate",
+      {
+        method: "POST",
+        headers: {
+          "Authorization":
+            "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiI3YzBlZmVmODhmZDFkZTQ1ZmQ2OTQzZjAyZWE2NWU3Y2QwMWQ1ODhjOGViMzYyYjgxZGU2YmJhYjFkYWE3ZDkxIiwic3ViIjoibWRzaG9haWIxOTVAZ21haWwuY29tIiwiZXhwIjoxNzY0NTgwNTQyfQ.OvYPuaAAXIpurnjHe1C-STV0FqDcxwJ8fdBmSNSOYpI",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          template: {
+            id: 1564426,
+            data: {
+              logoUrl: "https://admin.theqhq.com/wp-content/uploads/2025/11/logo.png",
+              EventName: data.event_title,
+              TicketHolder: data.holder_name || "N/A",
+              TicketNumber: ticketNumber,
+              DateTime: "Dec 18, 2024 • 10:00 PM",
+              Location: "Brooklyn Warehouse, NY",
+              qrID: data?.qr_id,
+            }
+          },
+          format: "pdf",
+          output: "base64",   // ⭐ IMPORTANT
+          name: `ticket-${ticketNumber}`
+        }),
+      }
+    );
+    
+
+    
+    const result = await response.json();
+    console.log(result);
+
+    const base64 = result.response;
+    if (!base64) {
+      console.error("Base64 not returned");
+      return;
+    }
+
+    downloadBase64Pdf(base64, `ticket-${ticketNumber}.pdf`);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+
+const downloadBase64Pdf = (base64Data, fileName) => {
+  const byteCharacters = atob(base64Data);
+  const byteNumbers = new Array(byteCharacters.length);
+
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+
+  const byteArray = new Uint8Array(byteNumbers);
+  const blob = new Blob([byteArray], { type: "application/pdf" });
+
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  a.click();
+
+  URL.revokeObjectURL(url);
+};
+
 
 
   useEffect(() => {
@@ -63,73 +158,6 @@ const TicketView = () => {
       fetchBookings();
     }
   }, [user]);
-
-
-   const contentRef = useRef<HTMLDivElement | null>(null);
-
-  const downloadDivAsPDF = async () => {
-    const element = contentRef.current;
-
-    if (!element) return;
-
-    const canvas = await html2canvas(element, {
-      scale: 2, // Higher quality
-      useCORS: true, // Allow external images
-      backgroundColor: "#0D0D0D",
-      scrollY: -window.scrollY,
-      scrollX: -window.scrollX,
-    });
-
-    const pdf = new jsPDF("p", "mm", "a4");
-
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-
-    const pxPerMm = canvas.width / pageWidth;
-    const pageHeightPx = Math.floor(pageHeight * pxPerMm);
-
-    const tempCanvas = document.createElement("canvas");
-    const tempCtx = tempCanvas.getContext("2d");
-
-    if (!tempCtx) return;
-
-    tempCanvas.width = canvas.width;
-
-    let renderedHeight = 0;
-    let pageIndex = 0;
-
-    while (renderedHeight < canvas.height) {
-      const sliceHeight = Math.min(pageHeightPx, canvas.height - renderedHeight);
-      tempCanvas.height = sliceHeight;
-
-      tempCtx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
-      tempCtx.drawImage(
-        canvas,
-        0,
-        renderedHeight,
-        canvas.width,
-        sliceHeight,
-        0,
-        0,
-        canvas.width,
-        sliceHeight
-      );
-
-      
-
-      const sliceImgData = tempCanvas.toDataURL("image/png");
-      const sliceHeightMm = (sliceHeight * pageWidth) / canvas.width;
-
-      if (pageIndex > 0) pdf.addPage();
-      pdf.addImage(sliceImgData, "PNG", 0, 0, pageWidth, sliceHeightMm);
-
-      renderedHeight += sliceHeight;
-      pageIndex += 1;
-    }
-
-    const safeTicket = ticketNumber || "ticket";
-    pdf.save(`ticket-${safeTicket}.pdf`);
-  };
 
   console.log("DATA", data);
 
@@ -201,26 +229,6 @@ const TicketView = () => {
     ) : (
       <div className="w-full max-w-xl sm:max-w-2xl mx-auto">
         {/* Header */}
-        
-
-        {/* Ticket Card */}
-      
-      <div style={{ padding: 0 }}>
-      <div
-        id="content"
-        ref={contentRef}
-        style={{
-          width: "210mm",
-          padding: "20px",
-          // border: "1px solid #ccc",
-          fontFamily: "Arial",
-          backgroundColor: "#0D0D0D",
-        }}
-      >
-
-<div className="text-center ">
-  <img src="/logo.png" alt="Logo" className="w-32 h-auto mx-auto" />
-</div>
         <div className="text-center mb-6 sm:mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold mb-1">
             Your Ticket hh
@@ -230,34 +238,60 @@ const TicketView = () => {
           </p>
         </div>
 
-        <div className={styles.printMainDiv}>
+        {/* Ticket Card */}
+        <Card
+          ref={ticketRef}
+          className="overflow-hidden mb-6 gradient-card neon-border bg-gradient-to-br from-primary/20 via-card to-card shadow-[0_0_40px_hsl(330_81%_60%_/_0.2)] print:shadow-none print:border print:border-border"
+        >
+          <CardContent className="p-0">
+            {/* Ticket Header */}
+            <div className="bg-primary/10 p-4 sm:p-6 border-b border-primary/20">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-4">
+                <h2 className="text-xl sm:text-2xl font-bold">
+                  {data?.event_title || "Event Name"}
+                </h2>
 
-          <div className={styles.pdfContentArea}>
-              <div className={styles.headingDiv}>
-                <h3 className={styles.headingDivh3}>{data?.event_title || "Event Name"}</h3>
-                <h5 className={styles.headingDivh5}>#{data?.qr_id}</h5>
+                              <Badge
+                    variant="secondary"
+                    className="
+                      hidden          /* mobile: hidden */
+                      sm:inline-flex   /* desktop: show */
+                      text-sm sm:text-lg 
+                      px-3 py-1 sm:px-4 sm:py-2
+                    "
+                  >
+                    #{data?.qr_id || "TICKET-ID"}
+                  </Badge>
+
               </div>
 
-              <br />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                <div className="sm:hidden">
+                      <p className="text-muted-foreground mb-1">Ticket No:</p>
+                      <p className="font-semibold">#{data?.qr_id}</p>
+                    </div>
 
-               <div className={styles.headingContent}>
-                <div className={styles.pdfContentAreaDiv}>
-                  <span>Date & Time:</span>
-                  <span className={styles.spanContetn}>{data?.event_date} • {data?.event_time}</span>
+                <div>
+                  <p className="text-muted-foreground mb-1">Date & Time</p>
+                  <p className="font-semibold">{data?.event_date} • {data?.event_time}</p>
                 </div>
-                <div className={styles.pdfContentAreaDiv}>
-                  <span>Location:</span>
-                  <span className={styles.spanContetn}>{data?.event_location}</span>
+                <div>
+                  <p className="text-muted-foreground mb-1">Location</p>
+                  <p className="font-semibold">{data?.event_location}</p>
                 </div>
-                <div className={styles.pdfContentAreaDiv}>
-                  <span>Ticket Holder:</span>
-                  <span className={styles.spanContetn}>{data?.user_name}</span>
+                <div>
+                  <p className="text-muted-foreground mb-1">Ticket Holder</p>
+                  <p className="font-semibold">{data?.user_name}</p>
                 </div>
+                {/* <div>
+                  <p className="text-muted-foreground mb-1">Ticket Type</p>
+                  <p className="font-semibold">General Admission</p>
+                </div> */}
               </div>
+            </div>
 
-          </div>
-
-        <div className={`text-center ${styles.pdfQRDiv}`}>
+            {/* QR Code */}
+            <div className="p-6 sm:p-8 text-center">
               <div className="inline-block p-1 rounded-lg border border-muted">
                 {qrValue ? (
                   <QRCodeCanvas
@@ -282,8 +316,27 @@ const TicketView = () => {
                 This QR opens a secure page for staff verification.
               </p>
             </div>
-        </div>
+          </CardContent>
+        </Card>
 
+        {/* Action Buttons */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6 print:hidden">
+          <Button
+            variant="outline"
+            className="h-12 text-sm sm:text-base"
+            onClick={downloadDivAsPDF}
+          >
+            <Download className="mr-2 h-5 w-5" /> Download
+          </Button>
+
+          <Button
+            variant="outline"
+            className="h-12 text-sm sm:text-base"
+            onClick={handlePrint}
+          >
+            <Printer className="mr-2 h-5 w-5" /> Print
+          </Button>
+        </div>
 
         {/* Important Info */}
         <Card className="mt-4">
@@ -310,31 +363,6 @@ const TicketView = () => {
 
           </CardContent>
         </Card>
-      
-      </div>
-      {/* Action Buttons */}
-        <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6 print:hidden ${styles.actionButtons}`}>
-          <Button
-            variant="outline"
-            className="h-12 text-sm sm:text-base"
-            onClick={downloadDivAsPDF}
-          >
-            <Download className="mr-2 h-5 w-5" /> Download
-          </Button>
-
-          <Button
-            variant="outline"
-            className="h-12 text-sm sm:text-base"
-            onClick={handlePrint}
-          >
-            <Printer className="mr-2 h-5 w-5" /> Print
-          </Button>
-        </div>
-
-      <br />
-
-    </div>
-        
       </div>
     )}
   </main>

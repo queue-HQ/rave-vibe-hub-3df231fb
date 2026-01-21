@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Calendar,
   Ticket,
@@ -20,11 +20,18 @@ import { useUserProfile } from "@/context/UserProfileContext";
 import { useEvents } from "@/context/EventsContext";
 
 const Dashboard = () => {
-  const { user, isLoading } = useUserProfile();
+  const { user, isLoading, isAdmin } = useUserProfile();
+  const navigate = useNavigate();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const userName = user?.display_name || user?.username || "";
   const { events, error } = useEvents();
   const [ticketsCount, setTicketsCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!isLoading && isAdmin) {
+      navigate("/editor", { replace: true });
+    }
+  }, [isLoading, isAdmin, navigate]);
 
   const upcomingEvents = useMemo(() => {
     const parseEventDateTime = (event: any) => {
