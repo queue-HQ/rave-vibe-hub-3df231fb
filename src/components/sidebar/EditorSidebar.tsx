@@ -43,7 +43,7 @@ export default function EditorSidebar({ isMobile = false, onClose }: EditorSideb
         { to: "/editor/users/new", label: "Add User", icon: UserPlus },
         { to: "/editor/partners/new", label: "Add Partner", icon: UserPlus },
         { to: "/editor/partners", label: "Partner Lists", icon: Users },
-        { to: "/editor/partners/access", label: "Partners Access", icon: Users },
+        // { to: "/editor/partners/access", label: "Partners Access", icon: Users },
       ];
 
   const handleLogout = () => {

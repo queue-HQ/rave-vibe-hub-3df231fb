@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +25,8 @@ const SignleEventPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { events, isLoading, error, refetch } = useEvents();
   const { toast } = useToast();
+
+  const [now, setNow] = useState(() => new Date());
 
   const event = events.find((item) => {
     if (!slug) return false;
@@ -95,6 +97,36 @@ const SignleEventPage = () => {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setNow(new Date());
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const activeTiers = useMemo(() => {
+    if (!event || typeof event !== "object") return [];
+    const tiers = (event as any).active_tiers;
+    return Array.isArray(tiers) ? tiers : [];
+  }, [event]);
+
+  const formatCountdown = (endAt: string) => {
+    if (!endAt) return "";
+    const end = new Date(endAt);
+    if (Number.isNaN(end.getTime())) return "";
+    const diff = end.getTime() - now.getTime();
+    if (diff <= 0) return "Expired";
+    const totalSeconds = Math.floor(diff / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    const hh = String(hours).padStart(2, "0");
+    const mm = String(minutes).padStart(2, "0");
+    const ss = String(seconds).padStart(2, "0");
+    return days > 0 ? `${days}d ${hh}:${mm}:${ss}` : `${hh}:${mm}:${ss}`;
+  };
 
   const handleBuyTicketClick = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
     if (isSoldOut) {
@@ -363,26 +395,53 @@ const SignleEventPage = () => {
           </div>
 
           {/* Sidebar */}
-         {/* Sidebar */}
 <div className="lg:col-span-1">
   <div className="space-y-6 sticky top-[100px] self-start max-h-[calc(100vh-100px)] overflow-y-auto">
     {/* Ticket Card */}
     <Card>
       <CardContent className="p-6 space-y-4">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-3xl font-bold text-primary">
-            PKR {event?.price}
-          </span>
-        </div>
+        {activeTiers.length > 0 ? (
+          <div className="space-y-4">
+            {activeTiers.map((tier: any) => (
+              <div key={tier.id} className="rounded-lg border p-4 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium">{tier.name || "Tier"}</p>
+                    {/* <p className="text-xs text-muted-foreground">
+                      {tier.start_date} {tier.start_time} - {tier.end_date} {tier.end_time}
+                    </p> */}
+                  </div>
+                  <span className="text-lg font-bold text-primary">PKR {tier.price}</span>
+                </div>
 
-      
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground">Time left</p>
+                  <p className="text-xs font-medium">{formatCountdown(tier.end_at)}</p>
+                </div>
+                <br />
 
-        {checkEventStatus(event?.date, event?.time) !== "past" && (
-          <Link to={`/book-ticket/${event.id}`} onClick={handleBuyTicketClick}>
-            <Button className="w-full h-12 text-lg font-bold">
-              {isSoldOut ? "Sold Out" : "Buy Ticket"}
-            </Button>
-          </Link>
+                <Link to={`/book-ticket/${event?.id}?tier=${tier.id}`} className="mt-5" onClick={handleBuyTicketClick}>
+                  <Button className="w-full h-12 text-lg font-bold" disabled={isSoldOut}>
+                    {isSoldOut ? "Sold Out" : "Buy Ticket"}
+                  </Button>
+                </Link>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-3xl font-bold text-primary">PKR {event?.price}</span>
+            </div>
+            <br />
+            {checkEventStatus(event?.date, event?.time) !== "past" && (
+              <Link to={`/book-ticket/${event?.id}`} onClick={handleBuyTicketClick}>
+                <Button className="w-full h-12 text-lg font-bold" disabled={isSoldOut}>
+                  {isSoldOut ? "Sold Out" : "Buy Ticket"}
+                </Button>
+              </Link>
+            )}
+          </div>
         )}
 
         <div className="pt-4 border-t border-border space-y-3">

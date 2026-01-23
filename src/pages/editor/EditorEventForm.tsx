@@ -27,7 +27,6 @@ type EventFormState = {
   time: string;
   event_venue: string;
   address: string;
-  event_price: string;
   feature_image: string;
   attending_peoples: string;
   event_duration: string;
@@ -49,6 +48,16 @@ type LineupForm = {
 type ImportantInfoForm = {
   name: string;
   content: string;
+};
+
+type TierPackageForm = {
+  id: number;
+  name: string;
+  start_time: string;
+  end_time: string;
+  start_date: string;
+  end_date: string;
+  price: string;
 };
 
 const statusOptions = [
@@ -95,7 +104,6 @@ const initialState: EventFormState = {
   time: "",
   event_venue: "",
   address: "",
-  event_price: "",
   feature_image: "",
   attending_peoples: "",
   event_duration: "",
@@ -110,6 +118,32 @@ const initialState: EventFormState = {
 
 const emptyLineup = (): LineupForm => ({ name: "", content: "", profile_picture: "" });
 const emptyImportantInfo = (): ImportantInfoForm => ({ name: "", content: "" });
+
+const emptyTierPackage = (id = 1): TierPackageForm => ({
+  id,
+  name: "",
+  start_time: "",
+  end_time: "",
+  start_date: "",
+  end_date: "",
+  price: "",
+});
+
+const normalizeTierDate = (value: string) => {
+  const trimmed = (value || "").trim();
+  if (!trimmed) return "";
+  if (/^\d{8}$/.test(trimmed)) {
+    return `${trimmed.slice(0, 4)}-${trimmed.slice(4, 6)}-${trimmed.slice(6)}`;
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    return trimmed;
+  }
+  const parsed = new Date(trimmed);
+  if (!Number.isNaN(parsed.getTime())) {
+    return format(parsed, "yyyy-MM-dd");
+  }
+  return trimmed;
+};
 
 const formatDateForMeta = (value: string) => {
   if (!value) return "";
@@ -158,6 +192,7 @@ export default function EditorEventForm() {
   const [lineups, setLineups] = useState<LineupForm[]>([emptyLineup()]);
   const [importantInfo, setImportantInfo] = useState<ImportantInfoForm[]>([emptyImportantInfo()]);
   const [sliderImages, setSliderImages] = useState<string[]>([""]);
+  const [tierPackages, setTierPackages] = useState<TierPackageForm[]>([emptyTierPackage(1)]);
   const [partners, setPartners] = useState<{ id: number; label: string }[]>([]);
   const [eventDate, setEventDate] = useState<Date | undefined>(undefined);
   const [featureUploading, setFeatureUploading] = useState(false);
@@ -222,7 +257,25 @@ export default function EditorEventForm() {
     setLineups([emptyLineup()]);
     setImportantInfo([emptyImportantInfo()]);
     setSliderImages([""]);
+    setTierPackages([emptyTierPackage(1)]);
     setEventDate(undefined);
+  };
+
+  const updateTierField = (index: number, field: keyof TierPackageForm, value: string | number) => {
+    setTierPackages((prev) =>
+      prev.map((tier, i) => (i === index ? { ...tier, [field]: value } as TierPackageForm : tier))
+    );
+  };
+
+  const addTierPackage = () => {
+    setTierPackages((prev) => {
+      const nextId = prev.reduce((max, t) => Math.max(max, Number(t.id) || 0), 0) + 1;
+      return [...prev, emptyTierPackage(nextId)];
+    });
+  };
+
+  const removeTierPackage = (index: number) => {
+    setTierPackages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const loadPartners = async () => {
@@ -313,6 +366,29 @@ export default function EditorEventForm() {
       return;
     }
 
+    const tierPayload = tierPackages
+      .map((tier) => ({
+        id: tier.id,
+        name: tier.name.trim(),
+        start_time: tier.start_time,
+        end_time: tier.end_time,
+        start_date: normalizeTierDate(tier.start_date),
+        end_date: normalizeTierDate(tier.end_date),
+        price: tier.price.trim(),
+      }))
+      .filter((tier) => tier.name || tier.price || tier.start_date || tier.end_date);
+
+    if (!tierPayload.length) {
+      toast.error("At least one tier package is required");
+      return;
+    }
+
+    const hasInvalidTier = tierPayload.some((tier) => !tier.name || !tier.price || !tier.start_date || !tier.end_date || !tier.start_time || !tier.end_time);
+    if (hasInvalidTier) {
+      toast.error("Please fill all tier fields (name, date range, time range, price)");
+      return;
+    }
+
     const sliderPayload = sliderImages.map((url) => url.trim()).filter(Boolean);
     const lineupsPayload = lineups
       .map((lineup, index) => ({
@@ -342,7 +418,7 @@ export default function EditorEventForm() {
       time: timeRange,
       event_venue: form.event_venue,
       address: form.address,
-      event_price: form.event_price,
+      tier_packages: tierPayload,
       feature_image: form.feature_image.trim(),
       slider_images: sliderPayload,
       lineups: lineupsPayload,
@@ -404,7 +480,6 @@ export default function EditorEventForm() {
         time: data.time || "",
         event_venue: data.event_venue || "",
         address: data.address || "",
-        event_price: data.event_price || "",
         feature_image: data.feature_image || "",
         attending_peoples: data.attending_peoples || "",
         event_duration: data.event_duration || "",
@@ -416,6 +491,32 @@ export default function EditorEventForm() {
         publish_date: data.publish_date || "",
         partner_id: data.partner_id ? String(data.partner_id) : "",
       }));
+
+      if (Array.isArray(data.tier_packages) && data.tier_packages.length) {
+        setTierPackages(
+          data.tier_packages.map((tier: any, index: number) => ({
+            id: Number(tier.id ?? index + 1),
+            name: String(tier.name ?? ""),
+            start_time: String(tier.start_time ?? ""),
+            end_time: String(tier.end_time ?? ""),
+            start_date: normalizeTierDate(String(tier.start_date ?? "")),
+            end_date: normalizeTierDate(String(tier.end_date ?? "")),
+            price: String(tier.price ?? ""),
+          }))
+        );
+      } else {
+        setTierPackages([
+          {
+            id: 1,
+            name: "Standard",
+            start_time: time24ToDisplay(data.start_event_time || "") || "",
+            end_time: time24ToDisplay(data.end_event_time || "") || "",
+            start_date: normalizeTierDate(String(form.event_date || data.event_date || "")),
+            end_date: normalizeTierDate(String(form.event_date || data.event_date || "")),
+            price: String(data.event_price || ""),
+          },
+        ]);
+      }
       if (data.event_date) {
         const parsed = new Date(data.event_date.length === 8 ? `${data.event_date.slice(0, 4)}-${data.event_date.slice(4, 6)}-${data.event_date.slice(6)}` : data.event_date);
         if (!isNaN(parsed.getTime())) {
@@ -573,9 +674,122 @@ export default function EditorEventForm() {
                 <Label htmlFor="address">Address</Label>
                 <Input id="address" name="address" value={form.address} onChange={handleChange} placeholder="Street address" />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="event_price">Ticket Event Price (PKR)</Label>
-                <Input id="event_price" name="event_price" value={form.event_price} onChange={handleChange} placeholder="6899" />
+              <div className="space-y-2 sm:col-span-2">
+                <div className="flex items-center justify-between">
+                  <Label>Tier Packages</Label>
+                  <Button type="button" variant="outline" size="sm" onClick={addTierPackage}>
+                    Add Tier
+                  </Button>
+                </div>
+                <div className="space-y-4">
+                  {tierPackages.map((tier, index) => (
+                    <div key={`tier-${tier.id}`} className="rounded-lg border p-4 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <p className="font-medium">Tier #{index + 1}</p>
+                        {tierPackages.length > 1 && (
+                          <Button type="button" variant="ghost" onClick={() => removeTierPackage(index)}>
+                            Remove
+                          </Button>
+                        )}
+                      </div>
+
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label>Name</Label>
+                          <Input
+                            value={tier.name}
+                            onChange={(e) => updateTierField(index, "name", e.target.value)}
+                            placeholder="Starter"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Price (PKR)</Label>
+                          <Input
+                            value={tier.price}
+                            onChange={(e) => updateTierField(index, "price", e.target.value)}
+                            placeholder="6899"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label>Start Time</Label>
+                          <Select value={tier.start_time} onValueChange={(value) => updateTierField(index, "start_time", value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select start time" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {timeOptions.map((option) => (
+                                <SelectItem key={option} value={option}>
+                                  {option}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>End Time</Label>
+                          <Select value={tier.end_time} onValueChange={(value) => updateTierField(index, "end_time", value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select end time" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {timeOptions.map((option) => (
+                                <SelectItem key={option} value={option}>
+                                  {option}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label>Start Date</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !tier.start_date && "text-muted-foreground")}>
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {tier.start_date ? format(new Date(tier.start_date), "PPP") : "Pick a date"}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={tier.start_date ? new Date(tier.start_date) : undefined}
+                                onSelect={(date) => updateTierField(index, "start_date", date ? format(date, "yyyy-MM-dd") : "")}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>End Date</Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !tier.end_date && "text-muted-foreground")}>
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                {tier.end_date ? format(new Date(tier.end_date), "PPP") : "Pick a date"}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={tier.end_date ? new Date(tier.end_date) : undefined}
+                                onSelect={(date) => updateTierField(index, "end_date", date ? format(date, "yyyy-MM-dd") : "")}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="space-y-2">

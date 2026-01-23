@@ -102,6 +102,7 @@ export interface BookingQueryParams {
   search?: string;
   start_date?: string;
   end_date?: string;
+  gender?: string;
   limit?: number;
 }
 
@@ -138,6 +139,8 @@ export const getAdminUsers = async (params: {
   per_page?: number;
   search?: string;
   status?: string;
+  gender?: string;
+  event_type?: string;
 } = {}) => {
   const res = await api.get("/admin/users", { params });
   return res.data;
@@ -158,8 +161,18 @@ export const updateAdminUser = async (id: number, data: Record<string, unknown>)
   return res.data;
 };
 
-export const getAdminMedia = async (params: { page?: number; per_page?: number } = {}) => {
+export const getAdminMedia = async (params: { page?: number; per_page?: number; search?: string; type?: string } = {}) => {
   const res = await api.get("/admin/media", { params });
+  return res.data;
+};
+
+export const deleteAdminMedia = async (id: number) => {
+  const res = await api.delete(`/admin/media/${id}`);
+  return res.data;
+};
+
+export const bulkDeleteAdminMedia = async (ids: number[]) => {
+  const res = await api.post("/admin/media/bulk-delete", { ids });
   return res.data;
 };
 

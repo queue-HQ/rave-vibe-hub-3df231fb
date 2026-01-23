@@ -41,7 +41,7 @@ export default function EditorLayout({ title, children }: EditorLayoutProps) {
           {title && (
             <header>
               <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-              <p className="text-muted-foreground text-sm mt-1">Editor workspace</p>
+              <p className="text-muted-foreground text-sm mt-1">Admin workspace</p>
             </header>
           )}
           {children}
