@@ -408,7 +408,7 @@ const SignleEventPage = () => {
                   <div>
                     <p className="text-sm font-medium">{tier.name || "Tier"}</p>
                     {/* <p className="text-xs text-muted-foreground">
-                      {tier.start_date} {tier.start_time} - {tier.end_date} {tier.end_time}
+                      {tier.start_date} {tier.start_time} - {tier.end_date} {tier.end_time
                     </p> */}
                   </div>
                   <span className="text-lg font-bold text-primary">PKR {tier.price}</span>
