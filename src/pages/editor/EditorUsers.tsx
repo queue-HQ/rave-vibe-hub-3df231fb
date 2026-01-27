@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/pagination";
 import EditorLayout from "@/components/layouts/EditorLayout";
 import { getAdminUsers, updateAdminUser } from "@/api/admin";
+import { apiUrl } from "@/lib/apiURL";
 import { toast } from "sonner";
 
 interface AdminUser {
@@ -47,11 +48,34 @@ export default function EditorUsers() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [genderFilter, setGenderFilter] = useState<string>("all");
   const [eventTypeFilter, setEventTypeFilter] = useState<string>("all");
+  const [eventTypeOptions, setEventTypeOptions] = useState<string[]>([]);
   const [filters, setFilters] = useState<UserFilters>({ search: "", status: "all", gender: "all", event_type: "all" });
   const [statusUpdating, setStatusUpdating] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [paginationInfo, setPaginationInfo] = useState({ total: 0, total_pages: 1, per_page: PER_PAGE });
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let mounted = true;
+    const loadEventTypes = async () => {
+      try {
+        const res = await fetch(`${apiUrl}/events`);
+        const json = await res.json();
+        if (!mounted) return;
+        const items = Array.isArray(json?.data) ? json.data : [];
+        const titles = items
+          .map((e: any) => String(e?.title ?? "").trim())
+          .filter(Boolean);
+        setEventTypeOptions(Array.from(new Set(titles)));
+      } catch {
+        // ignore
+      }
+    };
+    loadEventTypes();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const fetchUsers = useCallback(
     async (page: number, appliedFilters: UserFilters) => {
@@ -191,8 +215,18 @@ export default function EditorUsers() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All event types</SelectItem>
-                <SelectItem value="future">Future events</SelectItem>
-                <SelectItem value="bnc">BNC</SelectItem>
+                <SelectItem value="future">All Future Events</SelectItem>
+                <SelectItem value="bhuttnco">BHUTTNCO 5.0 NYE Edition</SelectItem>
+                {eventTypeOptions
+                  .filter((t) => {
+                    const normalized = t.toLowerCase();
+                    return normalized !== "all" && normalized !== "future" && normalized !== "bhuttnco";
+                  })
+                  .map((title) => (
+                    <SelectItem key={title} value={title}>
+                      {title}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
             <Button type="submit">Apply Filters</Button>

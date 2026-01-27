@@ -21,6 +21,8 @@ const Signup = () => {
   const [pageLoader, setPageLoader] = useState(true);
   const [openModal, setOpenModal] = useState(false);
   const [vibeDropdownOpen, setVibeDropdownOpen] = useState(false);
+  const [eventTypeDropdownOpen, setEventTypeDropdownOpen] = useState(false);
+  const [eventTypeOptions, setEventTypeOptions] = useState<string[]>(["All Future Events"]);
 
   const MAX_SCREENSHOTS = 2;
 
@@ -43,10 +45,34 @@ const Signup = () => {
     kicked: "",
     hear_about: "",
     events: "",
+    event_types: [] as string[],
     agree_rules: false,
     agree_rules_1: false, // 👈 UI checkbox 1
   agree_rules_2: false, // 👈 UI checkbox 2
   });
+
+  useEffect(() => {
+    let mounted = true;
+    const loadEventTypes = async () => {
+      try {
+        const res = await fetch(`${apiUrl}/events`);
+        const json = await res.json();
+        if (!mounted) return;
+        const items = Array.isArray(json?.data) ? json.data : [];
+        const titles = items
+          .map((e: any) => String(e?.title ?? "").trim())
+          .filter(Boolean);
+        const unique = Array.from(new Set(["All Future Events", ...titles]));
+        setEventTypeOptions(unique);
+      } catch {
+        // ignore
+      }
+    };
+    loadEventTypes();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const vibeOptions = [
     "Losing it to techno",
@@ -275,6 +301,77 @@ const Signup = () => {
                       required
                     />
                   </div>
+                </div>
+
+                <div className="space-y-2 relative">
+                  <Label>Event Type</Label>
+                  <span className="label2"><br/>Select one or more</span>
+
+                  <div
+                    className="w-full bg-black/40 border border-white/10 text-white rounded-md p-2 flex flex-wrap gap-1 min-h-[48px] cursor-pointer items-center"
+                    onClick={() => setEventTypeDropdownOpen((prev) => !prev)}
+                  >
+                    {formData.event_types.length ? (
+                      formData.event_types.map((v) => (
+                        <span
+                          key={v}
+                          className="bg-[#E932A2] text-white px-4 py-[6px] rounded-full flex items-center gap-1 text-sm"
+                        >
+                          {v}
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFormData({
+                                ...formData,
+                                event_types: formData.event_types.filter((val) => val !== v),
+                              });
+                            }}
+                            className="text-white hover:text-red-400 text-xs font-bold"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-white/50">Select event type(s)</span>
+                    )}
+                  </div>
+
+                  {eventTypeDropdownOpen && (
+                    <div className="absolute z-20 w-full bg-black/90 border border-white/20 mt-1 rounded-md max-h-48 overflow-y-auto">
+                      {eventTypeOptions.map((option) => {
+                        const selected = formData.event_types.includes(option);
+                        return (
+                          <div
+                            key={option}
+                            className={`px-3 py-2 cursor-pointer hover:bg-white/10 flex justify-between items-center ${
+                              selected ? "bg-white/20 font-semibold" : ""
+                            }`}
+                            onClick={() => {
+                              let current = [...formData.event_types];
+                              if (selected) {
+                                current = current.filter((v) => v !== option);
+                              } else {
+                                current.push(option);
+                              }
+                              setFormData({ ...formData, event_types: current });
+                            }}
+                          >
+                            <span>{option}</span>
+                            {selected && <span className="text-sm">✔</span>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {eventTypeDropdownOpen && (
+                    <div
+                      className="fixed inset-0 z-10"
+                      onClick={() => setEventTypeDropdownOpen(false)}
+                    />
+                  )}
                 </div>
 
                 <div className="flex gap-2">
