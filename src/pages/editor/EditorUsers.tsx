@@ -33,6 +33,8 @@ interface AdminUser {
 interface UserFilters {
   search: string;
   status: string;
+  gender: string;
+  event_type: string;
 }
 
 const statusOptions = ["pending", "approved", "rejected"] as const;
@@ -43,7 +45,9 @@ export default function EditorUsers() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [filters, setFilters] = useState<UserFilters>({ search: "", status: "all" });
+  const [genderFilter, setGenderFilter] = useState<string>("all");
+  const [eventTypeFilter, setEventTypeFilter] = useState<string>("all");
+  const [filters, setFilters] = useState<UserFilters>({ search: "", status: "all", gender: "all", event_type: "all" });
   const [statusUpdating, setStatusUpdating] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [paginationInfo, setPaginationInfo] = useState({ total: 0, total_pages: 1, per_page: PER_PAGE });
@@ -59,6 +63,8 @@ export default function EditorUsers() {
           per_page: PER_PAGE,
           search: appliedFilters.search || undefined,
           status: effectiveStatus,
+          gender: appliedFilters.gender !== "all" ? appliedFilters.gender : undefined,
+          event_type: appliedFilters.event_type !== "all" ? appliedFilters.event_type : undefined,
         });
 
         if (res?.success) {
@@ -87,7 +93,7 @@ export default function EditorUsers() {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setFilters({ search, status: statusFilter });
+    setFilters({ search, status: statusFilter, gender: genderFilter, event_type: eventTypeFilter });
     setCurrentPage(1);
   };
 
@@ -150,7 +156,7 @@ export default function EditorUsers() {
               </Link>
             </div>
           </div>
-          <form className="grid grid-cols-1 md:grid-cols-3 gap-3" onSubmit={handleSearchSubmit}>
+          <form className="grid grid-cols-1 md:grid-cols-5 gap-3" onSubmit={handleSearchSubmit}>
             <Input
               placeholder="Search by name, username or email"
               value={search}
@@ -167,6 +173,26 @@ export default function EditorUsers() {
                     {status.charAt(0).toUpperCase() + status.slice(1)}
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+            <Select value={genderFilter} onValueChange={(value) => setGenderFilter(value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="All genders" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All genders</SelectItem>
+                <SelectItem value="male">Male</SelectItem>
+                <SelectItem value="female">Female</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={eventTypeFilter} onValueChange={(value) => setEventTypeFilter(value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="All event types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All event types</SelectItem>
+                <SelectItem value="future">Future events</SelectItem>
+                <SelectItem value="bnc">BNC</SelectItem>
               </SelectContent>
             </Select>
             <Button type="submit">Apply Filters</Button>

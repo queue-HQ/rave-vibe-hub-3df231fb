@@ -74,10 +74,12 @@ export default function EditorBookings() {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [genderFilter, setGenderFilter] = useState<string>("all");
   const [eventFilter, setEventFilter] = useState<string>("");
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [appliedFilters, setAppliedFilters] = useState({
     status: "all",
+    gender: "all",
     event: "",
     start_date: "",
     end_date: "",
@@ -93,6 +95,7 @@ export default function EditorBookings() {
         page,
         per_page: PER_PAGE,
         status: overrideFilters.status !== "all" ? overrideFilters.status : undefined,
+        gender: overrideFilters.gender !== "all" ? overrideFilters.gender : undefined,
         event_name: overrideFilters.event || undefined,
         search: searchQuery || undefined,
         start_date: overrideFilters.start_date || undefined,
@@ -194,6 +197,7 @@ export default function EditorBookings() {
       setExporting(true);
       const exportParams = {
         status: appliedFilters.status !== "all" ? appliedFilters.status : undefined,
+        gender: appliedFilters.gender !== "all" ? appliedFilters.gender : undefined,
         event_name: appliedFilters.event || undefined,
         search: search || undefined,
         start_date: appliedFilters.start_date || undefined,
@@ -218,6 +222,7 @@ export default function EditorBookings() {
   const applyFilters = () => {
     const formatted = {
       status: statusFilter,
+      gender: genderFilter,
       event: eventFilter.trim(),
       start_date: dateRange?.from ? format(dateRange.from, "yyyy-MM-dd") : "",
       end_date: dateRange?.to ? format(dateRange.to, "yyyy-MM-dd") : "",
@@ -229,9 +234,10 @@ export default function EditorBookings() {
 
   const clearFilters = () => {
     setStatusFilter("all");
+    setGenderFilter("all");
     setEventFilter("");
     setDateRange(undefined);
-    const resetFilters = { status: "all", event: "", start_date: "", end_date: "" };
+    const resetFilters = { status: "all", gender: "all", event: "", start_date: "", end_date: "" };
     setAppliedFilters(resetFilters);
     loadBookings(1, resetFilters, search);
   };
@@ -324,6 +330,20 @@ export default function EditorBookings() {
                               {status}
                             </SelectItem>
                           ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium">Gender</p>
+                      <Select value={genderFilter} onValueChange={setGenderFilter}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="All genders" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All genders</SelectItem>
+                          <SelectItem value="male">Male</SelectItem>
+                          <SelectItem value="female">Female</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
