@@ -216,7 +216,7 @@ export default function EditorUsers() {
               <SelectContent>
                 <SelectItem value="all">All event types</SelectItem>
                 <SelectItem value="future">All Future Events</SelectItem>
-                <SelectItem value="bhuttnco">BHUTTNCO 5.0 NYE Edition</SelectItem>
+                {/* <SelectItem value="bhuttnco">BHUTTNCO 5.0 NYE Edition</SelectItem> */}
                 {eventTypeOptions
                   .filter((t) => {
                     const normalized = t.toLowerCase();
