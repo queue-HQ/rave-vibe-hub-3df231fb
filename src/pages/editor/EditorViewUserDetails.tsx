@@ -35,6 +35,7 @@ interface FormState {
   gender: string;
   instagram: string;
   profile_picture: string;
+  cnic_picture: string;
   age: string;
   rave_resume: string;
   why_join: string;
@@ -63,6 +64,7 @@ const emptyState: FormState = {
   gender: "",
   instagram: "",
   profile_picture: "",
+  cnic_picture: "",
   age: "",
   rave_resume: "",
   why_join: "",
@@ -85,10 +87,12 @@ export default function EditorViewUserDetails() {
   const [saving, setSaving] = useState(false);
   const [profilePictureFile, setProfilePictureFile] = useState<File | null>(null);
   const [profilePicturePreview, setProfilePicturePreview] = useState<string>("");
+  const [cnicPictureFile, setCnicPictureFile] = useState<File | null>(null);
+  const [cnicPicturePreview, setCnicPicturePreview] = useState<string>("");
   const [newScreenshots, setNewScreenshots] = useState<File[]>([]);
   const [existingScreenshots, setExistingScreenshots] = useState<string[]>([]);
   const [newScreenshotPreviews, setNewScreenshotPreviews] = useState<string[]>([]);
-  const [activeScreenshot, setActiveScreenshot] = useState<string | null>(null);
+  const [activeImage, setActiveImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -125,6 +129,7 @@ export default function EditorViewUserDetails() {
           gender: meta.gender || "",
           instagram: meta.instagram || "",
           profile_picture: meta.profile_picture || "",
+          cnic_picture: meta.cnic_picture || "",
           age: meta.age ? String(meta.age) : "",
           rave_resume: meta.rave_resume || "",
           why_join: meta.why_join || "",
@@ -140,6 +145,7 @@ export default function EditorViewUserDetails() {
         });
         setExistingScreenshots(screenshots);
         setProfilePicturePreview(meta.profile_picture || "");
+        setCnicPicturePreview(meta.cnic_picture || "");
       } catch (error: any) {
         toast.error(error.response?.data?.message || "Failed to load user");
         navigate("/editor/users");
@@ -162,6 +168,15 @@ export default function EditorViewUserDetails() {
     }
     setProfilePicturePreview(form.profile_picture || "");
   }, [profilePictureFile, form.profile_picture]);
+
+  useEffect(() => {
+    if (cnicPictureFile) {
+      const url = URL.createObjectURL(cnicPictureFile);
+      setCnicPicturePreview(url);
+      return () => URL.revokeObjectURL(url);
+    }
+    setCnicPicturePreview(form.cnic_picture || "");
+  }, [cnicPictureFile, form.cnic_picture]);
 
   useEffect(() => {
     const urls = newScreenshots.map((file) => URL.createObjectURL(file));
@@ -202,6 +217,10 @@ export default function EditorViewUserDetails() {
       if (profilePictureFile) {
         profilePictureUrl = await uploadFile(profilePictureFile);
       }
+      let cnicPictureUrl = form.cnic_picture;
+      if (cnicPictureFile) {
+        cnicPictureUrl = await uploadFile(cnicPictureFile);
+      }
       const uploadedScreenshots = await uploadScreenshots();
       const combinedScreenshots = [...existingScreenshots, ...uploadedScreenshots].slice(0, MAX_SCREENSHOTS);
 
@@ -218,6 +237,7 @@ export default function EditorViewUserDetails() {
           gender: form.gender,
           instagram: form.instagram,
           profile_picture: profilePictureUrl,
+          cnic_picture: cnicPictureUrl,
           insta_screenshot: combinedScreenshots,
           age: form.age ? Number(form.age) : "",
           rave_resume: form.rave_resume,
@@ -241,7 +261,12 @@ export default function EditorViewUserDetails() {
       toast.success("User updated");
       setExistingScreenshots(combinedScreenshots);
       setNewScreenshots([]);
-      setForm((prev) => ({ ...prev, profile_picture: profilePictureUrl, insta_screenshot: combinedScreenshots }));
+      setForm((prev) => ({
+        ...prev,
+        profile_picture: profilePictureUrl,
+        cnic_picture: cnicPictureUrl,
+        insta_screenshot: combinedScreenshots,
+      }));
     } catch (error: any) {
       toast.error(error?.message || error.response?.data?.message || "Failed to update user");
     } finally {
@@ -431,11 +456,39 @@ export default function EditorViewUserDetails() {
         />
         {profilePicturePreview && (
           <div className="h-32 w-32 overflow-hidden rounded-lg border">
-            <img src={profilePicturePreview} alt="Profile" className="h-full w-full object-cover" />
+            <button
+              type="button"
+              className="h-full w-full cursor-zoom-in"
+              onClick={() => setActiveImage(profilePicturePreview)}
+            >
+              <img src={profilePicturePreview} alt="Profile" className="h-full w-full object-cover" />
+            </button>
           </div>
         )}
       </div>
       <div className="space-y-3">
+        <Label>CNIC Picture</Label>
+        <Input
+          type="file"
+          accept="image/*"
+          onChange={(event) => {
+            const file = event.target.files?.[0] || null;
+            setCnicPictureFile(file);
+          }}
+        />
+        {cnicPicturePreview && (
+          <div className="h-32 w-48 overflow-hidden rounded-lg border">
+            <button
+              type="button"
+              className="h-full w-full cursor-zoom-in"
+              onClick={() => setActiveImage(cnicPicturePreview)}
+            >
+              <img src={cnicPicturePreview} alt="CNIC" className="h-full w-full object-cover" />
+            </button>
+          </div>
+        )}
+      </div>
+      <div className="space-y-3 lg:col-span-2">
         <Label>Instagram Screenshots (max {MAX_SCREENSHOTS})</Label>
         <Input
           type="file"
@@ -455,7 +508,7 @@ export default function EditorViewUserDetails() {
               <button
                 type="button"
                 className="h-full w-full cursor-zoom-in"
-                onClick={() => setActiveScreenshot(url)}
+                onClick={() => setActiveImage(url)}
               >
                 <img src={url} alt="Screenshot" className="h-full w-full object-cover" />
               </button>
@@ -473,7 +526,7 @@ export default function EditorViewUserDetails() {
               <button
                 type="button"
                 className="h-full w-full cursor-zoom-in"
-                onClick={() => setActiveScreenshot(preview)}
+                onClick={() => setActiveImage(preview)}
               >
                 <img src={preview} alt="New screenshot" className="h-full w-full object-cover" />
               </button>
@@ -489,11 +542,11 @@ export default function EditorViewUserDetails() {
             </div>
           ))}
         </div>
-        <Dialog open={Boolean(activeScreenshot)} onOpenChange={(open) => !open && setActiveScreenshot(null)}>
+        <Dialog open={Boolean(activeImage)} onOpenChange={(open) => !open && setActiveImage(null)}>
           <DialogContent className="max-w-3xl">
-            {activeScreenshot && (
+            {activeImage && (
               <div className="max-h-[80vh] overflow-hidden rounded-lg border bg-muted">
-                <img src={activeScreenshot} alt="Screenshot preview" className="h-full w-full object-contain" />
+                <img src={activeImage} alt="Image preview" className="h-full w-full object-contain" />
               </div>
             )}
           </DialogContent>

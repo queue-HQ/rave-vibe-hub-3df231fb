@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import type { MouseEvent } from "react";
 import {
   Calendar,
   Ticket,
@@ -11,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
 import { logout } from "@/lib/logout";
+import { toast } from "sonner";
 
 interface AppSidebarProps {
   isMobile?: boolean;
@@ -22,11 +24,30 @@ export default function AppSidebar({
   onClose,
 }: AppSidebarProps) {
   const navigate = useNavigate();
+  const rawUser = typeof window !== "undefined" ? localStorage.getItem("user") : null;
+  let isPendingSubscriber = false;
+  if (rawUser) {
+    try {
+      const parsed = JSON.parse(rawUser) as { role?: string; status?: string } | null;
+      const role = parsed?.role ? String(parsed.role).split(",")[0]?.trim().toLowerCase() : "";
+      const status = parsed?.status ? String(parsed.status).toLowerCase() : "";
+      isPendingSubscriber = role === "subscriber" && status === "pending";
+    } catch {
+      isPendingSubscriber = false;
+    }
+  }
 
   const handleLogout = () => {
     logout();
     if (onClose) onClose(); // close mobile sidebar
     navigate("/");
+  };
+
+  const guardPendingAction = (event: MouseEvent) => {
+    if (!isPendingSubscriber) return;
+    event.preventDefault();
+    toast.error("Your account is pending approval.");
+    if (onClose) onClose();
   };
 
   return (
@@ -54,21 +75,21 @@ export default function AppSidebar({
           </Button>
         </Link>
 
-        <Link to="/dashboard/profile" onClick={onClose}>
+        <Link to="/dashboard/profile" onClick={(e) => { guardPendingAction(e); if (!isPendingSubscriber) onClose?.(); }}>
           <Button variant="ghost" className="w-full justify-start text-lg">
             <User className="mr-3 h-5 w-5" />
             My Profile
           </Button>
         </Link>
 
-        <Link to="/events" onClick={onClose}>
+        <Link to="/events" onClick={(e) => { guardPendingAction(e); if (!isPendingSubscriber) onClose?.(); }}>
           <Button variant="ghost" className="w-full justify-start text-lg">
             <Calendar className="mr-3 h-5 w-5" />
             Events
           </Button>
         </Link>
 
-        <Link to="/dashboard/tickets" onClick={onClose}>
+        <Link to="/dashboard/tickets" onClick={(e) => { guardPendingAction(e); if (!isPendingSubscriber) onClose?.(); }}>
           <Button variant="ghost" className="w-full justify-start text-lg">
             <Ticket className="mr-3 h-5 w-5" />
             Bookings

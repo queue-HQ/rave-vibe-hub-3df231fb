@@ -70,6 +70,9 @@ export const UserProfileProvider = ({
 
       if (res?.success && res.user) {
         setUser(res.user);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("user", JSON.stringify(res.user));
+        }
       } else {
         setUser(null);
         setError(res?.message ?? "Session expired");
