@@ -466,13 +466,13 @@ const SignleEventPage = () => {
         )} */}
 
 
-        {capacityLimit && (
+        {capacityLimit ? (
             <div className="flex items-center gap-3">
               <Users className="h-5 w-5 text-muted-foreground" />
               {/* <span className="text-sm">{Math.max(availableTickets ?? 0, 0)} ticket left / {capacityLimit} total</span> */}
               <span className="text-sm">{capacityLimit} total</span>
             </div>
-          )}
+          ) : ""}
           {/* {event?.attending_peoples && (
             <div className="flex items-center gap-3">
               <Users className="h-5 w-5 text-muted-foreground" />
