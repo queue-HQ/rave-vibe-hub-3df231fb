@@ -22,6 +22,7 @@ const Signup = () => {
   const [openModal, setOpenModal] = useState(false);
   const [vibeDropdownOpen, setVibeDropdownOpen] = useState(false);
 
+  
   const MAX_SCREENSHOTS = 2;
 
   const [formData, setFormData] = useState({
