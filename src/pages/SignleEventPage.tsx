@@ -431,7 +431,7 @@ const SignleEventPage = () => {
         ) : (
           <div className="space-y-3">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-3xl font-bold text-primary">PKR {event?.price}</span>
+              <span className="text-3xl font-bold text-primary">{event?.price ? `PKR ${event?.price}` : 'Past Event'}</span>
             </div>
             <br />
             {checkEventStatus(event?.date, event?.time) !== "past" && (
