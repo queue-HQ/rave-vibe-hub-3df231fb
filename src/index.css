@@ -152,3 +152,85 @@ All colors MUST be HSL.
 .color-form--pinkLabel .label2 {
 color: #E932A2;
 }
+
+/* ===== JODIT TOOLBAR PINK THEME ===== */
+
+/* Toolbar background */
+.jodit-toolbar__box {
+  background-color: #141414 !important;
+  border: none !important;
+}
+
+/* Toolbar icons (SVG + text icons) */
+.jodit-toolbar-button svg,
+.jodit-toolbar-button span,
+.jodit-toolbar-button i {
+  fill: #E932A2 !important;
+  color: #E932A2 !important;
+}
+
+/* Hover state */
+.jodit-toolbar-button:hover svg,
+.jodit-toolbar-button:hover span,
+.jodit-toolbar-button:hover i {
+  fill: #ffffff !important;
+  color: #ffffff !important;
+}
+
+/* Hover background */
+.jodit-toolbar-button:hover {
+  background-color: #f48fb1 !important;
+}
+
+/* Active button */
+.jodit-toolbar-button.jodit-toolbar-button_active {
+  background-color: #ec407a !important;
+}
+
+.jodit-toolbar-button.jodit-toolbar-button_active svg,
+.jodit-toolbar-button.jodit-toolbar-button_active span {
+  fill: #ffffff !important;
+  color: #ffffff !important;
+}
+
+/* Dropdown arrows */
+.jodit-toolbar-button__trigger svg {
+  fill: #8a1d4a !important;
+}
+
+/* Disabled buttons */
+.jodit-toolbar-button_disabled svg {
+  fill: #c97a9a !important;
+}
+
+.jodit-container {
+  border: none !important;
+}
+
+a.jodit-status-bar-link {
+    font-size: 0;
+    display: none;
+}
+
+.jodit-status-bar.jodit-status-bar_resize-handle_true {
+    background: #e8339f;
+    color: #fff;
+}
+
+.jodit-toolbar__box:not(:empty) .jodit-toolbar-editor-collection:after {
+    border: none;
+    background: none !important;
+    display: none;
+}
+
+.jodit-editor__resize {
+    display: none !important;
+}
+
+.jodit-xpath span a {
+    color: #fff !important;
+}
+
+span.jodit-toolbar-button.jodit-toolbar-button_variant_initial.jodit-toolbar-button_selectall.jodit-toolbar-button_size_tiny {
+    background: #fff;
+}

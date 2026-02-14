@@ -14,11 +14,15 @@ interface UserProfile {
   display_name?: string;
   username?: string;
   email?: string;
+  role?: string;
   [key: string]: unknown;
 }
 
 interface UserProfileContextValue {
   user: UserProfile | null;
+  role: string | null;
+  isAdmin: boolean;
+  isSubscriber: boolean;
   isLoading: boolean;
   error: string | null;
   hasTriedFetching: boolean;
@@ -66,6 +70,9 @@ export const UserProfileProvider = ({
 
       if (res?.success && res.user) {
         setUser(res.user);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("user", JSON.stringify(res.user));
+        }
       } else {
         setUser(null);
         setError(res?.message ?? "Session expired");
@@ -89,15 +96,23 @@ export const UserProfileProvider = ({
     }
   }, [fetchProfile, hasTriedFetching]);
 
+  const role = useMemo(() => {
+    if (!user?.role) return null;
+    return String(user.role).split(',')[0]?.trim() || null;
+  }, [user]);
+
   const value = useMemo(
     () => ({
       user,
+      role,
+      isAdmin: role === 'administrator',
+      isSubscriber: role === 'subscriber',
       isLoading,
       error,
       hasTriedFetching,
       refetch: fetchProfile,
     }),
-    [user, isLoading, error, hasTriedFetching, fetchProfile]
+    [user, role, isLoading, error, hasTriedFetching, fetchProfile]
   );
 
   return (

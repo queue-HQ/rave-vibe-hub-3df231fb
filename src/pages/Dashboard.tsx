@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Calendar,
   Ticket,
@@ -18,13 +18,25 @@ import AppSidebar from "@/components/sidebar/AppSidebar";
 import slugify from "@/lib/slugify";
 import { useUserProfile } from "@/context/UserProfileContext";
 import { useEvents } from "@/context/EventsContext";
+import { toast } from "sonner";
 
 const Dashboard = () => {
-  const { user, isLoading } = useUserProfile();
+  const { user, isLoading, isAdmin, refetch } = useUserProfile();
+  const navigate = useNavigate();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const userName = user?.display_name || user?.username || "";
+  const userName =
+    [user?.first_name, user?.last_name].filter(Boolean).join(" ").trim() ||
+    user?.display_name ||
+    user?.username ||
+    "User";
   const { events, error } = useEvents();
   const [ticketsCount, setTicketsCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!isLoading && isAdmin) {
+      navigate("/editor", { replace: true });
+    }
+  }, [isLoading, isAdmin, navigate]);
 
   const upcomingEvents = useMemo(() => {
     const parseEventDateTime = (event: any) => {
@@ -99,6 +111,46 @@ const Dashboard = () => {
     return storedBookings ? Number(storedBookings) : 0;
   }, [user]);
 
+  const storedUserStatus = (() => {
+    try {
+      const raw = localStorage.getItem("user");
+      if (!raw) return "";
+      const parsed = JSON.parse(raw) as { status?: string };
+      return String(parsed?.status || "").toLowerCase();
+    } catch {
+      return "";
+    }
+  })();
+  const accountStatus = String(user?.status || storedUserStatus || "").toLowerCase();
+  const isPendingSubscriber = accountStatus === "pending";
+
+  useEffect(() => {
+    if (!isPendingSubscriber) return;
+    const interval = setInterval(() => {
+      refetch();
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [isPendingSubscriber, refetch]);
+
+  useEffect(() => {
+    if (!accountStatus) return;
+    const statusKey = "account_status_last_seen";
+    const pendingToastKey = "pending_status_toast_shown";
+    const previousStatus = localStorage.getItem(statusKey);
+
+    if (accountStatus === "pending" && sessionStorage.getItem(pendingToastKey) !== "1") {
+      toast.error("Your account is pending approval.");
+      sessionStorage.setItem(pendingToastKey, "1");
+    }
+
+    if (accountStatus === "approved" && previousStatus === "pending") {
+      toast.success("Your account is approved.");
+      sessionStorage.removeItem(pendingToastKey);
+    }
+
+    localStorage.setItem(statusKey, accountStatus);
+  }, [accountStatus]);
+
   return (
     <div className="min-h-screen bg-background">
 
@@ -142,7 +194,7 @@ const Dashboard = () => {
           <>
             <h1 className="pt-4 text-2xl sm:text-4xl font-bold mb-2 leading-tight">
               Welcome back,{" "}
-              <span className="text-primary">{user?.first_name + " " + user?.last_name}</span> 🎉
+              <span className="text-primary">{userName}</span>
             </h1>
             <p className="text-muted-foreground text-base sm:text-lg">
               Ready to discover the underground scene?
@@ -240,12 +292,20 @@ const Dashboard = () => {
                     <div>
                       <h3 className="font-bold text-lg">{event.title}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {event.date} • {event.venue}
+                        {event.date} - {event.venue}
                       </p>
                     </div>
                   </div>
 
-                  <Link to={`/event/${event.slug}`} className="w-full sm:w-auto">
+                  <Link
+                    to={`/event/${event.slug}`}
+                    className="w-full sm:w-auto"
+                    onClick={(e) => {
+                      if (!isPendingSubscriber) return;
+                      e.preventDefault();
+                      toast.error("Your account is pending approval.");
+                    }}
+                  >
                     <Button className="w-full sm:w-auto">View Details</Button>
                   </Link>
 
@@ -264,3 +324,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   Calendar,
   MapPin,
@@ -56,21 +56,37 @@ const formatPriceLabel = (amount: number, fallback?: string) => {
   return fallback ?? "N/A";
 };
 
+const toText = (value: unknown): string => {
+  if (typeof value === "string") return value;
+  if (value === null || value === undefined) return "";
+  return String(value);
+};
+
 const BookTicket = () => {
   const { user } = useUserProfile();
   const { id } = useParams(); // event ID from URL
+  const [searchParams] = useSearchParams();
   const { events, isLoading } = useEvents();
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  console.log('user', user)
+
   const [paymentProof, setPaymentProof] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const [formData, setFormData] = useState({
-    phone: user?.phone || "",
-    nic: user?.nic || "",
-    carNumber: user?.car_number || "",
-    additionalPerson: null as { name: string; email: string; phone: string; nic: string; carNumber: string } | null,
+  type BookingFormData = {
+    phone: string;
+    nic: string;
+    carNumber: string;
+    additionalPerson: { name: string; email: string; phone: string; nic: string; carNumber: string } | null;
+  };
+
+  const [formData, setFormData] = useState<BookingFormData>({
+    phone: toText((user as any)?.phone),
+    nic: toText((user as any)?.nic),
+    carNumber: toText((user as any)?.car_number),
+    additionalPerson: null,
   });
 
   const fullName = [user?.first_name, user?.last_name]
@@ -81,11 +97,27 @@ const BookTicket = () => {
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
-      phone: (user?.phone as string) || "",
+      phone: toText((user as any)?.phone),
+      nic: toText((user as any)?.nic),
+      carNumber: toText((user as any)?.car_number),
     }));
-  }, [user?.phone]);
+  }, [user?.phone, user?.nic, (user as any)?.car_number]);
 
   const event = events.find((item) => String(item.id) === String(id));
+
+  const selectedTierId = searchParams.get("tier");
+  const selectedTier = useMemo(() => {
+    if (!event || typeof event !== "object") return null;
+    const tiers = (event as any).tier_packages;
+    if (!Array.isArray(tiers)) return null;
+    if (!selectedTierId) {
+      const active = (event as any).active_tiers;
+      return Array.isArray(active) && active.length ? active[0] : null;
+    }
+    const idNum = Number(selectedTierId);
+    if (!Number.isFinite(idNum)) return null;
+    return tiers.find((t: any) => Number(t?.id) === idNum) ?? null;
+  }, [event, selectedTierId]);
 
   const capacityLimit = Number(event?.capacity_limit) || 0;
   const bookedTickets = Number(event?.booked_tickets) || 0;
@@ -102,8 +134,8 @@ const BookTicket = () => {
     typeof user?.gender === "string" ? user.gender.toLowerCase() : "";
   const isMaleUser = userGender === "male";
   const baseTicketPrice = useMemo(
-    () => getNumericPrice(event?.price),
-    [event?.price]
+    () => getNumericPrice(selectedTier?.price ?? (event as any)?.price),
+    [event, selectedTier]
   );
   const hasAdditionalPerson = Boolean(formData.additionalPerson);
   const isCoupleBooking = isMaleUser || hasAdditionalPerson;
@@ -242,6 +274,8 @@ const BookTicket = () => {
         couple_details: coupleDetails,
         is_couple_booking: isCoupleBooking,
         ticket_price: totalPrice,
+        tier_id: selectedTier?.id ?? null,
+        tier_name: selectedTier?.name ?? null,
       };
 
       // API request
@@ -347,7 +381,7 @@ const BookTicket = () => {
             </div>
           </div>
 
-          {/* Price */}
+          {/* Price*/}
           <div className="border-t pt-4 space-y-2">
             <div className="flex justify-between items-center mb-2">
               <span className="text-muted-foreground text-sm sm:text-base">
@@ -517,7 +551,7 @@ const BookTicket = () => {
           </div>
 
 
-          {/* Payment Proof */}
+          {/* Payment Proo */}
           <div className="border-t pt-6">
             <h3 className="text-lg sm:text-xl font-semibold mb-4">
               Payment Information
@@ -525,12 +559,11 @@ const BookTicket = () => {
 
             <p className="text-sm sm:text-base leading-relaxed">
               <strong>Bank Details:</strong><br />
-              Account Title: ZAIM SAJID MOOSANI<br />
-              Bank: Meezan Bank<br />
-              Account Number: 99040112528546<br />
-              IBAN: PK33MEZN0099040112528546
+              Account Title: Nusaib Abdullah<br />
+              Bank: HBL<br />
+              Account Number: 08517900601403<br />
+              {/* IBAN: PK33MEZN0099040112528546 */}
             </p>
-
             <div className="border-2 border-dashed border-primary/30 rounded-lg p-6 sm:p-8 text-center group cursor-pointer mt-6">
               <Upload className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-4 text-primary group-hover:animate-pulse" />
 
@@ -565,7 +598,7 @@ const BookTicket = () => {
             </div>
           </div>
 
-          {/* Important Informatio */}
+          {/* Important Information*/}
           {/* <div className="border-t pt-6">
             <h3 className="text-lg sm:text-xl font-semibold mb-4">
               Important Information
