@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import EditorLayout from "@/components/layouts/EditorLayout";
-import { bulkDeleteAdminMedia, deleteAdminMedia, getAdminMedia } from "@/api/admin";
+import { bulkDeleteAdminMedia, deleteAdminMedia, getAdminMedia, uploadPublicFile } from "@/api/admin";
 import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
+import { Loader2, Trash2, Upload } from "lucide-react";
 
 interface AdminMediaItem {
   id: number;
@@ -27,6 +27,8 @@ export default function EditorMedia() {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [uploadFiles, setUploadFiles] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
 
   const loadMedia = async (searchQuery = appliedSearch) => {
     try {
@@ -117,6 +119,52 @@ export default function EditorMedia() {
     }
   };
 
+  const handleUpload = async () => {
+    if (!uploadFiles.length) {
+      toast.error("Please select at least one image");
+      return;
+    }
+
+    try {
+      setUploading(true);
+      const uploads = await Promise.all(uploadFiles.map((file) => uploadPublicFile(file)));
+      const failed = uploads.filter((result) => !result?.success).length;
+
+      if (failed > 0) {
+        toast.warning(`${uploadFiles.length - failed} uploaded, ${failed} failed.`);
+      } else {
+        toast.success(`${uploadFiles.length} image(s) uploaded successfully.`);
+      }
+
+      setUploadFiles([]);
+      await loadMedia(appliedSearch);
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Failed to upload images");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleCopyUrl = async (url: string) => {
+    if (!url) {
+      toast.error("Image URL not found");
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Image URL copied");
+    } catch {
+      const tempInput = document.createElement("input");
+      tempInput.value = url;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
+      toast.success("Image URL copied");
+    }
+  };
+
   return (
     <EditorLayout title="Media Gallery">
       <Card>
@@ -134,6 +182,23 @@ export default function EditorMedia() {
           </div>
         </CardHeader>
         <CardContent>
+          <div className="mb-4 rounded-lg border p-3">
+            <p className="mb-3 text-sm font-medium">Upload Images</p>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <Input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(event) => setUploadFiles(Array.from(event.target.files || []))}
+                disabled={uploading}
+              />
+              <Button type="button" onClick={handleUpload} disabled={uploading || uploadFiles.length === 0} className="gap-2">
+                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                {uploading ? "Uploading..." : `Upload${uploadFiles.length ? ` (${uploadFiles.length})` : ""}`}
+              </Button>
+            </div>
+          </div>
+
           <form className="mb-4 flex flex-col gap-2 sm:flex-row" onSubmit={handleSearchSubmit}>
             <Input
               placeholder="Search images..."
@@ -226,9 +291,14 @@ export default function EditorMedia() {
               <div className="overflow-hidden rounded-lg border bg-muted">
                 <img src={previewItem.url} alt={previewItem.title} className="w-full object-contain h-[70vh]" />
               </div>
-              <a href={previewItem.url} target="_blank" rel="noreferrer" className="text-primary text-sm underline">
-                Open original
-              </a>
+              <div className="flex flex-wrap items-center gap-3">
+                <a href={previewItem.url} target="_blank" rel="noreferrer" className="text-primary text-sm underline">
+                  Open original
+                </a>
+                <Button type="button" variant="outline" size="sm" onClick={() => handleCopyUrl(previewItem.url)}>
+                  Copy URL
+                </Button>
+              </div>
             </div>
           )}
         </DialogContent>

@@ -151,6 +151,43 @@ export const createAdminUser = async (data: Record<string, unknown>) => {
   return res.data;
 };
 
+export interface ManualTicketingEvent {
+  id: number;
+  title: string;
+  event_date?: string;
+  venue?: string;
+  price?: string;
+}
+
+export const getManualTicketingUpcomingEvents = async () => {
+  const res = await api.get("/admin/manual-ticketing/upcoming-events");
+  return res.data as { success: boolean; data: ManualTicketingEvent[]; message?: string };
+};
+
+export const assignManualTicketToExistingUser = async (data: {
+  user_id: number;
+  event_id: number;
+  status?: string;
+}) => {
+  const res = await api.post("/admin/manual-ticketing/assign-existing", data);
+  return res.data;
+};
+
+export const createUserAndAssignManualTicket = async (data: {
+  username: string;
+  full_name: string;
+  email: string;
+  phone?: string;
+  gender?: string;
+  cnic_picture?: string;
+  event_id: number;
+  password: string;
+  status?: string;
+}) => {
+  const res = await api.post("/admin/manual-ticketing/create-and-assign", data);
+  return res.data;
+};
+
 export const getAdminUserDetail = async (id: number) => {
   const res = await api.get(`/admin/users/${id}`);
   return res.data;
