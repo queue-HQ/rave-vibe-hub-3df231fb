@@ -218,6 +218,7 @@ const TicketView = () => {
         }}
       >
 
+
 <div className="text-center ">
   <img src="/logo.png" alt="Logo" className="w-32 h-auto mx-auto" />
 </div>
