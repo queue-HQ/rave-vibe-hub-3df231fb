@@ -224,7 +224,7 @@ const TicketView = () => {
 </div>
         <div className="text-center mb-6 sm:mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold mb-1">
-            Your Ticket
+            Your Ticket 
           </h1>
           <p className="text-muted-foreground text-sm sm:text-base">
             Save this ticket or print it out
