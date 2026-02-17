@@ -38,6 +38,7 @@ export default function EditorSidebar({ isMobile = false, onClose }: EditorSideb
         { to: "/editor/posts", label: "Posts", icon: FileText },
         { to: "/editor/posts/new", label: "Add Post", icon: PlusCircle },
         { to: "/editor/bookings", label: "Bookings", icon: Ticket },
+        { to: "/editor/booking-form-builder", label: "Booking Form Builder", icon: FileText },
         { to: "/editor/manual-ticketing", label: "Manual Ticketing", icon: Ticket },
         { to: "/editor/media", label: "Media Gallery", icon: ImageIcon },
         { to: "/editor/users", label: "All Users", icon: Users },
