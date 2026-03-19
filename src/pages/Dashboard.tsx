@@ -128,7 +128,7 @@ const Dashboard = () => {
     if (!isPendingSubscriber) return;
     const interval = setInterval(() => {
       refetch();
-    }, 8000);
+    }, 60000);
     return () => clearInterval(interval);
   }, [isPendingSubscriber, refetch]);
 

@@ -416,7 +416,7 @@ const SignleEventPage = () => {
       <CardContent className="p-6 space-y-4">
         {visibleTiers.length > 0 ? (
           <div className="space-y-4">
-            {visibleTiers.map((tier: any) => {
+            {visibleTiers.map((tier: any, tierIndex: number) => {
               const tierGender = normalizeGender(tier?.gender);
               const isTierAllowed = !tierGender || !userGender || tierGender === userGender;
               const isGenderLocked = !isTierAllowed;
@@ -446,7 +446,7 @@ const SignleEventPage = () => {
                 <br />
 
                 <Link
-                  to={`/book-ticket/${event?.id}?tier=${tier.id}`}
+                  to={`/book-ticket/${event?.id}?tier=${tier.id}&tierIndex=${tierIndex}`}
                   className={`mt-5${isGenderLocked ? " pointer-events-none" : ""}`}
                   onClick={handleBuyTicketClick}
                   aria-disabled={isDisabled}

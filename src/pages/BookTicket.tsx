@@ -123,6 +123,8 @@ const DEFAULT_FORM_CONFIG: BookingFormConfig = {
   ],
 };
 
+const DEFAULT_COUPLE_SECTION = DEFAULT_FORM_CONFIG.sections.find((section) => section.key === "couple_information") as BookingSection;
+
 const getNumericPrice = (value: unknown): number => {
   if (typeof value === "number" && !Number.isNaN(value)) return value;
   if (typeof value === "string") {
@@ -182,10 +184,13 @@ export default function BookTicket() {
   const [fileValues, setFileValues] = useState<Record<string, File | null>>({});
   const [loadingFormConfig, setLoadingFormConfig] = useState(true);
   const [selectedTierId, setSelectedTierId] = useState<number | null>(null);
+  const [selectedTierIndex, setSelectedTierIndex] = useState<number | null>(null);
   const [additionalPersons, setAdditionalPersons] = useState<AdditionalPerson[]>([]);
 
   const event = events.find((item) => String(item.id) === String(id));
   const userGender = normalizeGender((user as any)?.gender);
+  const accountStatus = String((user as any)?.status || "").toLowerCase();
+  const isAccountApproved = accountStatus === "approved";
 
   const availableTiers: EventTier[] = useMemo(() => {
     const active = (event as any)?.active_tiers;
@@ -201,26 +206,55 @@ export default function BookTicket() {
 
   const selectedTier = useMemo(() => {
     if (!availableTiers.length) return null;
+    if (selectedTierIndex !== null && selectedTierIndex >= 0 && selectedTierIndex < availableTiers.length) {
+      return availableTiers[selectedTierIndex] ?? null;
+    }
     if (!selectedTierId) return availableTiers[0] ?? null;
     return availableTiers.find((tier) => Number(tier.id) === Number(selectedTierId)) ?? availableTiers[0] ?? null;
-  }, [availableTiers, selectedTierId]);
+  }, [availableTiers, selectedTierId, selectedTierIndex]);
 
   const requiredPersons = Math.max(1, Number(selectedTier?.required_persons ?? selectedTier?.requiredPersons ?? 1) || 1);
-  const isGroupTier = requiredPersons > 1;
+  const selectedTierGender = normalizeGender(selectedTier?.gender);
+  const isGroupTier = requiredPersons > 2;
+  const showCoupleSection = requiredPersons === 2 && selectedTierGender === "";
+
+  useEffect(() => {
+    if (!selectedTier) return;
+    console.log("[BookTicket] Selected tier:", selectedTier);
+    console.log("[BookTicket] Tier computed:", {
+      requiredPersons,
+      selectedTierGender,
+      isGroupTier,
+      showCoupleSection,
+    });
+  }, [selectedTier, requiredPersons, selectedTierGender, isGroupTier, showCoupleSection]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tierParam = Number(params.get("tier") || 0);
+    const tierIndexParam = Number(params.get("tierIndex") ?? -1);
+    if (!Number.isNaN(tierIndexParam) && tierIndexParam >= 0) {
+      setSelectedTierIndex(tierIndexParam);
+    } else {
+      setSelectedTierIndex(null);
+    }
     if (tierParam) {
       setSelectedTierId(tierParam);
     }
   }, [location.search]);
 
   useEffect(() => {
+    if (availableTiers.length && selectedTierIndex !== null) {
+      const clampedIndex = Math.min(Math.max(selectedTierIndex, 0), availableTiers.length - 1);
+      if (clampedIndex !== selectedTierIndex) {
+        setSelectedTierIndex(clampedIndex);
+      }
+      return;
+    }
     if (availableTiers.length && !selectedTierId) {
       setSelectedTierId(Number(availableTiers[0]?.id || 0) || null);
     }
-  }, [availableTiers, selectedTierId]);
+  }, [availableTiers, selectedTierId, selectedTierIndex]);
 
   useEffect(() => {
     if (!isGroupTier) {
@@ -252,21 +286,35 @@ export default function BookTicket() {
     return getNumericPrice((event as any)?.price);
   }, [event, selectedTier]);
 
+  const sectionsForRender = useMemo(() => {
+    const sections = Array.isArray(formConfig.sections) ? [...formConfig.sections] : [];
+    if (showCoupleSection && !sections.some((section) => section.key === "couple_information")) {
+      sections.splice(1, 0, DEFAULT_COUPLE_SECTION);
+    }
+    return sections;
+  }, [formConfig.sections, showCoupleSection]);
+
   const enabledSections = useMemo(
     () =>
-      (formConfig.sections || []).filter((section) => {
+      (sectionsForRender || []).filter((section) => {
+        if (section.key === "couple_information") return showCoupleSection;
         if (!section.enabled) return false;
-        if (isGroupTier && section.key === "couple_information") return false;
         return true;
       }),
-    [formConfig.sections, isGroupTier],
+    [sectionsForRender, showCoupleSection],
   );
 
   const initializeValues = (config: BookingFormConfig) => {
     const initialValues: Record<string, Record<string, any>> = {};
 
-    for (const section of config.sections || []) {
-      if (!section.enabled) continue;
+    const sections = Array.isArray(config.sections) ? [...config.sections] : [];
+    if (showCoupleSection && !sections.some((section) => section.key === "couple_information")) {
+      sections.splice(1, 0, DEFAULT_COUPLE_SECTION);
+    }
+
+    for (const section of sections) {
+      if (section.key !== "couple_information" && !section.enabled) continue;
+      if (section.key === "couple_information" && !showCoupleSection) continue;
       initialValues[section.key] = {};
       for (const field of section.fields || []) {
         if (!field.enabled) continue;
@@ -292,6 +340,23 @@ export default function BookTicket() {
 
     setDynamicValues(initialValues);
   };
+
+  useEffect(() => {
+    if (!showCoupleSection) return;
+    setDynamicValues((prev) => {
+      if (prev?.couple_information) return prev;
+      const section = DEFAULT_COUPLE_SECTION;
+      const nextSection: Record<string, any> = {};
+      for (const field of section.fields || []) {
+        if (!field.enabled) continue;
+        nextSection[field.key] = "";
+      }
+      return {
+        ...prev,
+        couple_information: nextSection,
+      };
+    });
+  }, [showCoupleSection]);
 
   useEffect(() => {
     const loadConfig = async () => {
@@ -535,6 +600,15 @@ export default function BookTicket() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!isAccountApproved) {
+      toast({
+        title: "Account pending approval",
+        description: "Your account is pending approval. You can book tickets once you are approved.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (isSoldOut) {
       toast({ title: "Tickets unavailable", description: "This event is sold out.", variant: "destructive" });
       return;
@@ -633,7 +707,7 @@ export default function BookTicket() {
         return String(value ?? "").trim() !== "";
       });
 
-      const coupleDetails = !isGroupTier && coupleHasAny
+      const coupleDetails = showCoupleSection && coupleHasAny
         ? {
             name: pickValue(coupleValues, ["name", "full_name"]),
             email: pickValue(coupleValues, ["email"]),
@@ -643,7 +717,20 @@ export default function BookTicket() {
           }
         : null;
 
-      const isCoupleBooking = !isGroupTier && Boolean(coupleDetails);
+      if (showCoupleSection) {
+        const requiredKeys: (keyof NonNullable<typeof coupleDetails>)[] = ["name", "email", "phone", "nic"];
+        const missing = requiredKeys.filter((key) => !String(coupleDetails?.[key] || "").trim());
+        if (missing.length) {
+          toast({
+            title: "Validation Error",
+            description: "Couple information is required for this tier.",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
+      const isCoupleBooking = showCoupleSection && Boolean(coupleDetails);
       const groupMultiplier = isGroupTier ? requiredPersons : isCoupleBooking ? 2 : 1;
       const totalPrice = baseTicketPrice * groupMultiplier;
 
@@ -656,6 +743,7 @@ export default function BookTicket() {
       const finalData = {
         event_id: event?.id,
         tier_id: selectedTier?.id,
+        tier_index: selectedTierIndex,
         date: currentDate,
         phone: pickValue(personalValues, ["phone", "phone_number"]),
         nic: pickValue(personalValues, ["nic", "cnic"]),
@@ -698,7 +786,7 @@ export default function BookTicket() {
       <div className="max-w-5xl mx-auto">
         <div className="mb-4 sm:mb-6">
           <Button variant="ghost" onClick={() => navigate(-1)} className="mb-3 sm:mb-4 text-sm sm:text-base">
-            ? Back
+            Back
           </Button>
           <h1 className="text-3xl sm:text-4xl font-bold">Book Your Ticket</h1>
           <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">Complete your booking details below</p>

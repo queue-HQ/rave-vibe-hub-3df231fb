@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -42,6 +43,8 @@ export const UserProfileProvider = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hasTriedFetching, setHasTriedFetching] = useState(false);
+  const lastFetchAtRef = useRef(0);
+  const inflightRef = useRef<Promise<void> | null>(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -62,32 +65,49 @@ export const UserProfileProvider = ({
       return;
     }
 
+    const now = Date.now();
+    const minIntervalMs = 30_000;
+    if (inflightRef.current) {
+      return inflightRef.current;
+    }
+    if (lastFetchAtRef.current && now - lastFetchAtRef.current < minIntervalMs) {
+      setHasTriedFetching(true);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
+    lastFetchAtRef.current = now;
 
-    try {
-      const res = await getUserProfile();
+    const task = (async () => {
+      try {
+        const res = await getUserProfile();
 
-      if (res?.success && res.user) {
-        setUser(res.user);
-        if (typeof window !== "undefined") {
-          localStorage.setItem("user", JSON.stringify(res.user));
+        if (res?.success && res.user) {
+          setUser(res.user);
+          if (typeof window !== "undefined") {
+            localStorage.setItem("user", JSON.stringify(res.user));
+          }
+        } else {
+          setUser(null);
+          setError(res?.message ?? "Session expired");
+          logout();
+          redirectToLogin();
         }
-      } else {
+      } catch (err) {
         setUser(null);
-        setError(res?.message ?? "Session expired");
+        setError("Unable to load profile");
         logout();
         redirectToLogin();
+      } finally {
+        inflightRef.current = null;
+        setIsLoading(false);
+        setHasTriedFetching(true);
       }
-    } catch (err) {
-      setUser(null);
-      setError("Unable to load profile");
-      logout();
-      redirectToLogin();
-    } finally {
-      setIsLoading(false);
-      setHasTriedFetching(true);
-    }
+    })();
+
+    inflightRef.current = task;
+    return task;
   }, [redirectToLogin]);
 
   useEffect(() => {
