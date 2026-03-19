@@ -58,6 +58,8 @@ type TierPackageForm = {
   start_date: string;
   end_date: string;
   price: string;
+  required_persons: number;
+  gender: string;
 };
 
 const statusOptions = [
@@ -67,6 +69,7 @@ const statusOptions = [
 ];
 
 const eventTypeOptions = ["Indoor", "Outdoor"];
+const genderOptions = ["male", "female", "other"];
 const timeOptions = [
   "12:00 AM",
   "1:00 AM",
@@ -127,6 +130,8 @@ const emptyTierPackage = (id = 1): TierPackageForm => ({
   start_date: "",
   end_date: "",
   price: "",
+  required_persons: 1,
+  gender: "",
 });
 
 const normalizeTierDate = (value: string) => {
@@ -375,6 +380,8 @@ export default function EditorEventForm() {
         start_date: normalizeTierDate(tier.start_date),
         end_date: normalizeTierDate(tier.end_date),
         price: tier.price.trim(),
+        required_persons: Number(tier.required_persons) || 1,
+        gender: tier.gender || "",
       }))
       .filter((tier) => tier.name || tier.price || tier.start_date || tier.end_date);
 
@@ -502,6 +509,8 @@ export default function EditorEventForm() {
             start_date: normalizeTierDate(String(tier.start_date ?? "")),
             end_date: normalizeTierDate(String(tier.end_date ?? "")),
             price: String(tier.price ?? ""),
+            required_persons: Number(tier.required_persons ?? 1) || 1,
+            gender: String(tier.gender ?? ""),
           }))
         );
       } else {
@@ -514,6 +523,8 @@ export default function EditorEventForm() {
             start_date: normalizeTierDate(String(form.event_date || data.event_date || "")),
             end_date: normalizeTierDate(String(form.event_date || data.event_date || "")),
             price: String(data.event_price || ""),
+            required_persons: 1,
+            gender: "",
           },
         ]);
       }
@@ -710,6 +721,36 @@ export default function EditorEventForm() {
                             onChange={(e) => updateTierField(index, "price", e.target.value)}
                             placeholder="6899"
                           />
+                        </div>
+                      </div>
+
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label>Required Persons</Label>
+                          <Input
+                            type="number"
+                            min={1}
+                            value={tier.required_persons}
+                            onChange={(e) => updateTierField(index, "required_persons", Number(e.target.value) || 1)}
+                            placeholder="1"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label>Gender (optional)</Label>
+                          <Select value={tier.gender || "any"} onValueChange={(value) => updateTierField(index, "gender", value === "any" ? "" : value)}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="No restriction" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="any">No restriction</SelectItem>
+                              {genderOptions.map((option) => (
+                                <SelectItem key={option} value={option}>
+                                  {option}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
 

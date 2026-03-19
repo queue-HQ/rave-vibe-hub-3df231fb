@@ -43,6 +43,14 @@ interface CoupleBookingDetails {
   pair_code?: string;
 }
 
+interface BookingInvitee {
+  id?: number;
+  name?: string;
+  email?: string;
+  status?: string;
+  gender?: string;
+}
+
 interface AdminBooking {
   id: number;
   event_id: number;
@@ -58,10 +66,39 @@ interface AdminBooking {
   couple_name?: string;
   is_couple_booking?: boolean;
   couple_booking?: CoupleBookingDetails | null;
+  pair_code?: string;
+  is_guest_entry?: boolean;
+  invite_stats?: {
+    total: number;
+    accepted: number;
+    waiting: number;
+    rejected: number;
+  };
+  invitees?: BookingInvitee[];
+  is_group_booking?: boolean;
+  tier_name?: string;
+  tier_id?: number;
+  tier_gender?: string;
+  required_persons?: number;
+  group_size?: number;
 }
 
 const statuses = ["Waiting Approval", "Pending", "Confirm", "Cancel", "Request Rejected"] as const;
 const PER_PAGE = 15;
+
+const formatInviteStatus = (status?: string) => {
+  const normalized = String(status || "").toLowerCase();
+  if (normalized === "waiting approval") return "pending";
+  if (normalized === "pending" || normalized === "confirm") return "accepted";
+  if (normalized === "request rejected" || normalized === "cancel") return "rejected";
+  return status || "pending";
+};
+
+const formatGenderLabel = (gender?: string) => {
+  const normalized = String(gender || "").toLowerCase().trim();
+  if (!normalized) return "";
+  return normalized;
+};
 
 export default function EditorBookings() {
   const navigate = useNavigate();
@@ -434,6 +471,7 @@ export default function EditorBookings() {
                     <th className="py-3">Email</th>
                     {/* <th className="py-3">Phone</th> */}
                     <th className="py-3">Status</th>
+                    <th className="py-3">Tier</th>
                     <th className="py-3">Event</th>
                     {/* <th className="py-3">CNIC</th> */}
                     <th className="py-3">Created</th>
@@ -477,6 +515,36 @@ export default function EditorBookings() {
                             ))}
                           </SelectContent>
                         </Select>
+                        {booking.invitees && booking.invitees.length > 0 ? (
+                          <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+                            {booking.invitees.map((invitee) => {
+                              const genderLabel = formatGenderLabel(invitee.gender);
+                              return (
+                                <div key={invitee.id ?? invitee.email ?? invitee.name} className="flex flex-wrap gap-1">
+                                  <span className="font-medium text-foreground">
+                                    {invitee.name || invitee.email || "Guest"}
+                                  </span>
+                                  {genderLabel ? <span className="capitalize">({genderLabel})</span> : null}
+                                  <span>- {formatInviteStatus(invitee.status)}</span>
+                                </div>
+                              );
+                            })}
+                            {booking.invite_stats && booking.invite_stats.total > 0 ? (
+                              <p className="text-xs text-muted-foreground mt-2">
+                                Invites: {booking.invite_stats.accepted}/{booking.invite_stats.total} accepted
+                              </p>
+                            ) : null}
+                          </div>
+                        ) : booking.invite_stats && booking.invite_stats.total > 0 ? (
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Invites: {booking.invite_stats.accepted}/{booking.invite_stats.total} accepted
+                          </p>
+                        ) : null}
+                      </td>
+                      <td className="py-3">
+                        {booking.is_group_booking
+                          ? booking.tier_name || (booking.tier_id ? `Tier #${booking.tier_id}` : "-")
+                          : "-"}
                       </td>
                       <td className="py-3">{booking.event_name || "-"}</td>
                       {/* <td className="py-3">

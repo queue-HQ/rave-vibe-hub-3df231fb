@@ -43,6 +43,15 @@ export const eventBooking = async (data: any) => {
   return res.data;
 };
 
+export const getBookingFormConfig = async (eventId?: number | string) => {
+  const numericEventId = Number(eventId);
+  const params = Number.isFinite(numericEventId) && numericEventId > 0
+    ? { event_id: numericEventId }
+    : undefined;
+  const res = await api.get("/booking-form-config", { params });
+  return res.data;
+};
+
 
 export const sendContactForm = async (data: any) => {
   const res = await axios.post(`${baseUrl}/wp-json/contact/v1/send`, data);

@@ -48,6 +48,7 @@ import EditorPartners from "@/pages/editor/EditorPartners";
 import EditorPartnerForm from "@/pages/editor/EditorPartnerForm";
 import EditorPartnersAccess from "@/pages/editor/EditorPartnersAccess";
 import EditorManualTicketing from "@/pages/editor/EditorManualTicketing";
+import EditorBookingFormBuilder from "@/pages/editor/EditorBookingFormBuilder";
 import PartnerDashboard from "@/pages/partner/PartnerDashboard";
 import PartnerEvents from "@/pages/partner/PartnerEvents";
 import PartnerBookings from "@/pages/partner/PartnerBookings";
@@ -300,6 +301,17 @@ const App = () => (
                   <ProtectedRoute>
                     <RoleGuard allowed={["administrator"]}>
                       <EditorManualTicketing />
+                    </RoleGuard>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/editor/booking-form-builder"
+                element={
+                  <ProtectedRoute>
+                    <RoleGuard allowed={["administrator"]}>
+                      <EditorBookingFormBuilder />
                     </RoleGuard>
                   </ProtectedRoute>
                 }

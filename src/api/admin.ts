@@ -1,6 +1,6 @@
 import api from "@/lib/axios";
 
-export const getAdminOverview = async (params: { range?: number } = {}) => {
+export const getAdminOverview = async (params: { range?: number; event_id?: number } = {}) => {
   const res = await api.get("/admin/overview", { params });
   return res.data;
 };
@@ -236,4 +236,63 @@ export type CreatePartnerPayload = {
 export const createAdminPartner = async (data: CreatePartnerPayload) => {
   const res = await api.post("/admin/partners", data);
   return res.data;
+};
+
+export type BookingBuilderFieldOption = {
+  label: string;
+  value: string;
+};
+
+export type BookingBuilderValidation = {
+  min?: number;
+  max?: number;
+  minLength?: number;
+  maxLength?: number;
+  pattern?: string;
+};
+
+export type BookingBuilderField = {
+  id: string;
+  key: string;
+  label: string;
+  type: "text" | "email" | "number" | "radio" | "checkbox" | "select" | "textarea" | "file";
+  required: boolean;
+  enabled: boolean;
+  placeholder?: string;
+  help_text?: string;
+  options?: BookingBuilderFieldOption[];
+  validation?: BookingBuilderValidation;
+};
+
+export type BookingBuilderSection = {
+  id: string;
+  key: string;
+  title: string;
+  description?: string;
+  enabled: boolean;
+  fields: BookingBuilderField[];
+};
+
+export type BookingFormConfig = {
+  settings: {
+    force_couple_for_male: boolean;
+  };
+  sections: BookingBuilderSection[];
+};
+
+export const getAdminBookingFormConfig = async (eventId?: number | null) => {
+  const params = eventId && eventId > 0 ? { event_id: eventId } : undefined;
+  const res = await api.get("/admin/booking-form-config", { params });
+  return res.data as { success: boolean; data: BookingFormConfig; message?: string };
+};
+
+export const saveAdminBookingFormConfig = async (config: BookingFormConfig, eventId?: number | null) => {
+  const payload: Record<string, unknown> = { config };
+  if (eventId && eventId > 0) {
+    payload.event_id = eventId;
+  } else {
+    payload.scope = "all";
+  }
+  const res = await api.post("/admin/booking-form-config", payload);
+  return res.data as { success: boolean; data: BookingFormConfig; message?: string };
 };
