@@ -16,6 +16,7 @@ import { Navbar } from "@/components/Navbar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@radix-ui/react-avatar";
 import { useEvents } from "@/context/EventsContext";
+import { useUserProfile } from "@/context/UserProfileContext";
 import slugify from "@/lib/slugify";
 import { checkEventStatus } from "@/lib/utils";
 import Footer from "@/components/Footer";
@@ -24,6 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 const SignleEventPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { events, isLoading, error, refetch } = useEvents();
+  const { user } = useUserProfile();
   const { toast } = useToast();
 
   const [now, setNow] = useState(() => new Date());
@@ -105,11 +107,23 @@ const SignleEventPage = () => {
     return () => window.clearInterval(id);
   }, []);
 
+  const normalizeGender = (value: unknown) => {
+    const gender = String(value || "").toLowerCase().trim();
+    return ["male", "female", "other"].includes(gender) ? gender : "";
+  };
+
+  const userGender = normalizeGender((user as any)?.gender);
+
   const activeTiers = useMemo(() => {
     if (!event || typeof event !== "object") return [];
     const tiers = (event as any).active_tiers;
     return Array.isArray(tiers) ? tiers : [];
   }, [event]);
+
+  const visibleTiers = useMemo(() => {
+    if (!activeTiers.length) return [];
+    return activeTiers;
+  }, [activeTiers]);
 
   const formatCountdown = (endAt: string) => {
     if (!endAt) return "";
@@ -400,13 +414,24 @@ const SignleEventPage = () => {
     {/* Ticket Card */}
     <Card>
       <CardContent className="p-6 space-y-4">
-        {activeTiers.length > 0 ? (
+        {visibleTiers.length > 0 ? (
           <div className="space-y-4">
-            {activeTiers.map((tier: any) => (
+            {visibleTiers.map((tier: any) => {
+              const tierGender = normalizeGender(tier?.gender);
+              const isTierAllowed = !tierGender || !userGender || tierGender === userGender;
+              const isGenderLocked = !isTierAllowed;
+              const isDisabled = isSoldOut || isGenderLocked;
+              return (
               <div key={tier.id} className="rounded-lg border p-4 space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-sm font-medium">{tier.name || "Tier"}</p>
+                    {tier.gender ? (
+                      <p className="text-xs text-muted-foreground capitalize">Gender: {tier.gender}</p>
+                    ) : null}
+                    {tier.required_persons ? (
+                      <p className="text-xs text-muted-foreground">Required persons: {tier.required_persons}</p>
+                    ) : null}
                     {/* <p className="text-xs text-muted-foreground">
                       {tier.start_date} {tier.start_time} - {tier.end_date} {tier.end_time
                     </p> */}
@@ -420,13 +445,22 @@ const SignleEventPage = () => {
                 </div>
                 <br />
 
-                <Link to={`/book-ticket/${event?.id}?tier=${tier.id}`} className="mt-5" onClick={handleBuyTicketClick}>
-                  <Button className="w-full h-12 text-lg font-bold" disabled={isSoldOut}>
+                <Link
+                  to={`/book-ticket/${event?.id}?tier=${tier.id}`}
+                  className={`mt-5${isGenderLocked ? " pointer-events-none" : ""}`}
+                  onClick={handleBuyTicketClick}
+                  aria-disabled={isDisabled}
+                  tabIndex={isDisabled ? -1 : undefined}
+                >
+                  <Button
+                    className={`w-full h-12 text-lg font-bold${!isTierAllowed ? " opacity-60 blur-[1px]" : ""}`}
+                    disabled={isDisabled}
+                  >
                     {isSoldOut ? "Sold Out" : "Buy Ticket"}
                   </Button>
                 </Link>
               </div>
-            ))}
+            )})}
           </div>
         ) : (
           <div className="space-y-3">

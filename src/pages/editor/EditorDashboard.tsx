@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Users, CalendarDays, CheckCircle, Clock, Activity, Ticket, UserPlus } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { AnalyticsChart } from "@/components/dashboard/AnalyticsChart";
 import { AnalyticsSummary, type SummaryMetric } from "@/components/dashboard/AnalyticsSummary";
@@ -42,6 +44,11 @@ interface AdminEventSummary {
   time?: string;
 }
 
+interface EventOption {
+  id: number;
+  title: string;
+}
+
 type OverviewStatKey = keyof Pick<OverviewData, "total_users" | "total_events" | "tickets_bought" | "pending_bookings">;
 
 const RANGE_OPTIONS = [
@@ -68,11 +75,14 @@ const EditorDashboard = () => {
   const [overview, setOverview] = useState<OverviewData | null>(null);
   const [overviewLoading, setOverviewLoading] = useState(true);
   const [range, setRange] = useState<number>(7);
+  const [eventOptions, setEventOptions] = useState<EventOption[]>([]);
+  const [selectedEventValue, setSelectedEventValue] = useState<string>("all");
   const [recentUsers, setRecentUsers] = useState<AdminUserSummary[]>([]);
   const [recentUsersLoading, setRecentUsersLoading] = useState(true);
   const [recentEvents, setRecentEvents] = useState<AdminEventSummary[]>([]);
   const [recentEventsLoading, setRecentEventsLoading] = useState(true);
   const navigate = useNavigate();
+  const selectedEventId = selectedEventValue === "all" ? undefined : Number(selectedEventValue);
 
   useEffect(() => {
     let isMounted = true;
@@ -80,7 +90,7 @@ const EditorDashboard = () => {
     (async () => {
       try {
         setOverviewLoading(true);
-        const res = await getAdminOverview({ range });
+        const res = await getAdminOverview({ range, event_id: selectedEventId });
         if (!isMounted) return;
         if (res?.success) {
           setOverview(res.data ?? null);
@@ -101,7 +111,52 @@ const EditorDashboard = () => {
     return () => {
       isMounted = false;
     };
-  }, [range]);
+  }, [range, selectedEventId]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    (async () => {
+      try {
+        const allEvents: EventOption[] = [];
+        let page = 1;
+        let totalPages = 1;
+
+        do {
+          const res = await getAdminEvents({ page, per_page: 50 });
+          if (!isMounted) return;
+          if (!res?.success) {
+            toast.error(res?.message || "Failed to load events");
+            break;
+          }
+
+          const rows = Array.isArray(res.data) ? res.data : [];
+          allEvents.push(...rows.map((event: AdminEventSummary) => ({ id: event.id, title: event.title })));
+          totalPages = Math.max(1, Number(res?.pagination?.total_pages ?? 1));
+          page += 1;
+        } while (page <= totalPages);
+
+        if (isMounted) {
+          const seen = new Set<number>();
+          setEventOptions(
+            allEvents.filter((event) => {
+              if (!event.id || seen.has(event.id)) return false;
+              seen.add(event.id);
+              return true;
+            })
+          );
+        }
+      } catch (error: any) {
+        if (isMounted) {
+          toast.error(error.response?.data?.message || "Failed to load events");
+        }
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -176,26 +231,28 @@ const EditorDashboard = () => {
       {
         label: "Analytics Total",
         value: formatNumber(overview?.analytics_total),
-        description: overview ? `Across the last ${overview.range_days ?? range} days` : undefined,
+        description: overview
+          ? `Across the last ${overview.range_days ?? range} days${selectedEventId ? " for selected event" : ""}`
+          : undefined,
         icon: Activity,
         trend: "positive",
       },
       {
         label: "Tickets Bought",
         value: formatNumber(overview?.tickets_bought),
-        description: "All confirmed ticket purchases",
+        description: selectedEventId ? "Confirmed purchases for selected event" : "All confirmed ticket purchases",
         icon: Ticket,
         trend: "positive",
       },
       {
         label: "Today Registrations",
         value: formatNumber(overview?.today_registrations),
-        description: "New users today",
+        description: selectedEventId ? "Today's bookings for selected event" : "Today's bookings across all events",
         icon: UserPlus,
         trend: ((overview?.today_registrations ?? 0) > 0 ? "positive" : "neutral") as SummaryMetric["trend"],
       },
     ];
-  }, [overview, range]);
+  }, [overview, range, selectedEventId]);
 
   const recentUserRows = useMemo(() => {
     return recentUsers.map((user) => ({
@@ -219,6 +276,31 @@ const EditorDashboard = () => {
     <EditorLayout title="Admin Dashboard">
       <div className="min-h-screen bg-background">
       <main className="p-6 max-w-7xl mx-auto">
+        <section className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
+          <div className="w-full sm:w-[320px]">
+            <Select value={selectedEventValue} onValueChange={setSelectedEventValue}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select event" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Events</SelectItem>
+                {eventOptions.map((event) => (
+                  <SelectItem key={event.id} value={String(event.id)}>
+                    {event.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button
+            type="button"
+            variant={selectedEventValue === "all" ? "default" : "outline"}
+            onClick={() => setSelectedEventValue("all")}
+          >
+            All
+          </Button>
+        </section>
+
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           {statCards.map((stat, index) => (
             <StatCard

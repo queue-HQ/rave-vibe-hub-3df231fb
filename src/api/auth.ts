@@ -43,8 +43,12 @@ export const eventBooking = async (data: any) => {
   return res.data;
 };
 
-export const getBookingFormConfig = async () => {
-  const res = await api.get("/booking-form-config");
+export const getBookingFormConfig = async (eventId?: number | string) => {
+  const numericEventId = Number(eventId);
+  const params = Number.isFinite(numericEventId) && numericEventId > 0
+    ? { event_id: numericEventId }
+    : undefined;
+  const res = await api.get("/booking-form-config", { params });
   return res.data;
 };
 

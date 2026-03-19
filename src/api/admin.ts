@@ -1,6 +1,6 @@
 import api from "@/lib/axios";
 
-export const getAdminOverview = async (params: { range?: number } = {}) => {
+export const getAdminOverview = async (params: { range?: number; event_id?: number } = {}) => {
   const res = await api.get("/admin/overview", { params });
   return res.data;
 };
@@ -280,12 +280,19 @@ export type BookingFormConfig = {
   sections: BookingBuilderSection[];
 };
 
-export const getAdminBookingFormConfig = async () => {
-  const res = await api.get("/admin/booking-form-config");
+export const getAdminBookingFormConfig = async (eventId?: number | null) => {
+  const params = eventId && eventId > 0 ? { event_id: eventId } : undefined;
+  const res = await api.get("/admin/booking-form-config", { params });
   return res.data as { success: boolean; data: BookingFormConfig; message?: string };
 };
 
-export const saveAdminBookingFormConfig = async (config: BookingFormConfig) => {
-  const res = await api.post("/admin/booking-form-config", { config });
+export const saveAdminBookingFormConfig = async (config: BookingFormConfig, eventId?: number | null) => {
+  const payload: Record<string, unknown> = { config };
+  if (eventId && eventId > 0) {
+    payload.event_id = eventId;
+  } else {
+    payload.scope = "all";
+  }
+  const res = await api.post("/admin/booking-form-config", payload);
   return res.data as { success: boolean; data: BookingFormConfig; message?: string };
 };

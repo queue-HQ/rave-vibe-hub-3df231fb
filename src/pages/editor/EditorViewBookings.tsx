@@ -22,6 +22,14 @@ interface CoupleBookingDetails {
   qr_id?: string;
 }
 
+interface BookingInvitee {
+  id?: number;
+  name?: string;
+  email?: string;
+  status?: string;
+  gender?: string;
+}
+
 interface AdminBooking {
   id: number;
   event_id: number;
@@ -41,9 +49,38 @@ interface AdminBooking {
   is_couple_booking?: boolean;
   couple_name?: string;
   couple_booking?: CoupleBookingDetails | null;
+  pair_code?: string;
+  is_guest_entry?: boolean;
+  invite_stats?: {
+    total: number;
+    accepted: number;
+    waiting: number;
+    rejected: number;
+  };
+  invitees?: BookingInvitee[];
+  is_group_booking?: boolean;
+  tier_name?: string;
+  tier_id?: number;
+  tier_gender?: string;
+  required_persons?: number;
+  group_size?: number;
 }
 
 const statuses = ["Waiting Approval", "Pending", "Confirm", "Cancel", "Request Rejected"] as const;
+
+const formatInviteStatus = (status?: string) => {
+  const normalized = String(status || "").toLowerCase();
+  if (normalized === "waiting approval") return "pending";
+  if (normalized === "pending" || normalized === "confirm") return "accepted";
+  if (normalized === "request rejected" || normalized === "cancel") return "rejected";
+  return status || "pending";
+};
+
+const formatGenderLabel = (gender?: string) => {
+  const normalized = String(gender || "").toLowerCase().trim();
+  if (!normalized) return "";
+  return normalized;
+};
 
 export default function EditorViewBookings() {
   const navigate = useNavigate();
@@ -103,16 +140,42 @@ export default function EditorViewBookings() {
 
   const detailRows = useMemo(() => {
     if (!booking) return [];
+    const invitees = booking.invitees ?? [];
+    const inviteesContent = invitees.length ? (
+      <div className="space-y-1 text-sm text-foreground">
+        {invitees.map((invitee) => {
+          const genderLabel = formatGenderLabel(invitee.gender);
+          return (
+            <div key={invitee.id ?? invitee.email ?? invitee.name} className="flex flex-wrap gap-1">
+              <span className="font-medium">
+                {invitee.name || invitee.email || "Guest"}
+              </span>
+              {genderLabel ? <span className="capitalize">({genderLabel})</span> : null}
+              <span>- {formatInviteStatus(invitee.status)}</span>
+            </div>
+          );
+        })}
+      </div>
+    ) : (
+      "-"
+    );
     return [
       { label: "Booking ID", value: `#${booking.id}` },
       { label: "QR ID", value: booking.qr_id || "-" },
       //   { label: "Event ID", value: booking.event_id || "-" },
       { label: "Event Name", value: booking.event_name || "-" },
+      booking.tier_name || booking.is_group_booking
+        ? { label: "Tier", value: booking.tier_name || (booking.tier_id ? `Tier #${booking.tier_id}` : "-") }
+        : null,
       { label: "Name", value: booking.name || "-" },
       { label: "Email", value: booking.email || "-" },
       { label: "Phone", value: booking.phone || "-" },
       { label: "Status", value: booking.user_status || "-" },
       { label: "User Status", value: booking.status || "-" },
+      booking.invite_stats
+        ? { label: "Invite Progress", value: `${booking.invite_stats.accepted}/${booking.invite_stats.total} accepted` }
+        : null,
+      invitees.length ? { label: "Invitees", value: inviteesContent } : null,
       { label: "CNIC", value: booking.nic || "-" },
       { label: "Car Number", value: booking.carNumber || "-" },
       { label: "Price", value: booking.price ? `PKR ${booking.price}` : "-" },
@@ -133,7 +196,7 @@ export default function EditorViewBookings() {
           ? new Date(booking.created_at).toLocaleString()
           : "-",
       },
-    ];
+    ].filter(Boolean) as { label: string; value: any }[];
   }, [booking]);
 
   const renderContent = () => {
@@ -171,7 +234,11 @@ export default function EditorViewBookings() {
               {detailRows.map((row) => (
                 <div key={row.label} className="rounded-lg border p-3">
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">{row.label}</p>
-                  <p className="text-base font-medium text-foreground">{row.value}</p>
+                  {typeof row.value === "string" || typeof row.value === "number" ? (
+                    <p className="text-base font-medium text-foreground">{row.value}</p>
+                  ) : (
+                    <div className="text-sm text-foreground">{row.value}</div>
+                  )}
                 </div>
               ))}
             </div>

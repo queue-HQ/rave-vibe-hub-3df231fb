@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
+  getAdminEvents,
   getAdminBookingFormConfig,
   saveAdminBookingFormConfig,
   type BookingBuilderField,
@@ -51,8 +52,16 @@ const optionsToText = (options: { label: string; value: string }[] = []) => {
   return options.map((opt) => `${opt.label}|${opt.value}`).join("\n");
 };
 
+type EventOption = {
+  id: number;
+  title: string;
+  event_date?: string;
+};
+
 export default function EditorBookingFormBuilder() {
   const [config, setConfig] = useState<BookingFormConfig | null>(null);
+  const [eventOptions, setEventOptions] = useState<EventOption[]>([]);
+  const [selectedEventId, setSelectedEventId] = useState<string>("all");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [openSections, setOpenSections] = useState<string[]>([]);
@@ -60,11 +69,31 @@ export default function EditorBookingFormBuilder() {
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   const sections = useMemo(() => config?.sections || [], [config]);
+  const selectedEventNumeric = useMemo(() => {
+    const parsed = Number(selectedEventId);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+  }, [selectedEventId]);
 
-  const loadConfig = async () => {
+  const loadEvents = async () => {
+    try {
+      const res = await getAdminEvents({ page: 1, per_page: 100, status: "publish" });
+      const events = Array.isArray(res?.data) ? res.data : [];
+      setEventOptions(
+        events.map((item: any) => ({
+          id: Number(item.id),
+          title: String(item.title || `Event ${item.id}`),
+          event_date: item.event_date ? String(item.event_date) : "",
+        })),
+      );
+    } catch {
+      setEventOptions([]);
+    }
+  };
+
+  const loadConfig = async (eventId: number | null = null) => {
     try {
       setLoading(true);
-      const res = await getAdminBookingFormConfig();
+      const res = await getAdminBookingFormConfig(eventId);
       if (res?.success && res.data) {
         setConfig(res.data);
         setOpenSections([]);
@@ -80,7 +109,10 @@ export default function EditorBookingFormBuilder() {
   };
 
   useEffect(() => {
-    loadConfig();
+    (async () => {
+      await loadEvents();
+      await loadConfig(null);
+    })();
   }, []);
 
   useEffect(() => {
@@ -169,7 +201,7 @@ export default function EditorBookingFormBuilder() {
     if (!config) return;
     try {
       setSaving(true);
-      const res = await saveAdminBookingFormConfig(config);
+      const res = await saveAdminBookingFormConfig(config, selectedEventNumeric);
       if (res?.success && res.data) {
         setConfig(res.data);
         toast.success("Booking form config saved");
@@ -212,7 +244,7 @@ export default function EditorBookingFormBuilder() {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Checkout Form Settings</CardTitle>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={loadConfig} disabled={loading || saving}>
+            <Button variant="outline" onClick={() => loadConfig(selectedEventNumeric)} disabled={loading || saving}>
               Refresh
             </Button>
             <Button onClick={handleSave} disabled={saving}>
@@ -222,20 +254,32 @@ export default function EditorBookingFormBuilder() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="rounded-lg border p-4">
-            <Label className="mb-2 block">Force Couple For Male Users</Label>
-            <div className="flex items-center gap-2">
-              <Checkbox
-                checked={Boolean(config.settings?.force_couple_for_male)}
-                onCheckedChange={(checked) =>
-                  setConfig((prev) =>
-                    prev
-                      ? { ...prev, settings: { ...prev.settings, force_couple_for_male: Boolean(checked) } }
-                      : prev,
-                  )
-                }
-              />
+            <Label className="mb-2 block">Event Scope</Label>
+            <div className="grid gap-3 md:max-w-md">
+              <Select
+                value={selectedEventId}
+                onValueChange={async (value) => {
+                  setSelectedEventId(value);
+                  const parsed = Number(value);
+                  const eventId = Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+                  await loadConfig(eventId);
+                }}
+                disabled={loading || saving}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select event scope" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Events</SelectItem>
+                  {eventOptions.map((event) => (
+                    <SelectItem key={event.id} value={String(event.id)}>
+                      {event.title}{event.event_date ? ` (${event.event_date})` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <span className="text-sm text-muted-foreground">
-                If enabled, male attendees must fill couple information.
+                Choose a specific event to customize fields for it, or select All Events to apply common fields everywhere.
               </span>
             </div>
           </div>

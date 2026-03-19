@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Calendar, Clock, Loader2, MapPin, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -49,6 +49,23 @@ type BookingFormConfig = {
     force_couple_for_male?: boolean;
   };
   sections: BookingSection[];
+};
+
+type EventTier = {
+  id: number;
+  name?: string;
+  price?: string | number;
+  required_persons?: number;
+  requiredPersons?: number;
+  gender?: string;
+};
+
+type AdditionalPerson = {
+  name: string;
+  email: string;
+  phone: string;
+  nic: string;
+  gender: string;
 };
 
 const DEFAULT_FORM_CONFIG: BookingFormConfig = {
@@ -125,6 +142,11 @@ const normalizeString = (value: unknown) => {
   return String(value);
 };
 
+const normalizeGender = (value: unknown) => {
+  const gender = String(value || "").toLowerCase().trim();
+  return ["male", "female", "other"].includes(gender) ? gender : "";
+};
+
 async function uploadFile(file: File) {
   const data = new FormData();
   data.append("file", file);
@@ -150,6 +172,7 @@ export default function BookTicket() {
   const { user } = useUserProfile();
   const { id } = useParams();
   const { events, isLoading } = useEvents();
+  const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -158,8 +181,61 @@ export default function BookTicket() {
   const [dynamicValues, setDynamicValues] = useState<Record<string, Record<string, any>>>({});
   const [fileValues, setFileValues] = useState<Record<string, File | null>>({});
   const [loadingFormConfig, setLoadingFormConfig] = useState(true);
+  const [selectedTierId, setSelectedTierId] = useState<number | null>(null);
+  const [additionalPersons, setAdditionalPersons] = useState<AdditionalPerson[]>([]);
 
   const event = events.find((item) => String(item.id) === String(id));
+  const userGender = normalizeGender((user as any)?.gender);
+
+  const availableTiers: EventTier[] = useMemo(() => {
+    const active = (event as any)?.active_tiers;
+    const all = (event as any)?.tier_packages;
+    const tiers = Array.isArray(active) && active.length ? active : Array.isArray(all) ? all : [];
+    return tiers.filter((tier: any) => {
+      const tierGender = normalizeGender(tier?.gender);
+      if (!tierGender) return true;
+      if (!userGender) return true;
+      return tierGender === userGender;
+    });
+  }, [event, userGender]);
+
+  const selectedTier = useMemo(() => {
+    if (!availableTiers.length) return null;
+    if (!selectedTierId) return availableTiers[0] ?? null;
+    return availableTiers.find((tier) => Number(tier.id) === Number(selectedTierId)) ?? availableTiers[0] ?? null;
+  }, [availableTiers, selectedTierId]);
+
+  const requiredPersons = Math.max(1, Number(selectedTier?.required_persons ?? selectedTier?.requiredPersons ?? 1) || 1);
+  const isGroupTier = requiredPersons > 1;
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tierParam = Number(params.get("tier") || 0);
+    if (tierParam) {
+      setSelectedTierId(tierParam);
+    }
+  }, [location.search]);
+
+  useEffect(() => {
+    if (availableTiers.length && !selectedTierId) {
+      setSelectedTierId(Number(availableTiers[0]?.id || 0) || null);
+    }
+  }, [availableTiers, selectedTierId]);
+
+  useEffect(() => {
+    if (!isGroupTier) {
+      setAdditionalPersons([]);
+      return;
+    }
+    const count = Math.max(0, requiredPersons - 1);
+    setAdditionalPersons((prev) => {
+      const next = [...prev];
+      while (next.length < count) {
+        next.push({ name: "", email: "", phone: "", nic: "", gender: "" });
+      }
+      return next.slice(0, count);
+    });
+  }, [isGroupTier, requiredPersons]);
 
   const capacityLimit = Number(event?.capacity_limit) || 0;
   const bookedTickets = Number(event?.booked_tickets) || 0;
@@ -170,11 +246,20 @@ export default function BookTicket() {
       : null;
 
   const isSoldOut = typeof availableTickets === "number" && availableTickets <= 0;
-  const baseTicketPrice = useMemo(() => getNumericPrice((event as any)?.price), [event]);
+  const baseTicketPrice = useMemo(() => {
+    const tierPrice = getNumericPrice(selectedTier?.price);
+    if (tierPrice > 0) return tierPrice;
+    return getNumericPrice((event as any)?.price);
+  }, [event, selectedTier]);
 
   const enabledSections = useMemo(
-    () => (formConfig.sections || []).filter((section) => section.enabled),
-    [formConfig.sections],
+    () =>
+      (formConfig.sections || []).filter((section) => {
+        if (!section.enabled) return false;
+        if (isGroupTier && section.key === "couple_information") return false;
+        return true;
+      }),
+    [formConfig.sections, isGroupTier],
   );
 
   const initializeValues = (config: BookingFormConfig) => {
@@ -212,7 +297,7 @@ export default function BookTicket() {
     const loadConfig = async () => {
       try {
         setLoadingFormConfig(true);
-        const res = await getBookingFormConfig();
+        const res = await getBookingFormConfig(id);
         const config = res?.success && res?.data ? res.data : DEFAULT_FORM_CONFIG;
         setFormConfig(config);
         initializeValues(config);
@@ -225,7 +310,7 @@ export default function BookTicket() {
     };
 
     loadConfig();
-  }, [user?.email]);
+  }, [id, user?.email]);
 
   const setFieldValue = (sectionKey: string, fieldKey: string, value: any) => {
     setDynamicValues((prev) => ({
@@ -235,6 +320,12 @@ export default function BookTicket() {
         [fieldKey]: value,
       },
     }));
+  };
+
+  const updateAdditionalPerson = (index: number, field: keyof AdditionalPerson, value: string) => {
+    setAdditionalPersons((prev) =>
+      prev.map((person, i) => (i === index ? { ...person, [field]: value } : person))
+    );
   };
 
   const validateForm = () => {
@@ -455,6 +546,66 @@ export default function BookTicket() {
       return;
     }
 
+    if (availableTiers.length > 0 && !selectedTier) {
+      toast({ title: "Validation Error", description: "Please select a tier.", variant: "destructive" });
+      return;
+    }
+
+    const tierGender = normalizeGender((selectedTier as any)?.gender);
+    if (tierGender && userGender && tierGender !== userGender) {
+      toast({ title: "Validation Error", description: "Selected tier is not available for your gender.", variant: "destructive" });
+      return;
+    }
+
+    if (isGroupTier) {
+      const expected = Math.max(0, requiredPersons - 1);
+      if (additionalPersons.length !== expected) {
+        toast({ title: "Validation Error", description: `Please add exactly ${expected} additional person(s).`, variant: "destructive" });
+        return;
+      }
+
+      let hasFemale = false;
+      for (let i = 0; i < additionalPersons.length; i += 1) {
+        const person = additionalPersons[i];
+        if (!person.name.trim()) {
+          toast({ title: "Validation Error", description: `Additional person ${i + 1} name is required.`, variant: "destructive" });
+          return;
+        }
+        if (!person.email.trim()) {
+          toast({ title: "Validation Error", description: `Additional person ${i + 1} email is required.`, variant: "destructive" });
+          return;
+        }
+        if (!person.phone.trim()) {
+          toast({ title: "Validation Error", description: `Additional person ${i + 1} phone is required.`, variant: "destructive" });
+          return;
+        }
+        if (!person.nic.trim()) {
+          toast({ title: "Validation Error", description: `Additional person ${i + 1} CNIC is required.`, variant: "destructive" });
+          return;
+        }
+        const personGender = normalizeGender(person.gender);
+        if (!personGender) {
+          toast({ title: "Validation Error", description: `Additional person ${i + 1} gender is required.`, variant: "destructive" });
+          return;
+        }
+        if (personGender === "female") hasFemale = true;
+
+        if (tierGender === "female" && personGender !== "female") {
+          toast({ title: "Validation Error", description: `Additional person ${i + 1} must be female.`, variant: "destructive" });
+          return;
+        }
+        if (tierGender === "other" && personGender !== "other") {
+          toast({ title: "Validation Error", description: `Additional person ${i + 1} must be other.`, variant: "destructive" });
+          return;
+        }
+      }
+
+      if (tierGender === "male" && !hasFemale) {
+        toast({ title: "Validation Error", description: "At least one additional person must be female.", variant: "destructive" });
+        return;
+      }
+    }
+
     try {
       setSubmitting(true);
 
@@ -482,7 +633,7 @@ export default function BookTicket() {
         return String(value ?? "").trim() !== "";
       });
 
-      const coupleDetails = coupleHasAny
+      const coupleDetails = !isGroupTier && coupleHasAny
         ? {
             name: pickValue(coupleValues, ["name", "full_name"]),
             email: pickValue(coupleValues, ["email"]),
@@ -492,8 +643,9 @@ export default function BookTicket() {
           }
         : null;
 
-      const isCoupleBooking = Boolean(coupleDetails);
-      const totalPrice = baseTicketPrice * (isCoupleBooking ? 2 : 1);
+      const isCoupleBooking = !isGroupTier && Boolean(coupleDetails);
+      const groupMultiplier = isGroupTier ? requiredPersons : isCoupleBooking ? 2 : 1;
+      const totalPrice = baseTicketPrice * groupMultiplier;
 
       const paymentProofUrl =
         pickValue(payloadSections.proof_of_payment || {}, ["payment_proof", "proof", "screenshot"]) ||
@@ -503,13 +655,15 @@ export default function BookTicket() {
 
       const finalData = {
         event_id: event?.id,
+        tier_id: selectedTier?.id,
         date: currentDate,
         phone: pickValue(personalValues, ["phone", "phone_number"]),
         nic: pickValue(personalValues, ["nic", "cnic"]),
         carNumber: pickValue(personalValues, ["carNumber", "car_number"]),
         payment_image: paymentProofUrl,
-        additionalPerson: coupleDetails,
-        couple_details: coupleDetails,
+        additionalPerson: isGroupTier ? null : coupleDetails,
+        couple_details: isGroupTier ? null : coupleDetails,
+        additional_persons: isGroupTier ? additionalPersons : undefined,
         is_couple_booking: isCoupleBooking,
         ticket_price: totalPrice,
         dynamic_form: payloadSections,
@@ -583,6 +737,13 @@ export default function BookTicket() {
                   <span className="text-muted-foreground text-sm sm:text-base">Ticket Price</span>
                   <span className="text-xl sm:text-xl font-bold text-primary">{formatPriceLabel(baseTicketPrice, event?.price)}</span>
                 </div>
+                {selectedTier ? (
+                  <div className="text-sm text-muted-foreground space-y-1">
+                    <p>Tier: {selectedTier.name || `Tier #${selectedTier.id}`}</p>
+                    <p>Required Persons: {requiredPersons}</p>
+                    <p>Gender: {selectedTier.gender ? selectedTier.gender : "Any"}</p>
+                  </div>
+                ) : null}
                 {capacityLimit ? (
                   <p className="text-sm text-muted-foreground">{Math.max(availableTickets ?? 0, 0)} seats left out of {capacityLimit}</p>
                 ) : null}
@@ -593,6 +754,42 @@ export default function BookTicket() {
 
           <Card className="lg:col-span-3 p-5 sm:p-6 md:p-8 rounded-2xl shadow-soft">
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* {availableTiers.length > 0 ? (
+                <div className="border-t pt-6 first:border-t-0 first:pt-0">
+                  <h3 className="text-lg sm:text-xl font-semibold mb-2">Select Tier</h3>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label>Tier</Label>
+                      <Select
+                        value={selectedTier ? String(selectedTier.id) : ""}
+                        onValueChange={(value) => setSelectedTierId(Number(value))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select tier" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableTiers.map((tier) => (
+                            <SelectItem key={tier.id} value={String(tier.id)}>
+                              {tier.name || `Tier #${tier.id}`}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Tier Details</Label>
+                      <div className="rounded-lg border p-3 text-sm space-y-1">
+                        <p>Price: {formatPriceLabel(baseTicketPrice, String((selectedTier as any)?.price || ""))}</p>
+                        {selectedTier?.gender ? <p className="capitalize">Gender: {selectedTier.gender}</p> : <p>Gender: Any</p>}
+                        <p>Required Persons: {requiredPersons}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : null} */}
+
+             
+
               {enabledSections.map((section) => (
                 <div key={section.id} className="border-t pt-6 first:border-t-0 first:pt-0">
                   <h3 className="text-lg sm:text-xl font-semibold mb-2">{section.title}</h3>
@@ -608,6 +805,69 @@ export default function BookTicket() {
                   </div>
                 </div>
               ))}
+
+               {isGroupTier ? (
+                <div className="border-t pt-6 first:border-t-0 first:pt-0">
+                  <h3 className="text-lg sm:text-xl font-semibold mb-2">Additional Persons</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Add {Math.max(0, requiredPersons - 1)} additional person(s).
+                  </p>
+                  <div className="space-y-4">
+                    {additionalPersons.map((person, index) => (
+                      <div key={`additional-${index}`} className="rounded-lg border p-4 grid gap-4 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label>Name</Label>
+                          <Input
+                            value={person.name}
+                            onChange={(e) => updateAdditionalPerson(index, "name", e.target.value)}
+                            placeholder="Full name"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Email</Label>
+                          <Input
+                            value={person.email}
+                            onChange={(e) => updateAdditionalPerson(index, "email", e.target.value)}
+                            placeholder="name@example.com"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Phone</Label>
+                          <Input
+                            value={person.phone}
+                            onChange={(e) => updateAdditionalPerson(index, "phone", e.target.value)}
+                            placeholder="+92 300 0000000"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>CNIC</Label>
+                          <Input
+                            value={person.nic}
+                            onChange={(e) => updateAdditionalPerson(index, "nic", e.target.value)}
+                            placeholder="xxxx-xxxxxxx-x"
+                          />
+                        </div>
+                        <div className="space-y-2 md:col-span-2">
+                          <Label>Gender</Label>
+                          <Select
+                            value={person.gender}
+                            onValueChange={(value) => updateAdditionalPerson(index, "gender", value)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select gender" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="male">male</SelectItem>
+                              <SelectItem value="female">female</SelectItem>
+                              <SelectItem value="other">other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
 
               <Button
                 type="submit"
