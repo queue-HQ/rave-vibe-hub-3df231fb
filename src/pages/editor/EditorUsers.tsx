@@ -66,16 +66,14 @@ export default function EditorUsers() {
     let mounted = true;
     const loadEventTypes = async () => {
       try {
-        const res = await fetch(`${apiUrl}/events`);
-        const json = await res.json();
+        const res = await api.get('/admin/event-types');
         if (!mounted) return;
-        const items = Array.isArray(json?.data) ? json.data : [];
-        const titles = items
-          .map((e: any) => String(e?.title ?? "").trim())
-          .filter(Boolean);
-        setEventTypeOptions(Array.from(new Set(titles)));
-      } catch {
-        // ignore
+        const items = Array.isArray(res?.data?.data) ? res.data.data : [];
+        setEventTypeOptions(items);
+      } catch (error) {
+        console.error('Failed to load event types:', error);
+        // Fallback to empty array if API fails
+        if (mounted) setEventTypeOptions([]);
       }
     };
     loadEventTypes();
