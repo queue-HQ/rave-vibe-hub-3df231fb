@@ -30,7 +30,8 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { Calendar as CalendarIcon, Download, Filter, Trash2, X } from "lucide-react";
+import { Calendar as CalendarIcon, Download, Filter, Trash2, X, Printer } from "lucide-react";
+import api from "@/lib/axios";
 
 interface CoupleBookingDetails {
   name?: string;
@@ -256,6 +257,39 @@ export default function EditorBookings() {
     }
   };
 
+  const handlePrintView = async () => {
+    try {
+      const params = new URLSearchParams();
+      
+      if (search) params.append('search', search);
+      if (appliedFilters.status !== 'all') params.append('status', appliedFilters.status);
+      if (appliedFilters.gender !== 'all') params.append('gender', appliedFilters.gender);
+      if (appliedFilters.event) params.append('event_name', appliedFilters.event);
+      if (appliedFilters.start_date) params.append('start_date', appliedFilters.start_date);
+      if (appliedFilters.end_date) params.append('end_date', appliedFilters.end_date);
+      params.append('format', 'print');
+      
+      const response = await api.get(`/admin/bookings/export?${params.toString()}`);
+      
+      // Open print view in new window
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(response.data.html);
+        printWindow.document.close();
+        printWindow.print();
+      }
+      
+      toast.success('Print view opened successfully');
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        toast.error('Authorization failed. Please login again.');
+      } else {
+        toast.error('Failed to open print view. Please try again.');
+      }
+      console.error('Print view error:', error);
+    }
+  };
+
   const applyFilters = () => {
     const formatted = {
       status: statusFilter,
@@ -342,6 +376,10 @@ export default function EditorBookings() {
               <Button variant="outline" className="gap-2" onClick={handleExport} disabled={exporting}>
                 <Download className="h-4 w-4" />
                 Export CSV
+              </Button>
+              <Button variant="outline" size="sm" onClick={handlePrintView} className="flex items-center gap-1">
+                <Printer className="h-3 w-3" />
+                Print
               </Button>
               <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
                 <SheetTrigger asChild>

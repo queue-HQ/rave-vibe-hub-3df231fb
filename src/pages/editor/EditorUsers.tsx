@@ -15,8 +15,10 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { Download, Calendar, FileText, FileSpreadsheet, Printer } from "lucide-react";
 import EditorLayout from "@/components/layouts/EditorLayout";
 import { getAdminUsers, updateAdminUser } from "@/api/admin";
+import api from "@/lib/axios";
 import { apiUrl } from "@/lib/apiURL";
 import { toast } from "sonner";
 
@@ -36,6 +38,8 @@ interface UserFilters {
   status: string;
   gender: string;
   event_type: string;
+  date_from: string;
+  date_to: string;
 }
 
 const statusOptions = ["pending", "approved", "rejected"] as const;
@@ -48,8 +52,10 @@ export default function EditorUsers() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [genderFilter, setGenderFilter] = useState<string>("all");
   const [eventTypeFilter, setEventTypeFilter] = useState<string>("all");
+  const [dateFromFilter, setDateFromFilter] = useState<string>("");
+  const [dateToFilter, setDateToFilter] = useState<string>("");
   const [eventTypeOptions, setEventTypeOptions] = useState<string[]>([]);
-  const [filters, setFilters] = useState<UserFilters>({ search: "", status: "all", gender: "all", event_type: "all" });
+  const [filters, setFilters] = useState<UserFilters>({ search: "", status: "all", gender: "all", event_type: "all", date_from: "", date_to: "" });
   const [statusUpdating, setStatusUpdating] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [paginationInfo, setPaginationInfo] = useState({ total: 0, total_pages: 1, per_page: PER_PAGE });
@@ -117,8 +123,81 @@ export default function EditorUsers() {
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setFilters({ search, status: statusFilter, gender: genderFilter, event_type: eventTypeFilter });
+    setFilters({ search, status: statusFilter, gender: genderFilter, event_type: eventTypeFilter, date_from: dateFromFilter, date_to: dateToFilter });
     setCurrentPage(1);
+  };
+
+  const handleDownloadCSV = async () => {
+    await downloadFile('csv');
+  };
+
+  const handleDownloadTXT = async () => {
+    await downloadFile('txt');
+  };
+
+  const handleDownloadDOCX = async () => {
+    await downloadFile('docx');
+  };
+
+  const handlePrintView = async () => {
+    await downloadFile('print');
+  };
+
+  const downloadFile = async (format: string) => {
+    try {
+      const params = new URLSearchParams();
+      
+      if (search) params.append('search', search);
+      if (statusFilter !== 'all') params.append('status', statusFilter);
+      if (genderFilter !== 'all') params.append('gender', genderFilter);
+      if (eventTypeFilter !== 'all') params.append('event_type', eventTypeFilter);
+      if (dateFromFilter) params.append('date_from', dateFromFilter);
+      if (dateToFilter) params.append('date_to', dateToFilter);
+      params.append('format', format);
+      
+      const response = await api.get(`/admin/users/download?${params.toString()}`, {
+        responseType: format === 'print' ? 'json' : 'blob',
+      });
+      
+      if (format === 'print') {
+        // Open print view in new window
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+          printWindow.document.write(response.data.html);
+          printWindow.document.close();
+          printWindow.print();
+        }
+      } else {
+        // Create download link for file formats
+        const url = window.URL.createObjectURL(response.data);
+        const link = document.createElement('a');
+        link.href = url;
+        
+        // Generate filename with timestamp and format
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+        const extensions = {
+          csv: 'csv',
+          txt: 'txt',
+          docx: 'docx'
+        };
+        const filename = `users_export_${timestamp}.${extensions[format] || 'csv'}`;
+        
+        link.setAttribute('download', filename);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+      }
+      
+      toast.success(`${format.toUpperCase()} downloaded successfully`);
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        toast.error('Authorization failed. Please login again.');
+      } else {
+        toast.error(`Failed to download ${format.toUpperCase()}. Please try again.`);
+      }
+      console.error('Download error:', error);
+    }
   };
 
   const handleStatusChange = async (userId: number, newStatus: string) => {
@@ -175,12 +254,65 @@ export default function EditorUsers() {
               <Button variant="outline" onClick={() => fetchUsers(currentPage, filters)} disabled={loading}>
                 Refresh
               </Button>
+              
+              {/* Download Dropdown */}
+              {/* <Select>
+                <SelectTrigger className="flex items-center gap-2">
+                  <Download className="h-4 w-4" />
+                  Download
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="csv" onClick={handleDownloadCSV}>
+                    <div className="flex items-center gap-2">
+                      <FileSpreadsheet className="h-4 w-4" />
+                      CSV (Excel)
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="txt" onClick={handleDownloadTXT}>
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      TXT (Notepad)
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="docx" onClick={handleDownloadDOCX}>
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      DOCX (Word)
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="print" onClick={handlePrintView}>
+                    <div className="flex items-center gap-2">
+                      <Printer className="h-4 w-4" />
+                      Print View
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select> */}
+
+              {/* Individual Download Buttons */}
+              {/* <Button variant="outline" size="sm" onClick={handleDownloadCSV} className="flex items-center gap-1">
+                <FileSpreadsheet className="h-3 w-3" />
+                CSV
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleDownloadTXT} className="flex items-center gap-1">
+                <FileText className="h-3 w-3" />
+                TXT
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleDownloadDOCX} className="flex items-center gap-1">
+                <FileText className="h-3 w-3" />
+                DOCX
+              </Button> */}
+              <Button variant="outline" size="sm" onClick={handlePrintView} className="flex items-center gap-1">
+                <Printer className="h-3 w-3" />
+                Print
+              </Button>
+              
               <Link to="/editor/users/new">
                 <Button>Add User</Button>
               </Link>
             </div>
           </div>
-          <form className="grid grid-cols-1 md:grid-cols-5 gap-3" onSubmit={handleSearchSubmit}>
+          <form className="grid grid-cols-1 md:grid-cols-7 gap-3" onSubmit={handleSearchSubmit}>
             <Input
               placeholder="Search by name, username or email"
               value={search}
@@ -229,6 +361,18 @@ export default function EditorUsers() {
                   ))}
               </SelectContent>
             </Select>
+            <Input
+              type="date"
+              placeholder="From Date (YYYY-MM-DD)"
+              value={dateFromFilter}
+              onChange={(e) => setDateFromFilter(e.target.value)}
+            />
+            <Input
+              type="date"
+              placeholder="To Date (YYYY-MM-DD)"
+              value={dateToFilter}
+              onChange={(e) => setDateToFilter(e.target.value)}
+            />
             <Button type="submit">Apply Filters</Button>
           </form>
         </CardHeader>
